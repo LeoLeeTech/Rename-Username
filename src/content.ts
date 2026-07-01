@@ -94,7 +94,6 @@ import {
   getTags,
   initBookmarksStore,
 } from './storage/bookmarks'
-import { getEmojiTags } from './storage/tags'
 import type { UserTag, UserTagMeta } from './types'
 import { generateUtagsId, sortTags } from './utils'
 import { setupConsole } from './utils/console.js'
@@ -128,7 +127,6 @@ const EXCLUDED_SUBFRAME_HOSTS = new Set([
   'accounts.google.com',
 ])
 
-let emojiTags: string[]
 const host = location.host
 
 const eventManager = new EventListenerManager()
@@ -430,10 +428,9 @@ function showCurrentPageLinkUtagsPrompt(
               .join(', ')
           }
         } else if (!currentTags.includes(tag)) {
-          element.dataset.utags_tags = sortTags(
-            [...currentTags, tag],
-            emojiTags
-          ).join(', ')
+          element.dataset.utags_tags = sortTags([...currentTags, tag], []).join(
+            ', '
+          )
         }
       }
 
@@ -467,7 +464,7 @@ async function updateAddTagsToCurrentPageMenuCommand() {
   }
 
   const object = getTags(key)
-  const tags = object.tags
+  const tags = splitTags(object.tags)
 
   await menuCommandManager.updateMenuCommand(tags)
   await menuCommandManager.updateQuickTagMenuCommands(tags)
@@ -661,7 +658,7 @@ function appendTagsToPage(
   for (const tag of tags) {
     li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
     const a = createTag(tag, {
-      isEmoji: emojiTags.includes(tag),
+      isEmoji: false,
       noLink: isTagManager,
       enableSelect: isTagManager,
     })
@@ -791,8 +788,6 @@ async function displayTags() {
   if (DEBUG) {
     console.debug('start of displayTags')
   }
-
-  emojiTags = await getEmojiTags()
 
   // cleanUnusedUtags()
 

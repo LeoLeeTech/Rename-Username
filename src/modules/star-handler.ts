@@ -1,3 +1,5 @@
+import { splitTags } from 'utags-utils'
+
 import { getBookmark } from '../storage/bookmarks'
 
 /**
@@ -80,7 +82,7 @@ export function initStarHandler(
 
 export function hasStarTag(href: string): boolean {
   const bookmark = getBookmark(href)
-  const tags = bookmark?.tags || []
+  const tags = splitTags(bookmark?.tags || '')
   return tags.includes(STAR_TAG)
 }
 
@@ -111,7 +113,7 @@ export function toggleStarHandler(
   try {
     // Get current bookmark data
     const bookmark = getBookmark(href)
-    const currentTags = bookmark?.tags || []
+    const currentTags = splitTags(bookmark?.tags || '')
 
     // Check if star tag is currently present
     const hasStarTag = currentTags.includes(STAR_TAG)

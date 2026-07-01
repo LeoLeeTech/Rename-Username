@@ -268,7 +268,7 @@ function isBookmarkTagsAndMetadata(
     value !== null &&
     typeof value === 'object' &&
     'tags' in value &&
-    Array.isArray((value as BookmarkTagsAndMetadata).tags)
+    typeof (value as BookmarkTagsAndMetadata).tags === 'string'
   )
 }
 

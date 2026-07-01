@@ -1,3 +1,5 @@
+import { splitTags } from 'utags-utils'
+
 import { getElementUtags } from './modules/dom-reference-manager'
 import { markElementWhetherVisited, TAG_VISITED } from './modules/visited'
 import { getTags } from './storage/bookmarks'
@@ -64,9 +66,9 @@ export function buildTagsForDisplay(
   }
 
   const key = utags.key
-  const object = getTags(key) as { tags?: string[] }
+  const object = getTags(key)
 
-  const tags: string[] = (object.tags || []).slice()
+  const tags = splitTags(object.tags || '')
   // The visited state can be updated by other tabs, so re-check before adding the visited tag.
   markElementWhetherVisited(key, node)
   if (node.dataset.utags_visited === '1') {

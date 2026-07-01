@@ -554,11 +554,6 @@
       }
     }
 
-    &.utags_emoji_list li span {
-      font-family: var(--utags-emoji-tag-font-family) !important;
-      line-height: unset !important;
-    }
-
     .utags_text_tag {
       &::before {
         display: none !important;

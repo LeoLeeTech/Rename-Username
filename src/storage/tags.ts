@@ -147,11 +147,3 @@ export async function getRecentAddedTags(): Promise<string[]> {
 export async function getPinnedTags(): Promise<string[]> {
   return splitTags(getSettingsValue('pinnedTags') || '')
 }
-
-/**
- * Retrieves the list of emoji tags from settings
- * @returns Array of emoji tag strings
- */
-export async function getEmojiTags(): Promise<string[]> {
-  return splitTags(getSettingsValue('emojiTags') || '')
-}

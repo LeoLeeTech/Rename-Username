@@ -5,7 +5,12 @@ import {
   setValue,
 } from 'browser-extension-storage'
 import { addEventListener, doc, isUrl, uniq } from 'browser-extension-utils'
-import { normalizeCreated, normalizeUpdated, trimTitle } from 'utags-utils'
+import {
+  normalizeCreated,
+  normalizeUpdated,
+  splitTags,
+  trimTitle,
+} from 'utags-utils'
 
 import type {
   BookmarkMetadata,
@@ -84,7 +89,7 @@ type BookmarksStoreV3 = {
 
 // V3 changed to BookmarkTagsAndMetadata
 type TagsAndMeta = {
-  tags: string[]
+  tags: string
   meta?: ItemMeta
 }
 
@@ -248,7 +253,7 @@ export async function getCachedUrlMap(): Promise<BookmarksData> {
 export function getBookmark(key: string): BookmarkTagsAndMetadata {
   return (
     cachedUrlMap[key] || {
-      tags: [],
+      tags: '',
       meta: { created: 0, updated: 0 },
     }
   )
@@ -265,7 +270,7 @@ export const getTags = getBookmark
  */
 export async function saveBookmark(
   key: string,
-  tags: string[],
+  tags: string,
   meta: Record<string, any> | undefined
 ): Promise<void> {
   console.log('saveBookmark', key, tags, meta)
@@ -281,7 +286,8 @@ export async function saveBookmark(
     extensionVersion: currentExtensionVersion,
   }
 
-  const newTags = mergeTags(tags, [])
+  const newTags = mergeTags(splitTags(tags), [])
+  const newTagsValue = stringifyTags(newTags)
   let oldTags: string[] = []
 
   if (!isValidKey(key)) {
@@ -294,9 +300,9 @@ export async function saveBookmark(
     // Mark as deleted bookmark if no tags are provided
     const existingData = urlMap[key]
     if (existingData) {
-      oldTags = existingData.tags || []
+      oldTags = splitTags(existingData.tags || '')
       if (!oldTags.includes(DELETED_BOOKMARK_TAG)) {
-        existingData.tags = [...oldTags, DELETED_BOOKMARK_TAG]
+        existingData.tags = stringifyTags([...oldTags, DELETED_BOOKMARK_TAG])
         existingData.meta = {
           ...existingData.meta,
           updated2: now,
@@ -312,7 +318,7 @@ export async function saveBookmark(
     // Update or create bookmark
     const existingData = urlMap[key] || {}
     const existingDataStr = JSON.stringify(existingData)
-    oldTags = existingData.tags || []
+    oldTags = splitTags(existingData.tags || '')
 
     const title =
       trimTitle(meta?.title as string) || trimTitle(existingData.meta?.title)
@@ -337,7 +343,7 @@ export async function saveBookmark(
     }
 
     const newData = {
-      tags: newTags,
+      tags: newTagsValue,
       meta: newMeta,
     }
     const newDataStr = JSON.stringify(newData)
@@ -388,7 +394,7 @@ function isValidKey(key: string): boolean {
  * @returns boolean indicating if value is a valid tags array
  */
 function isValidTags(tags: unknown): boolean {
-  return Array.isArray(tags) && tags.every((tag) => typeof tag === 'string')
+  return typeof tags === 'string'
 }
 
 /**
@@ -409,6 +415,10 @@ function mergeTags(tags: string[], tags2: string[]): string[] {
   )
 }
 
+function stringifyTags(tags: string[]): string {
+  return mergeTags(tags, []).join(',')
+}
+
 /**
  * Filters out bookmarks that contain the '._DELETED_' tag
  * @param data The bookmarks data to filter
@@ -419,7 +429,7 @@ function filterDeleted(data: BookmarksData): BookmarksData {
 
   for (const [key, bookmark] of Object.entries(data)) {
     // Check if the bookmark contains the '._DELETED_' tag
-    if (bookmark.tags && !bookmark.tags.includes(DELETED_BOOKMARK_TAG)) {
+    if (!splitTags(bookmark.tags || '').includes(DELETED_BOOKMARK_TAG)) {
       filteredData[key] = bookmark
     }
   }

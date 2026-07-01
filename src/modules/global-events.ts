@@ -13,7 +13,6 @@ import { splitTags } from 'utags-utils'
 
 import { i } from '../messages'
 import { saveTags } from '../storage/bookmarks'
-import { getEmojiTags } from '../storage/tags'
 import { type NullOrUndefined, type UserTag, type UserTagMeta } from '../types'
 import { filterTags, sortTags } from '../utils'
 import { type EventListenerManager } from '../utils/event-listener-manager'
@@ -163,8 +162,7 @@ function bindDocumentEventsInternal(
           '.utags_captain_tag,.utags_captain_tag2,.utags_custom_btn'
         ) as HTMLElement | undefined
         const textTag = target.closest('.utags_text_tag') as
-          | HTMLElement
-          | undefined
+          HTMLElement | undefined
         if (captainTag) {
           event.preventDefault()
           event.stopPropagation()
@@ -186,18 +184,16 @@ function bindDocumentEventsInternal(
               ? simplePrompt
               : advancedPrompt
             const newTags = (await myPrompt(i('prompt.addTags'), tags)) as
-              | string
-              | NullOrUndefined
+              string | NullOrUndefined
 
             isPromptShown = false
 
             captainTag.focus()
             // eslint-disable-next-line eqeqeq
             if (key && newTags != undefined) {
-              const emojiTags = await getEmojiTags()
               const newTagsArray = sortTags(
                 filterTags(splitTags(newTags), TAG_VISITED),
-                emojiTags
+                []
               )
 
               if (
@@ -212,7 +208,7 @@ function bindDocumentEventsInternal(
                 addVisited(key)
               }
 
-              await saveTags(key, newTagsArray, meta)
+              await saveTags(key, newTagsArray.join(','), meta)
             }
           })
         } else if (textTag) {

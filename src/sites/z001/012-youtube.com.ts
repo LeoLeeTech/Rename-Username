@@ -1,7 +1,7 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, getAttribute } from 'browser-extension-utils'
 import styleText from 'data-text:./012-youtube.com.scss'
-import { getTrimmedTitle } from 'utags-utils'
+import { getTrimmedTitle, splitTags } from 'utags-utils'
 
 import { getStarIconSvg } from '../../modules/star-icon'
 import { getBookmark } from '../../storage/bookmarks'
@@ -193,7 +193,7 @@ export default (() => {
           const meta: UserTagMeta = { type }
           if (title) meta.title = title
           const bookmark = getBookmark(key)
-          const tags = bookmark.tags || []
+          const tags = splitTags(bookmark.tags || '')
           const hasStar = containsStarRatingTag(tags)
           const tobeTags = hasStar ? removeStarRatingTags(tags) : ['★', ...tags]
           bookmarkElement.dataset.utags_key = key

@@ -15,7 +15,6 @@ import createModal from '../components/modal'
 import createTag from '../components/tag'
 import { i } from '../messages'
 import {
-  getEmojiTags,
   getMostUsedTags,
   getPinnedTags,
   getRecentAddedTags,
@@ -26,7 +25,6 @@ import { createTimeout } from './timer-manager'
 let pinnedTags: string[]
 let mostUsedTags: string[]
 let recentAddedTags: string[]
-let emojiTags: string[]
 let displayedTags = new Set()
 let currentTags = new Set<string>()
 let disableTagStyleInPrompt = false
@@ -39,7 +37,6 @@ export function clearTagManagerCache(): void {
   pinnedTags = []
   mostUsedTags = []
   recentAddedTags = []
-  emojiTags = []
   displayedTags = new Set()
   currentTags = new Set()
 }
@@ -82,14 +79,6 @@ function updateLists(container?: HTMLElement) {
     updateCandidateTagList(ul, pinnedTags)
   }
 
-  const ul4 = $(
-    '.utags_modal_content ul.utags_select_list.utags_emoji_list',
-    container
-  )
-  if (ul4) {
-    updateCandidateTagList(ul4, emojiTags, 1000, true)
-  }
-
   const ul2 = $(
     '.utags_modal_content ul.utags_select_list.utags_most_used',
     container
@@ -110,8 +99,7 @@ function updateLists(container?: HTMLElement) {
 function updateCandidateTagList(
   ul: HTMLElement,
   candidateTags: string[],
-  limitSize?: number,
-  isEmoji?: boolean
+  limitSize?: number
 ) {
   ul.textContent = ''
 
@@ -127,7 +115,7 @@ function updateCandidateTagList(
       // class: index === 0 ? "utags_active" : "",
     })
     addElement(li, 'span', {
-      class: 'utags_text_tag' + (isEmoji ? ' utags_emoji_tag' : ''),
+      class: 'utags_text_tag',
       textContent: text,
       'data-utags_tag': text,
     })
@@ -159,11 +147,11 @@ function getPreviousList(parentElement: HTMLElement) {
 function updateCurrentTagList(ul: HTMLElement) {
   ul.textContent = ''
 
-  const sortedTags = sortTags([...currentTags], emojiTags)
+  const sortedTags = sortTags([...currentTags], [])
   for (const tag of sortedTags) {
     displayedTags.add(tag)
     const li = addElement(ul, 'li')
-    const a = createTag(tag, { isEmoji: emojiTags.includes(tag), noLink: true })
+    const a = createTag(tag, { isEmoji: false, noLink: true })
     if (li) li.append(a)
   }
 }
@@ -188,7 +176,7 @@ function removeAllActive(type?: number) {
 }
 
 async function copyCurrentTags(input: HTMLInputElement) {
-  const value = sortTags([...currentTags], emojiTags).join(', ')
+  const value = sortTags([...currentTags], []).join(', ')
   await copyText(value)
   input.value = value
   input.focus()
@@ -325,13 +313,6 @@ function createPromptView(
       'utags_select_list utags_recent_added' +
       (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
     'data-utags_list_name': i('prompt.recentAddedTags'),
-  })
-
-  addElement(listWrapper, 'ul', {
-    class:
-      'utags_select_list utags_emoji_list' +
-      (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
-    'data-utags_list_name': i('prompt.emojiTags'),
   })
 
   updateLists(content)
@@ -627,8 +608,7 @@ function createPromptView(
     }
 
     const li = target.closest('ul.utags_select_list li') as
-      | HTMLElement
-      | undefined
+      HTMLElement | undefined
     if (li) {
       removeAllActive()
       addClass(li, 'utags_active2')
@@ -663,7 +643,6 @@ export async function advancedPrompt(
   pinnedTags = await getPinnedTags()
   mostUsedTags = await getMostUsedTags()
   recentAddedTags = await getRecentAddedTags()
-  emojiTags = await getEmojiTags()
   currentTags = new Set(splitTags(value))
   disableTagStyleInPrompt = !getSettingsValue<boolean>('enableTagStyleInPrompt')
 

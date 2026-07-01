@@ -70,7 +70,7 @@ export type BookmarkMetadata = {
  * The tags and metadata of a bookmark.
  */
 export type BookmarkTagsAndMetadata = {
-  tags: string[]
+  tags: string
   meta: BookmarkMetadata
   // /**
   //  * The alternate URLs of the bookmark.
