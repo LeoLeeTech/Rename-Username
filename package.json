@@ -1,7 +1,7 @@
 {
-  "name": "utags",
-  "displayName": "UTags - Add usertags to links",
-  "displayName:zh-CN": "小鱼标签 (UTags) - 为链接添加用户标签",
+  "name": "rename",
+  "displayName": "Rename",
+  "displayName:zh-CN": "Rename",
   "version": "0.34.2",
   "description": "Browser extension for custom user labels on websites.",
   "type": "module",
@@ -12,12 +12,8 @@
   },
   "homepage": "https://github.com/utags/utags#readme",
   "scripts": {
-    "format": "prettier --write . && npx prettier@2.8.8 --config .prettierrc-markdown.cjs --write '**/*.md'",
-    "xo": "xo",
-    "lint": "run-s lint:*",
-    "lint:format": "npm run format",
-    "lint:code": "xo --fix",
-    "lint:type": "tsc --noemit",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noemit",
     "dev": "run-p dev:*",
     "dev:chrome": "plasmo dev",
     "dev:firefox": "sleep 2 && plasmo dev --target=firefox-mv2",
@@ -56,8 +52,7 @@
     "prettier-plugin-svelte": "^3.4.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "sass": "^1.99.0",
-    "typescript": "^5.9.3",
-    "xo": "^1.2.3"
+    "typescript": "^5.9.3"
   },
   "manifest": {
     "permissions": [

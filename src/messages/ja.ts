@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': 'シンプルな方法でタグを追加する',
   'settings.openTagsPage': 'タグリスト',
   'settings.openDataPage': 'データのエクスポート/インポート',
-  'settings.title': '🏷️ 小魚タグ (UTags) - リンクにユーザータグを追加',
+  'settings.title': 'Rename',
   'settings.information': '設定を変更した後、ページを再読み込みすると有効になります',
   'settings.report': '問題を報告',
   'prompt.addTags': '[UTags] タグを入力してください。複数のタグはカンマで区切ってください',

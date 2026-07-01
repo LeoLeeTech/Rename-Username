@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '在当前网站启用小鱼标签',
+  'settings.enableCurrentSite': '在当前网站启用 Rename',
   'settings.enableCurrentSiteCustomRule': '启用当前网站的自定义匹配规则',
   'settings.customRuleValue': '自定义匹配规则',
   'settings.useVisitedFunction': '在当前网站启用浏览内容标记功能',
@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': '使用简单方式添加标签',
   'settings.openTagsPage': '标签列表',
   'settings.openDataPage': '导出数据/导入数据',
-  'settings.title': '🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
+  'settings.title': 'Rename',
   'settings.information': '更改设置后，重新加载页面即可生效',
   'settings.report': '反馈问题',
   'prompt.addTags': '[UTags] 请输入标签，多个标签以逗号分隔',

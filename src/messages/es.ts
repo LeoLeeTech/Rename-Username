@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Usar método simple para agregar etiquetas',
   'settings.openTagsPage': 'Lista de etiquetas',
   'settings.openDataPage': 'Exportar/Importar datos',
-  'settings.title': '🏷️ UTags - Agregar etiquetas de usuario a los enlaces',
+  'settings.title': 'Rename',
   'settings.information': 'Después de cambiar la configuración, recargue la página para que surta efecto',
   'settings.report': 'Reportar problema',
   'prompt.addTags': '[UTags] Por favor ingrese etiquetas, múltiples etiquetas están separadas por comas',

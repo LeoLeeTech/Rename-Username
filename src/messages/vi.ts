@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Sử dụng phương pháp đơn giản để thêm thẻ',
   'settings.openTagsPage': 'Danh sách tag',
   'settings.openDataPage': 'Xuất/Nhập dữ liệu',
-  'settings.title': '🏷️ UTags - Thêm tag người dùng vào liên kết',
+  'settings.title': 'Rename',
   'settings.information': 'Sau khi thay đổi cài đặt, hãy tải lại trang để có hiệu lực',
   'settings.report': 'Báo cáo vấn đề',
   'prompt.addTags': '[UTags] Vui lòng nhập tag, nhiều tag được phân cách bằng dấu phẩy',

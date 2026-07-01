@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '在當前網站啟用小魚標籤',
+  'settings.enableCurrentSite': '在當前網站啟用 Rename',
   'settings.enableCurrentSiteCustomRule': '啟用當前網站的自訂匹配規則',
   'settings.customRuleValue': '自訂匹配規則',
   'settings.useVisitedFunction': '在當前網站啟用瀏覽內容標記功能',
@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': '使用簡單方式添加標籤',
   'settings.openTagsPage': '標籤列表',
   'settings.openDataPage': '匯出資料/匯入資料',
-  'settings.title': '🏷️ 小魚標籤 (UTags) - 為連結添加用戶標籤',
+  'settings.title': 'Rename',
   'settings.information': '更改設定後，重新載入頁面即可生效',
   'settings.report': '回饋問題',
   'prompt.addTags': '[UTags] 請輸入標籤，多個標籤以逗號分隔',

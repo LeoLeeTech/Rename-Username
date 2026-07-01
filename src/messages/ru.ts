@@ -16,7 +16,7 @@ const messages = {
   'settings.useSimplePrompt': 'Использовать простой метод добавления тегов',
   'settings.openTagsPage': 'Открыть список тегов',
   'settings.openDataPage': 'Экспорт/импорт данных',
-  'settings.title': '🏷️ UTags - Добавить пользовательские теги к ссылкам',
+  'settings.title': 'Rename',
   'settings.information': 'После изменения настроек перезагрузите страницу для применения изменений',
   'settings.report': 'Сообщить о проблеме...',
   'prompt.addTags': '[UTags] Введите теги, разделяя их запятыми',

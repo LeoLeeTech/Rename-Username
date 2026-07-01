@@ -7,7 +7,7 @@ function IndexOptions() {
         padding: 16,
         width: '500px',
       }}>
-      <h1>小鱼标签 (UTags)</h1>
+      <h1>Rename</h1>
       <ul
         style={{
           display: 'flex',

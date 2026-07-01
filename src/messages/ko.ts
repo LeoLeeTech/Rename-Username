@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': '간단한 방법으로 태그 추가',
   'settings.openTagsPage': '태그 목록',
   'settings.openDataPage': '데이터 내보내기/가져오기',
-  'settings.title': '🏷️ UTags - 링크에 사용자 태그 추가',
+  'settings.title': 'Rename',
   'settings.information': '설정을 변경한 후 페이지를 새로고침하면 적용됩니다',
   'settings.report': '문제 신고',
   'prompt.addTags': '[UTags] 태그를 입력하세요. 여러 태그는 쉼표로 구분하세요',

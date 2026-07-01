@@ -16,7 +16,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Utiliser une méthode simple pour ajouter des tags',
   'settings.openTagsPage': 'Liste des tags',
   'settings.openDataPage': 'Exporter/Importer des données',
-  'settings.title': '🏷️ UTags - Ajouter des tags utilisateur aux liens',
+  'settings.title': 'Rename',
   'settings.information': "Après avoir modifié les paramètres, rechargez la page pour qu'ils prennent effet",
   'settings.report': 'Signaler un problème',
   'prompt.addTags': '[UTags] Veuillez saisir des tags, plusieurs tags sont séparés par des virgules',
