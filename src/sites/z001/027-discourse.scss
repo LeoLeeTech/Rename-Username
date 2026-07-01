@@ -1,0 +1,383 @@
+:not(#a):not(#b):not(#c) {
+  /* default */
+  * + {
+    .utags_ul_0 {
+      /* right-center */
+      object-position: 200% 50%;
+      --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+      --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+      --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+      --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+      --utags-notag-captain-tag-top: var(--utags-notag-captain-tag-top-5);
+      --utags-notag-captain-tag-left: var(--utags-notag-captain-tag-left-5);
+      --utags-captain-tag-background-color: var(
+        --utags-captain-tag-background-color-overlap
+      );
+    }
+    .utags_ul_1 {
+      /* left-bottom */
+      object-position: 0% 200%;
+    }
+  }
+
+  /* topic list page */
+  .topic-list {
+    --utags-list-node-display: table-row;
+
+    .main-link a.title + {
+      .utags_ul_1 {
+        margin-bottom: 4px !important;
+      }
+    }
+    .discourse-tag + {
+      .utags_ul_0 {
+        --utags-notag-captain-tag-top: 1px;
+      }
+      .utags_ul_1 {
+        margin-top: 3px !important;
+      }
+    }
+    .posters a:first-of-type + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-left: -6px;
+      }
+
+      .utags_ul_1 {
+        position: absolute;
+        top: -9999px;
+        margin-top: 4px !important;
+        margin-left: -2px !important;
+      }
+    }
+  }
+
+  /* topoic detail page header */
+  header {
+    .header-title a.topic-link + {
+      .utags_ul_1 {
+        object-position: 100% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-bottom: 4px !important;
+      }
+    }
+    /* title use `dispaly: inline` at linux.do */
+    .header-title a.topic-link[data-utags_flag="inline"] + {
+      .utags_ul_1 {
+        position: unset;
+        margin-bottom: 4px !important;
+      }
+    }
+    .badge-category__wrapper + {
+      .utags_ul_1 {
+        margin-top: 2px !important;
+      }
+    }
+  }
+
+  /* topoic detail page content */
+  #topic-title {
+    a.fancy-title + {
+      .utags_ul_1 {
+        margin-bottom: 8px !important;
+      }
+    }
+    .discourse-tag + {
+      .utags_ul_1 {
+        margin-top: 5px !important;
+      }
+    }
+  }
+
+  .topic-body .topic-meta-data .names,
+  /* https://github.com/hmjz100/DiscourseHelper this userscript remove 'topic-meta-data' class */
+  .topic-body .names {
+    &[data-utags_fit_content="1"] {
+      /* width: fit-content !important; */
+      max-width: max-content !important;
+
+      *:not(svg) {
+        width: fit-content !important;
+      }
+    }
+
+    a + {
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        z-index: 100;
+      }
+    }
+  }
+
+  .post-links-container .post-links .track-link {
+    &[data-utags_fit_content="1"] {
+      max-width: max-content !important;
+      max-height: max-content !important;
+    }
+  }
+
+  /* user-card */
+  .user-card .names {
+    &[data-utags_fit_content="1"] {
+      max-width: max-content !important;
+      max-height: max-content !important;
+    }
+
+    a.user-profile-link + {
+      .utags_ul_0 {
+        object-position: 200% 0%;
+        margin-top: 6px !important;
+      }
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-left: 16px !important;
+      }
+    }
+  }
+
+  /* https://discourse.org/categories */
+  .column .category-list .category-title-link {
+    + {
+      .utags_ul_1 {
+        object-position: 200% 50%;
+        position: absolute;
+        top: -9999px;
+      }
+    }
+  }
+  .column .latest-topic-list {
+    .main-link {
+      .title + {
+        .utags_ul_1 {
+          margin-bottom: 4px !important;
+        }
+      }
+      .badge-category__wrapper + {
+        .utags_ul_1 {
+          padding-top: 3px !important;
+        }
+      }
+      .discourse-tag + {
+        .utags_ul_1 {
+          margin-top: 4px !important;
+        }
+      }
+    }
+
+    .topic-poster a + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-top: 13px;
+        --utags-notag-captain-tag-left: -4px;
+      }
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-top: 17px !important;
+        margin-left: 0px !important;
+      }
+    }
+  }
+  /* https://discourse.org/search?q= */
+  .search-container {
+    --utags-list-node-display: flex;
+    .search-link {
+      &[data-utags_fit_content="1"] {
+        display: inline-block !important;
+        width: fit-content !important;
+
+        *:not(svg) {
+          width: fit-content !important;
+        }
+      }
+
+      + {
+        .utags_ul_1 {
+          object-position: 0% 0%;
+          position: absolute;
+          top: -9999px;
+          margin-top: -14px !important;
+        }
+      }
+    }
+
+    .search-results .author a + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-top: 13px;
+        --utags-notag-captain-tag-left: -4px;
+      }
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-top: 17px !important;
+        margin-left: 0px !important;
+      }
+    }
+  }
+
+  /* https://linux.do/u/neo/summary */
+  .user-info .user-detail .name-line a {
+    &[data-utags_fit_content="1"] {
+      display: inline-block !important;
+      width: fit-content !important;
+
+      *:not(svg) {
+        width: fit-content !important;
+      }
+    }
+  }
+
+  /* https://linux.do/u/neo/activity/bookmarks */
+  .bookmark-list.topic-list tr {
+    a.avatar + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-top: 6px;
+      }
+      .utags_ul_1 {
+        position: absolute;
+        top: -9999px;
+        margin-top: 10px !important;
+      }
+    }
+  }
+
+  /* https://linux.do/u/neo/activity/reactions */
+  .user-content .user-stream-item__header,
+  /* https://linux.do/u/neo/activity/likes-given */
+  .user-content .filter-1 .post-list-item .post-list-item__header {
+    a.avatar-link + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-top: -4px;
+        --utags-notag-captain-tag-left: -4px;
+      }
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-top: 2px !important;
+        margin-left: 0px !important;
+      }
+    }
+  }
+
+  /* profile header */
+  .user-profile-names [data-utags] {
+    &[data-utags_fit_content="1"] {
+      display: inline-block !important;
+      width: fit-content !important;
+
+      *:not(svg) {
+        width: fit-content !important;
+      }
+    }
+  }
+
+  /* Leader board */
+  .leaderboard .winner {
+    padding-bottom: 50px;
+
+    .winner__avatar[data-user-card] + {
+      .utags_ul_0 {
+        object-position: 0% 200%;
+        --utags-notag-captain-tag-top: -56px;
+        --utags-notag-captain-tag-left: -4px;
+      }
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-top: -56px !important;
+        margin-left: 0px !important;
+      }
+    }
+  }
+
+  /* Notifications */
+  .notification a {
+    &[data-utags_fit_content="1"] {
+      display: inline-flex !important;
+      width: fit-content !important;
+
+      *:not(svg) {
+        width: fit-content !important;
+      }
+    }
+
+    & + {
+      .utags_ul_1 {
+        object-position: 0% 200%;
+        position: absolute;
+        top: -9999px;
+        margin-top: -6px !important;
+        margin-left: 42px !important;
+      }
+    }
+  }
+
+  /* 主题列表最后一个需要显示， */
+  [data-utags_list_node]:last-of-type {
+    display: var(--utags-list-node-display) !important;
+  }
+
+  /* 覆盖通知列表第二列内容 */
+  .user-menu.revamped .menu-tabs-container {
+    z-index: 91;
+    background-color: var(--secondary);
+  }
+
+  /* 隐藏原有的书签按钮 */
+  .actions__ .bookmark-menu-trigger:nth-of-type(n + 2) {
+    display: none;
+  }
+
+  .utags_custom_btn.starred {
+    svg {
+      color: var(--utags-star-tag-color);
+    }
+  }
+}
+
+/* Mobile */
+/* topic list > author */
+.mobile-view:not(#a):not(#b):not(#c) {
+  .topic-list a[data-user-card] + {
+    .utags_ul_0 {
+      object-position: 0% 200%;
+      --utags-notag-captain-tag-top: 14px;
+      --utags-notag-captain-tag-left: -8px;
+    }
+    .utags_ul_1 {
+      object-position: 0% 200%;
+      position: absolute;
+      top: -9999px;
+      margin-top: 18px !important;
+      margin-left: -4px !important;
+      max-width: 58px !important;
+    }
+  }
+
+  .topic-body .topic-meta-data .names a + {
+    .utags_ul_0 {
+      object-position: 0% 200%;
+      --utags-notag-captain-tag-top: -4px;
+      --utags-notag-captain-tag-left: -4px;
+    }
+
+    .utags_ul_1 {
+      object-position: 0% 200%;
+      position: absolute;
+      top: -9999px;
+      z-index: 100;
+    }
+  }
+}

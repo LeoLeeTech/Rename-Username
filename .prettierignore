@@ -1,0 +1,13 @@
+node_modules/**
+LICENSE
+.plasmo/**
+build/chrome-*/**
+build/firefox-*/**
+build/*-dev/**
+*.min.js
+tsconfig.json
+tsconfig.tsbuildinfo
+._*
+dist/*
+coverage/*
+**/src/paraglide/**

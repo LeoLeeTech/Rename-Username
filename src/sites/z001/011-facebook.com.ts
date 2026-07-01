@@ -1,0 +1,115 @@
+import { $, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./011-facebook.com.scss'
+import { getTrimmedTitle } from 'utags-utils'
+
+import { getFirstHeadElement, getUrlParameters } from '../../utils'
+import { setUtags } from '../../utils/dom-utils'
+import { setUtagsAttributes } from '../../utils/index'
+import defaultSite from '../default'
+
+export default (() => {
+  const prefix = location.origin + '/'
+
+  function getUserProfileUrl(href: string, exact = false) {
+    if (href.startsWith(prefix)) {
+      const href2 = href.slice(prefix.length).toLowerCase()
+      // https://www.facebook.com/profile.php?id=123456789
+      if (href2.startsWith('profile.php')) {
+        const parameters = getUrlParameters(href, ['id', 'sk'])
+        if (parameters.id && !parameters.sk) {
+          return 'https://www.facebook.com/profile.php?id=' + parameters.id
+        }
+      }
+      // https://www.facebook.com/123456789/ => https://www.facebook.com/profile.php?id=123456789
+      else if (/^\d+\/?([?#].*)?$/.test(href2)) {
+        return (
+          'https://www.facebook.com/profile.php?id=' +
+          href2.replace(/^(\d+).*/, '$1')
+        )
+      }
+      // https://www.facebook.com/messages/t/123456789/ => https://www.facebook.com/profile.php?id=123456789
+      else if (/^messages\/t\/\d+\/?([?#].*)?$/.test(href2)) {
+        return (
+          'https://www.facebook.com/profile.php?id=' +
+          href2.replace(/^messages\/t\/(\d+).*/, '$1')
+        )
+      }
+      // https://www.facebook.com/friends/requests/?profile_id=123456789 => https://www.facebook.com/profile.php?id=123456789
+      // https://www.facebook.com/friends/suggestions/?profile_id=123456789 => https://www.facebook.com/profile.php?id=123456789
+      else if (
+        href2.startsWith('friends/requests/?profile_id=') ||
+        href2.startsWith('friends/suggestions/?profile_id=')
+      ) {
+        const parameters = getUrlParameters(href, ['profile_id'])
+        if (parameters.profile_id) {
+          return (
+            'https://www.facebook.com/profile.php?id=' + parameters.profile_id
+          )
+        }
+      }
+      // https://www.facebook.com/nickname
+      else if (
+        ((exact && /^[\w.]+([?#].*)?$/.test(href2)) ||
+          (!exact && /^[\w.]+/.test(href2))) &&
+        !/^(policies|events|ads|business|privacy|help|friends|messages|profile\.php|permalink\.php|photo\.php|\w+\.php)\b/.test(
+          href2
+        )
+      ) {
+        return 'https://www.facebook.com/' + href2.replace(/(^[\w.]+).*/, '$1')
+      }
+    }
+
+    return undefined
+  }
+
+  return {
+    matches: /^(www|m)\.facebook\.com$/,
+    preProcess() {
+      // profile header
+      const element = getFirstHeadElement('div[role="main"] h1')
+      if (element) {
+        const title = getTrimmedTitle(element)
+        const key = getUserProfileUrl(location.href)
+        if (title && key) {
+          setUtagsAttributes(element, { key, type: 'user' })
+        }
+      }
+    },
+    validate(element: HTMLAnchorElement, href: string) {
+      if (
+        !href.startsWith('https://www.facebook.com/') &&
+        !href.startsWith('https://m.facebook.com/') &&
+        !href.startsWith('https://l.facebook.com/')
+      ) {
+        return true
+      }
+
+      const key = getUserProfileUrl(href, true)
+      if (key) {
+        const title = getTrimmedTitle(element)
+        if (!title) {
+          return false
+        }
+
+        if ($('svg,img', element)) {
+          element.dataset.utags_flag = 'username_with_avatar'
+        }
+
+        const meta = { type: 'user', title }
+        setUtags(element, key, meta)
+        setAttribute(element, 'data-utags', element.dataset.utags || '')
+
+        return true
+      }
+
+      // element.dataset.utags_other = "1"
+      // return false
+      return false
+    },
+    excludeSelectors: [
+      ...defaultSite.excludeSelectors,
+      'div[data-pagelet="ProfileTabs"]',
+    ],
+    getStyle: () => styleText,
+  }
+})()

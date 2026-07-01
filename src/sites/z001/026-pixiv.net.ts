@@ -1,0 +1,101 @@
+import { $, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./026-pixiv.net.scss'
+import { getTrimmedTitle } from 'utags-utils'
+
+import { setUtags } from '../../utils/dom-utils'
+import { setUtagsAttributes } from '../../utils/index'
+
+export default (() => {
+  const prefix = 'https://www.pixiv.net/'
+
+  function getUserProfileUrl(url: string, exact = false) {
+    if (url.startsWith(prefix)) {
+      let href2 = url.slice(22)
+      if (href2.startsWith('en/')) {
+        href2 = href2.slice(3)
+      }
+
+      if (exact) {
+        if (/^users\/\d+([?#].*)?$/.test(href2)) {
+          return prefix + href2.replace(/^(users\/\d+).*/, '$1')
+        }
+      } else if (/^users\/\d+/.test(href2)) {
+        return prefix + href2.replace(/^(users\/\d+).*/, '$1')
+      }
+    }
+
+    return undefined
+  }
+
+  return {
+    matches: /pixiv\.net/,
+    preProcess() {
+      const key = getUserProfileUrl(location.href)
+      if (key) {
+        // profile header
+        const element = $('h1')
+        if (element) {
+          setUtagsAttributes(element, { key, type: 'user' })
+        }
+      }
+    },
+    listNodesSelectors: [
+      // Thumbnail
+      'li.list-none',
+      // Home recommend
+      '[data-ga4-label="home_recommend"] > div.w-full',
+      // Comments
+      '.charcoal-modal-body section[role="feed"] > article',
+      // Artworks > Related works
+      '.gtm-illust-recommend-zone li',
+      // Tags
+      'section ul li',
+    ],
+    conditionNodesSelectors: [
+      'li.list-none a',
+      // Home recommend
+      '[data-ga4-label="home_recommend"] > div.w-full a[data-ga4-label="user_name_link"]',
+      // Comments
+      '.charcoal-modal-body section[role="feed"] > article a',
+      // Artworks > Related works
+      '.gtm-illust-recommend-zone li a',
+      // Tags
+      'section ul li a',
+    ],
+    validate(element: HTMLAnchorElement, href: string) {
+      if (!href.includes('www.pixiv.net')) {
+        return true
+      }
+
+      const key = getUserProfileUrl(href, true)
+      if (key) {
+        const title = element.textContent
+        if (
+          !title ||
+          /プロフィールを見る|View Profile|프로필 보기|查看个人资料|查看個人資料|ホーム|Home|홈|主页|首頁/.test(
+            title
+          )
+        ) {
+          return false
+        }
+
+        const meta = { type: 'user', title }
+
+        setUtags(element, key, meta)
+        setAttribute(element, 'data-utags', element.dataset.utags || '')
+
+        return true
+      }
+
+      // key = getPostUrl(href)
+      // if (key) {
+      //   const meta = { type: "post" }
+      //   setUtags(element, key, meta)
+      //   return true
+      // }
+
+      return false
+    },
+    getStyle: () => styleText,
+  }
+})()

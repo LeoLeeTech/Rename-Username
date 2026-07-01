@@ -1,0 +1,17 @@
+{
+  "extends": "plasmo/templates/tsconfig.base",
+  "include": [
+    ".plasmo/index.d.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+  ],
+  "exclude": ["node_modules/**", "build/**"],
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "paths": {
+      "~*": ["./src/*"],
+    },
+    "strictNullChecks": true
+  },
+}

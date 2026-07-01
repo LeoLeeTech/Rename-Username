@@ -1,0 +1,114 @@
+:not(#a):not(#b):not(#c) {
+  /* 帖子详细页 */
+  .header h1 + {
+    .utags_ul_0 {
+      /* right-center */
+      object-position: 0% 200%;
+      --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+      --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+      --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+      --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+      --utags-notag-captain-tag-top: -8px;
+      --utags-notag-captain-tag-left: var(--utags-notag-captain-tag-left-5);
+    }
+  }
+
+  /* 用户详细页 */
+  h1[data-utags_type="user"] {
+    &[data-utags_fit_content="1"] {
+      max-width: fit-content !important;
+    }
+
+    & + .utags_ul_0 {
+      /* right-center */
+      object-position: 200% 50%;
+      --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+      --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+      --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+      --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+      --utags-notag-captain-tag-top: 0px;
+      --utags-notag-captain-tag-left: var(--utags-notag-captain-tag-left-5);
+    }
+  }
+
+  /* V2EX Polish */
+  [class*="v2p-theme"] {
+    .utags_ul_0 {
+      /* right-center */
+      object-position: 200% 50%;
+      --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+      --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+      --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+      --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+      --utags-notag-captain-tag-top: var(--utags-notag-captain-tag-top-5);
+      --utags-notag-captain-tag-left: var(--utags-notag-captain-tag-left-5);
+      --utags-captain-tag-background-color: var(
+        --utags-captain-tag-background-color-overlap
+      );
+    }
+
+    .topic_info .utags_ul_1 {
+      z-index: 2;
+    }
+  }
+
+  /* 节点页面 */
+  .title .node-breadcrumb {
+    &[data-utags_fit_content="1"] {
+      display: inline-block !important;
+      max-width: fit-content !important;
+    }
+
+    & + {
+      .utags_ul_0 {
+        /* right-center */
+        object-position: 200% 50%;
+        --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+        --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+        --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+        --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+        --utags-notag-captain-tag-top: var(--utags-notag-captain-tag-top-5);
+        --utags-notag-captain-tag-left: 2px;
+        --utags-captain-tag-background-color: var(
+          --utags-captain-tag-background-color-overlap
+        );
+      }
+
+      .utags_ul_1 {
+        object-position: 200% 50%;
+        position: absolute;
+        top: -9999px;
+      }
+    }
+  }
+
+  // 标签页面
+  .box .header > span[data-utags_flag="tag_page"] + {
+    .utags_ul_0 {
+      /* right-center */
+      object-position: 200% 50%;
+      --utags-notag-ul-disply: var(--utags-notag-ul-disply-5);
+      --utags-notag-ul-height: var(--utags-notag-ul-height-5);
+      --utags-notag-ul-position: var(--utags-notag-ul-position-5);
+      --utags-notag-ul-top: var(--utags-notag-ul-top-5);
+      --utags-notag-captain-tag-top: var(--utags-notag-captain-tag-top-5);
+      --utags-notag-captain-tag-left: 2px;
+      --utags-captain-tag-background-color: var(
+        --utags-captain-tag-background-color-overlap
+      );
+    }
+
+    .utags_ul_1 {
+      object-position: 200% 50%;
+      position: absolute;
+      top: -9999px;
+    }
+  }
+
+  /* VXNA 列表 */
+  .xna-entry,
+  /* Planet 列表 */
+  .planet-post {
+    --utags-list-node-display: flex;
+  }
+}

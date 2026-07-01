@@ -1,0 +1,1775 @@
+import { getPrefferedLocale } from 'browser-extension-i18n'
+import {
+  getSettingsValue,
+  initSettings,
+  showSettings,
+  type SettingsTable,
+} from 'browser-extension-settings'
+import {
+  $,
+  $$,
+  addClass,
+  addElement,
+  addEventListener,
+  addStyle,
+  createElement,
+  createHTML,
+  doc,
+  getAttribute,
+  getOffsetPosition,
+  hasClass,
+  registerMenuCommand,
+  removeClass,
+  runWhenBodyExists,
+  runWhenHeadExists,
+  setAttribute,
+  setStyle,
+  throttle,
+  uniq,
+  type RegisterMenuCommandOptions,
+} from 'browser-extension-utils'
+import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
+import type { PlasmoCSConfig } from 'plasmo'
+import { splitTags } from 'utags-utils'
+
+import createTag from './components/tag'
+import {
+  buildTagsForDisplay,
+  shouldUpdateUtagsWhenNodeUpdated,
+} from './content-utils'
+import { getAvailableLocales, i, resetI18n } from './messages'
+import { clearTagManagerCache } from './modules/advanced-tag-manager'
+import { registerDebuggingHotkey } from './modules/debugging'
+import { clearDomReferences } from './modules/dom-reference-manager'
+import { outputData } from './modules/export-import'
+import {
+  bindDocumentEvents,
+  bindWindowEvents,
+  hideAllUtagsInArea,
+} from './modules/global-events'
+import { createMenuCommandManager } from './modules/menu-command-manager'
+import {
+  configureQueueEmptyCallback,
+  configureScannedNodeProcessingBlocker,
+  configureScannedNodeProcessor,
+  enqueueScannedNode,
+  enqueueScannedNodes,
+  setScannedNodeProcessingEnabled,
+  type ScannedNode,
+} from './modules/scanned-node-queue'
+import { initStarHandler, toggleStarHandler } from './modules/star-handler'
+import {
+  ensureCombinedStyleForDocument,
+  rebuildAndApplyCombinedStyle,
+} from './modules/style-manager'
+import { destroySyncAdapter, initSyncAdapter } from './modules/sync-adapter'
+import { clearAllTimers, createTimeout } from './modules/timer-manager'
+import {
+  clearUtagsUlRegistry,
+  ensureUtagsUlTracked,
+  getAllRegisteredUtagsUls,
+  getRegisteredUtagsUlCount,
+  getUtagsUl,
+  registerElementUtagsUl,
+  unregisterElementUtagsUl,
+  unregisterUtagsUl,
+} from './modules/utags-registry'
+import {
+  addVisitedValueChangeListener,
+  clearVisitedCache,
+  isAvailableOnCurrentSite,
+  onSettingsChange as visitedOnSettingsChange,
+} from './modules/visited'
+import { setupWebappBridge } from './modules/webapp-bridge'
+import {
+  getCanonicalUrl,
+  getListNodes,
+  isScannerBusy,
+  postProcess,
+  scanDom,
+  updateMatchedNodesSelector,
+  type ScanDomOptions,
+} from './sites/index'
+import {
+  addTagsValueChangeListener,
+  clearCachedUrlMap,
+  getTags,
+  initBookmarksStore,
+} from './storage/bookmarks'
+import { getEmojiTags } from './storage/tags'
+import type { UserTag, UserTagMeta } from './types'
+import { generateUtagsId, sortTags } from './utils'
+import { setupConsole } from './utils/console.js'
+import { EventListenerManager } from './utils/event-listener-manager'
+
+export const config: PlasmoCSConfig = {
+  run_at: 'document_start',
+  matches: ['https://*/*', 'http://*/*'],
+
+  all_frames: true,
+}
+
+if (
+  // eslint-disable-next-line n/prefer-global/process
+  process.env.PLASMO_TARGET === 'chrome-mv3' ||
+  // eslint-disable-next-line n/prefer-global/process
+  process.env.PLASMO_TARGET === 'firefox-mv2'
+) {
+  // Receive popup trigger to show settings in the content context
+  const runtime =
+    (globalThis as any).chrome?.runtime ?? (globalThis as any).browser?.runtime
+  runtime?.onMessage?.addListener((message: any) => {
+    if (message?.type === 'utags:show-settings') {
+      void showSettings()
+    }
+  })
+}
+
+const EXCLUDED_SUBFRAME_HOSTS = new Set([
+  'challenges.cloudflare.com',
+  'accounts.google.com',
+])
+
+let emojiTags: string[]
+const host = location.host
+
+const eventManager = new EventListenerManager()
+
+// Store menu id for hide/unhide all tags command
+let hideAllTagsMenuId: string | number | undefined
+let customRuleTextAreaElem: undefined | HTMLTextAreaElement
+
+// Helper to check whether all tags are currently hidden
+function isAllTagsHidden(): boolean {
+  return hasClass(doc.documentElement, 'utags_hide_all_tags')
+}
+
+// Click handler to toggle class and refresh menu title
+async function onClickHideAllTags() {
+  const isHidden = isAllTagsHidden()
+  const toggle = (element: HTMLElement) => {
+    if (isHidden) {
+      removeClass(element, 'utags_hide_all_tags')
+    } else {
+      addClass(element, 'utags_hide_all_tags')
+    }
+  }
+
+  toggle(doc.documentElement)
+
+  const iframes = doc.querySelectorAll('iframe')
+  for (const iframe of iframes) {
+    try {
+      const iframeDoc = iframe.contentDocument
+      if (iframeDoc) {
+        toggle(iframeDoc.documentElement)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (isHidden) {
+    displayTagsThrottled()
+  }
+
+  await registerOrUpdateHideAllTagsMenu()
+}
+
+// Register or update the hide/unhide all tags menu command
+async function registerOrUpdateHideAllTagsMenu() {
+  const title = `🙈 ${isAllTagsHidden() ? i('menu.unhideAllTags') : i('menu.hideAllTags')}`
+  const options: RegisterMenuCommandOptions = {}
+  if (hideAllTagsMenuId === undefined) {
+    hideAllTagsMenuId = await registerMenuCommand(
+      title,
+      onClickHideAllTags,
+      options
+    )
+  } else {
+    options.id = String(hideAllTagsMenuId)
+    await registerMenuCommand(title, onClickHideAllTags, options)
+  }
+}
+
+const isEnabledByDefault = () => {
+  if (host.includes('www.bilibili.com')) {
+    return false
+  }
+
+  return true
+}
+
+const isQuickStarAvailable = () => {
+  if (
+    host === 'linux.do' ||
+    host === 'idcflare.com' ||
+    // FIXME: 临时关闭 youtube.com 的快速收藏功能
+    // host.includes('youtube.com') ||
+    // eslint-disable-next-line no-restricted-globals
+    host.includes(`p${atob('b3I=')}nhub.com`)
+  ) {
+    return true
+  }
+
+  return false
+}
+
+const isTagManager = location.href.includes('utags.pipecraft.net/tags/')
+
+const getSettingsTable = (): SettingsTable => {
+  let groupNumber = 1
+
+  return {
+    [`enableCurrentSite_${host}`]: {
+      title: i('settings.enableCurrentSite'),
+      defaultValue: true,
+    },
+
+    ...(isQuickStarAvailable()
+      ? {
+          [`enableQuickStar_${host}`]: {
+            title: i('settings.enableQuickStar'),
+            defaultValue: true,
+            group: ++groupNumber,
+          },
+        }
+      : {}),
+
+    showHidedItems: {
+      title: i('settings.showHidedItems'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    noOpacityEffect: {
+      title: i('settings.noOpacityEffect'),
+      defaultValue: false,
+      group: groupNumber,
+    },
+
+    [`useVisitedFunction_${host}`]: {
+      title: i('settings.useVisitedFunction'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    [`displayEffectOfTheVisitedContent_${host}`]: {
+      title: i('settings.displayEffectOfTheVisitedContent'),
+      type: 'select',
+      // 默认值：中
+      defaultValue: '2',
+      options: {
+        [i('settings.displayEffectOfTheVisitedContent.recordingonly')]: '0',
+        [i('settings.displayEffectOfTheVisitedContent.showtagonly')]: '1',
+        [i('settings.displayEffectOfTheVisitedContent.changecolor')]: '4',
+        [i('settings.displayEffectOfTheVisitedContent.translucent')]: '2',
+        [i('settings.displayEffectOfTheVisitedContent.hide')]: '3',
+      },
+      group: groupNumber,
+    },
+
+    pinnedTagsTitle: {
+      title: i('settings.pinnedTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="pinnedTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: ++groupNumber,
+    },
+    pinnedTags: {
+      title: i('settings.pinnedTags'),
+      defaultValue: i('settings.pinnedTagsDefaultValue'),
+      placeholder: i('settings.pinnedTagsPlaceholder'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+    emojiTagsTitle: {
+      title: i('settings.emojiTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="emojiTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: groupNumber,
+    },
+    emojiTags: {
+      title: i('settings.emojiTags'),
+      defaultValue:
+        '★, ★★, ★★★, ☆, ☆☆, ☆☆☆, 👍, 👎, ❤️, ⭐, 🌟, 🔥, 💩, ⚠️, 💯, 👏, 👀, 🐷, 📌, 📍, 🏆, 💎, 💡, 🤖, 📔, 📖, 📚, 📜, 📕, 📗, 🧰, ⛔, 🚫, 🔴, 🟠, 🟡, 🟢, 🔵, 🟣, ❗, ❓, ✅, ❌',
+      placeholder: '👍, 👎',
+      type: 'textarea',
+      group: groupNumber,
+    },
+    quickTagsTitle: {
+      title: i('settings.quickTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="quickTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: ++groupNumber,
+    },
+    quickTags: {
+      title: i('settings.quickTags'),
+      defaultValue: '★, ❤️',
+      placeholder: i('settings.quickTagsPlaceholder'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+
+    customStyle: {
+      title: i('settings.customStyle'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    customStyleValue: {
+      title: 'Custom style value',
+      defaultValue: i('settings.customStyleDefaultValue'),
+      placeholder: i('settings.customStyleDefaultValue'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+    customStyleTip: {
+      title: i('settings.customStyleExamples'),
+      type: 'tip',
+      tipContent: i('settings.customStyleExamplesContent'),
+      group: groupNumber,
+    },
+
+    [`customStyle_${host}`]: {
+      title: i(`settings.customStyleCurrentSite`),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    [`customStyleValue_${host}`]: {
+      title: 'Custom style value',
+      defaultValue: '',
+      placeholder: i('settings.customStyleDefaultValue'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+
+    [`enableCustomRule_${host}`]: {
+      title: i('settings.enableCurrentSiteCustomRule'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    [`customRuleValue_${host}`]: {
+      title: i('settings.customRuleValue'),
+      defaultValue: '',
+      placeholder: `.content a[href]
+#main a[href]`,
+      type: 'textarea',
+      group: groupNumber,
+    },
+
+    enableTagStyleInPrompt: {
+      title: i('settings.enableTagStyleInPrompt'),
+      defaultValue: true,
+      group: ++groupNumber,
+    },
+
+    useSimplePrompt: {
+      title: i('settings.useSimplePrompt'),
+      defaultValue: false,
+      group: groupNumber,
+    },
+
+    openTagsPage: {
+      title: i('settings.openTagsPage'),
+      type: 'externalLink',
+      url: 'https://utags.link/',
+      group: ++groupNumber,
+    },
+    openDataPage: {
+      title: i('settings.openDataPage'),
+      type: 'externalLink',
+      url: 'https://utags.link/',
+      group: groupNumber,
+    },
+  }
+}
+
+// Styles are centrally managed by style-manager now
+
+function updateDocumentElementAttributes() {
+  if (getSettingsValue('showHidedItems')) {
+    if (!hasClass(doc.documentElement, 'utags_no_hide')) {
+      addClass(doc.documentElement, 'utags_no_hide')
+      updateTagPositionForAllTaggedTargets()
+    }
+  } else if (hasClass(doc.documentElement, 'utags_no_hide')) {
+    removeClass(doc.documentElement, 'utags_no_hide')
+    updateTagPositionForAllTaggedTargets()
+  }
+
+  if (getSettingsValue('noOpacityEffect')) {
+    if (!hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
+      addClass(doc.documentElement, 'utags_no_opacity_effect')
+    }
+  } else if (hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
+    removeClass(doc.documentElement, 'utags_no_opacity_effect')
+  }
+
+  {
+    const newValue =
+      getSettingsValue<string>(`displayEffectOfTheVisitedContent_${host}`) || ''
+    if (newValue !== doc.documentElement.dataset.utagsVisited) {
+      doc.documentElement.dataset.utagsVisited = newValue
+    }
+  }
+
+  {
+    const newValue = getSettingsValue(`enableCurrentSite_${host}`)
+      ? host
+      : 'off'
+    if (newValue !== doc.documentElement.dataset.utags) {
+      doc.documentElement.dataset.utags = newValue
+    }
+  }
+}
+
+function onSettingsChange() {
+  updateDocumentElementAttributes()
+
+  const locale = getSettingsValue<string>('locale') || getPrefferedLocale()
+  resetI18n(locale)
+
+  if (getSettingsValue(`enableCustomRule_${host}`)) {
+    const selectorRaw =
+      getSettingsValue<string>(`customRuleValue_${host}`) || ''
+    const selector = selectorRaw
+      .split(/[\n\r]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+      .join(', ')
+
+    let isValid = true
+    if (selector) {
+      try {
+        document.querySelector(selector)
+      } catch {
+        isValid = false
+      }
+    }
+
+    if (customRuleTextAreaElem) {
+      if (isValid) {
+        customRuleTextAreaElem.style.borderColor = ''
+        customRuleTextAreaElem.style.outline = ''
+      } else {
+        customRuleTextAreaElem.style.borderColor = 'red'
+        customRuleTextAreaElem.style.outline = 'red'
+        console.log('Invalid selector:', selector)
+      }
+    }
+
+    if (isValid) {
+      updateMatchedNodesSelector(selector)
+    }
+  } else {
+    updateMatchedNodesSelector('')
+  }
+
+  rebuildAndApplyCombinedStyle()
+  if (getSettingsValue(`enableCurrentSite_${host}`)) {
+    displayTagsThrottled()
+  }
+}
+
+// For debug
+const DEBUG = true
+
+/**
+ * Append a link to the current page at the end of the document body
+ * @returns A cleanup function that removes the appended link
+ */
+function appendCurrentPageLink(options?: {
+  href?: string
+  title?: string
+  description?: string
+}): () => void {
+  options = options || {}
+  const containerId = 'utags_current_page_link_container'
+
+  // Check if container already exists
+  const existingContainer = $('#' + containerId)
+  if (existingContainer) {
+    return () => {
+      if (existingContainer.parentNode) {
+        existingContainer.remove()
+      }
+    }
+  }
+
+  // Create the container div
+  const containerElement = document.createElement('div')
+  containerElement.id = containerId
+
+  // Create the anchor element
+  const linkElement = document.createElement('a')
+  linkElement.href = options.href || location.href
+  // Use options.title if provided, otherwise use document.title
+  linkElement.textContent = options.title || document.title
+  linkElement.id = 'utags_current_page_link'
+  linkElement.dataset.utags_link = ''
+
+  // Add description to dataset if provided
+  if (options.description) {
+    // TODO: read from description tag, but don't overwrite exsiting value
+    linkElement.dataset.utags_description = options.description
+  }
+
+  // Append link to container
+  containerElement.append(linkElement)
+
+  // Append container to the end of document body
+  document.body.append(containerElement)
+
+  // Return cleanup function
+  return () => {
+    if (containerElement.parentNode) {
+      containerElement.remove()
+    }
+  }
+}
+
+function showCurrentPageLinkUtagsPrompt(
+  tag?: string,
+  remove = false,
+  options?: {
+    href?: string
+    title?: string
+    description?: string
+  }
+) {
+  const cleanUp = appendCurrentPageLink(options)
+  createTimeout(() => {
+    const element = $('#utags_current_page_link + ul.utags_ul button')!
+    if (element) {
+      if (tag) {
+        const currentTags = splitTags(element.dataset.utags_tags)
+        if (remove) {
+          if (currentTags.includes(tag)) {
+            element.dataset.utags_tags = currentTags
+              .filter((t) => t !== tag)
+              .join(', ')
+          }
+        } else if (!currentTags.includes(tag)) {
+          element.dataset.utags_tags = sortTags(
+            [...currentTags, tag],
+            emojiTags
+          ).join(', ')
+        }
+      }
+
+      element.click()
+    } else {
+      showCurrentPageLinkUtagsPrompt(tag, remove)
+    }
+  }, 10)
+  createTimeout(() => {
+    cleanUp()
+  }, 1000)
+}
+
+// Initialize menu command manager
+const menuCommandManager = createMenuCommandManager(
+  () => {
+    showCurrentPageLinkUtagsPrompt()
+  },
+  (tag: string, remove: boolean) => {
+    showCurrentPageLinkUtagsPrompt(tag, remove)
+  }
+)
+
+/**
+ * Update menu command for adding tags to current page
+ */
+async function updateAddTagsToCurrentPageMenuCommand() {
+  const key = getCanonicalUrl(location.href)
+  if (!key) {
+    return
+  }
+
+  const object = getTags(key)
+  const tags = object.tags
+
+  await menuCommandManager.updateMenuCommand(tags)
+  await menuCommandManager.updateQuickTagMenuCommands(tags)
+}
+
+const scrollBoundElements = new WeakSet<HTMLElement>()
+let isScrolling = false
+
+function handleScroll() {
+  if (!isScrolling) {
+    requestAnimationFrame(() => {
+      updateTagPositionForAllTargets()
+      isScrolling = false
+    })
+    isScrolling = true
+  }
+}
+
+function bindScrollEvent(element: HTMLElement) {
+  let parent = element.parentElement
+  while (parent) {
+    const style = getComputedStyle(parent)
+    const overflowY = style.overflowY
+    const overflowX = style.overflowX
+    if (
+      (overflowY === 'auto' ||
+        overflowY === 'scroll' ||
+        overflowX === 'auto' ||
+        overflowX === 'scroll') &&
+      !scrollBoundElements.has(parent)
+    ) {
+      parent.addEventListener('scroll', handleScroll, { passive: true })
+      scrollBoundElements.add(parent)
+    }
+
+    parent = parent.parentElement
+  }
+
+  if (!scrollBoundElements.has(globalThis.document.documentElement)) {
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    scrollBoundElements.add(globalThis.document.documentElement)
+  }
+}
+
+let lastScannerResult: ScannedNode[] = []
+const utagsMouseoverBoundElements = new WeakSet<HTMLElement>()
+
+function ensureUtagsMouseoverHandler(element: HTMLElement) {
+  if (utagsMouseoverBoundElements.has(element)) {
+    return
+  }
+
+  utagsMouseoverBoundElements.add(element)
+
+  if (element.dataset.utags_absolute) {
+    addEventListener(element, 'mouseover', (event) => {
+      const target = event.currentTarget as HTMLElement | undefined
+      if (!target) {
+        return
+      }
+
+      const utagsUl = getUtagsUl(target)
+      if (utagsUl) {
+        updateTagPosition(target)
+        addClass(utagsUl, 'utags_ul_active')
+      }
+    })
+    addEventListener(element, 'mouseout', (event) => {
+      const target = event.currentTarget as HTMLElement | undefined
+      if (!target) {
+        return
+      }
+
+      const utagsUl = getUtagsUl(target)
+      if (utagsUl) {
+        removeClass(utagsUl, 'utags_ul_active')
+      }
+    })
+    return
+  }
+
+  addEventListener(element, 'mouseover', (event) => {
+    const target = event.currentTarget as HTMLElement | undefined
+    if (!target) {
+      return
+    }
+
+    updateTagPosition(target)
+  })
+}
+
+function getUtagsTargetElementByElement(element: HTMLElement): HTMLElement {
+  if (element.dataset.utags_target_selector) {
+    return (
+      $(element.dataset.utags_target_selector, element) ||
+      element.closest(element.dataset.utags_target_selector) ||
+      element
+    )
+  }
+
+  return element
+}
+
+function appendUtagsToElement(
+  element: HTMLElement,
+  utagsUl: HTMLElement | undefined
+) {
+  if (!utagsUl) {
+    return
+  }
+
+  const target = getUtagsTargetElementByElement(element)
+  if (!(target instanceof HTMLAnchorElement)) {
+    setAttribute(target, 'data-utags_node_type', 'link')
+  }
+
+  target.after(utagsUl)
+}
+
+function appendTagsToPage(
+  element: HTMLElement,
+  key: string,
+  tags: string[],
+  meta: UserTagMeta | undefined
+) {
+  let utagsId = element.dataset.utags_id
+  if (!utagsId) {
+    utagsId = generateUtagsId()
+    element.dataset.utags_id = utagsId
+  }
+
+  ensureUtagsMouseoverHandler(element)
+
+  const existingUtagsUl = getUtagsUl(element)
+
+  if (existingUtagsUl) {
+    if (
+      hasClass(existingUtagsUl, 'utags_ul') &&
+      element.dataset.utags === tags.join(',') &&
+      key === getAttribute(existingUtagsUl, 'data-utags_key')
+    ) {
+      if (!existingUtagsUl.isConnected) {
+        appendUtagsToElement(element, existingUtagsUl)
+        ensureUtagsUlTracked(existingUtagsUl)
+      }
+
+      return
+    }
+
+    unregisterUtagsUl(existingUtagsUl)
+    existingUtagsUl.remove()
+  }
+
+  // console.debug('appendTagsToPage', utagsId, element)
+
+  // On some websites, using the `UL` tag will affect the selectors of the original website.
+  // For example: https://www.zhipin.com/
+  const tagName = element.dataset.utags_ul_type === 'ol' ? 'ol' : 'ul'
+  const utagsUl = createElement(tagName, {
+    class: tags.length === 0 ? 'utags_ul utags_ul_0' : 'utags_ul utags_ul_1',
+    'data-utags_key': key,
+    'data-utags_exclude': '',
+  })
+  let li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
+
+  const a = createElement('button', {
+    type: 'button',
+    // href: "",
+    // tabindex: "0",
+    title: 'Add tags',
+    'data-utags_tag': '🏷️',
+    'data-utags_key': key,
+    'data-utags_tags': tags.join(', '),
+    'data-utags_meta': meta ? JSON.stringify(meta) : '',
+    'data-utags_exclude': '',
+    class:
+      tags.length === 0
+        ? 'utags_text_tag utags_captain_tag'
+        : 'utags_text_tag utags_captain_tag2',
+  })
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-tags-fill" viewBox="0 0 16 16">
+<path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+<path d="M1.293 7.793A1 1 0 0 1 1 7.086V2a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l.043-.043-7.457-7.457z"/>
+</svg>
+`
+  a.innerHTML = createHTML(svg)
+
+  li.append(a)
+  utagsUl.append(li)
+
+  for (const tag of tags) {
+    li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
+    const a = createTag(tag, {
+      isEmoji: emojiTags.includes(tag),
+      noLink: isTagManager,
+      enableSelect: isTagManager,
+    })
+    li.append(a)
+    utagsUl.append(li)
+  }
+
+  registerElementUtagsUl(element, utagsUl)
+  utagsUl.dataset.utags_id = utagsId
+  if (element.dataset.utags_absolute) {
+    const container =
+      $('#utags_absolute_ul_container') ||
+      addElement(document.documentElement, 'div', {
+        id: 'utags_absolute_ul_container',
+      })
+    if (container) {
+      container.append(utagsUl)
+      utagsUl.dataset.utags_absolute_target_id = element.id || utagsId
+
+      bindScrollEvent(element)
+    }
+  } else {
+    appendUtagsToElement(element, utagsUl)
+  }
+
+  setAttribute(element, 'data-utags', tags.join(','))
+  /* Fix v2ex polish start */
+  // 为了防止阻塞渲染页面，延迟执行
+  // 20260327: 删掉此逻辑
+  // createTimeout(() => {
+  //   const style = getComputedStyle(element)
+  //   const zIndex = style.zIndex
+  //   if (zIndex && zIndex !== 'auto') {
+  //     setStyle(utagsUl, { zIndex })
+  //   }
+  // }, 200)
+  /* Fix v2ex polish end */
+}
+
+/**
+ * Clean utags elements after SPA web apps re-rendered.
+ * works on these sites
+ * - youtube
+ *
+ * Fix mp.weixin.qq.com issue, 有推荐阅读, 往期推荐内容时，utags_ul 和子元素的 class 都会被清空。https://github.com/utags/utags/issues/29
+ */
+function cleanUnusedUtags() {
+  for (const utagsUl of getAllRegisteredUtagsUls()) {
+    if (!utagsUl.isConnected) {
+      // SPA page navigated, utags_ul is removed from DOM
+      console.warn(
+        'cleanUnusedUtags 1',
+        utagsUl.dataset.utags_id,
+        utagsUl.dataset.utags_key
+      )
+
+      if (utagsUl.dataset.utags_absolute_target_id) {
+        const target = document.getElementById(
+          utagsUl.dataset.utags_absolute_target_id
+        )
+        if (target && target.dataset.utags_original_margin_right) {
+          target.style.marginRight =
+            target.dataset.utags_original_margin_right + 'px'
+          delete target.dataset.utags_original_margin_right
+        }
+      }
+
+      unregisterUtagsUl(utagsUl)
+      continue
+    }
+
+    const element = utagsUl.previousSibling as HTMLElement
+    if (element) {
+      if (element.hasAttribute('data-utags')) {
+        const currentUtagsUl = getUtagsUl(element)
+        if (currentUtagsUl === utagsUl) {
+          continue
+        }
+        // else keep currentUtagsUl as it's a new utagsUl for this element
+      } else {
+        unregisterElementUtagsUl(element)
+      }
+    }
+
+    console.warn(
+      'cleanUnusedUtags 2',
+      utagsUl.dataset.utags_id,
+      utagsUl.dataset.utags_key
+    )
+
+    if (utagsUl.dataset.utags_absolute_target_id) {
+      const target = document.getElementById(
+        utagsUl.dataset.utags_absolute_target_id
+      )
+      if (target && target.dataset.utags_original_margin_right) {
+        target.style.marginRight =
+          target.dataset.utags_original_margin_right + 'px'
+        delete target.dataset.utags_original_margin_right
+      }
+    }
+
+    unregisterUtagsUl(utagsUl)
+    utagsUl.remove()
+  }
+}
+
+function processNodeForDisplay(node: HTMLElement) {
+  const result = buildTagsForDisplay(node)
+  if (!result) {
+    return
+  }
+
+  const { key, tags, meta } = result
+
+  appendTagsToPage(node, key, tags, meta)
+}
+
+configureScannedNodeProcessor(processNodeForDisplay)
+configureQueueEmptyCallback(displayTags)
+configureScannedNodeProcessingBlocker(isScannerBusy)
+
+async function displayTags() {
+  if (isAllTagsHidden()) {
+    return
+  }
+
+  if (DEBUG) {
+    console.debug('start of displayTags')
+  }
+
+  emojiTags = await getEmojiTags()
+
+  // console.debug("displayTags")
+  const listNodes = getListNodes()
+  for (const node of listNodes) {
+    if (node.dataset.utags_list_node === undefined) {
+      // Flag list nodes first
+      node.dataset.utags_list_node = ''
+    }
+  }
+
+  for (const node of listNodes) {
+    const conditionNodes = $$('[data-utags_condition_node]', node)
+    const tagsArray: string[] = []
+    for (const node2 of conditionNodes) {
+      if (!node2.dataset.utags) {
+        continue
+      }
+
+      if (node2.closest('[data-utags_list_node]') !== node) {
+        // Nested list node
+        continue
+      }
+
+      tagsArray.push(node2.dataset.utags)
+    }
+
+    // The list node and the condition node are the same element
+    if (node.dataset.utags_condition_node !== undefined && node.dataset.utags) {
+      tagsArray.push(node.dataset.utags)
+    }
+
+    let listNodeValue: string
+    if (tagsArray.length === 1) {
+      listNodeValue = ',' + tagsArray[0] + ','
+    } else if (tagsArray.length > 1) {
+      listNodeValue = ',' + uniq(tagsArray.join(',').split(',')).join(',') + ','
+    } else {
+      listNodeValue = ''
+    }
+
+    if (node.dataset.utags_list_node !== listNodeValue) {
+      node.dataset.utags_list_node = listNodeValue
+    }
+  }
+
+  // cleanUnusedUtags()
+
+  updateTagPositionForAllTaggedTargets()
+
+  postProcess()
+
+  if (DEBUG) {
+    console.debug('end of displayTags')
+  }
+}
+
+const displayTagsThrottled = throttle(displayTags, 500)
+
+async function initStorage() {
+  await initBookmarksStore()
+  await initSyncAdapter()
+
+  ensureCombinedStyleForDocument()
+
+  // Enable queue-based processing only after storage is fully initialized.
+  // This ensures that tag data is available when processing scanned nodes.
+  setScannedNodeProcessingEnabled(!doc.hidden)
+
+  eventManager.addEventListener(doc, 'visibilitychange', () => {
+    setScannedNodeProcessingEnabled(!doc.hidden)
+  })
+
+  const onStorageChange = () => {
+    console.log('Storage updated, hidden -', doc.hidden)
+    if (!doc.hidden && lastScannerResult.length > 0) {
+      console.log('Start re-display tags')
+      // Re-queue all scanned nodes so they can be re-rendered with latest data.
+      enqueueScannedNodes(lastScannerResult)
+    }
+
+    // Update memu commands
+    void updateAddTagsToCurrentPageMenuCommand()
+  }
+
+  addTagsValueChangeListener(onStorageChange)
+  addVisitedValueChangeListener(onStorageChange)
+}
+
+function getOutermostOffsetParent(
+  element1: HTMLElement,
+  element2: HTMLElement
+): HTMLElement | undefined {
+  if (
+    !(element1 instanceof HTMLElement) ||
+    !(element2 instanceof HTMLElement)
+  ) {
+    throw new TypeError('Both arguments must be valid HTMLElements.')
+  }
+
+  const offsetParent1 = element1.offsetParent as HTMLElement
+  const offsetParent2 = element2.offsetParent as HTMLElement
+
+  if (offsetParent1 && offsetParent2) {
+    if (offsetParent1.contains(offsetParent2)) {
+      return offsetParent1
+    }
+
+    if (offsetParent2.contains(offsetParent1)) {
+      return offsetParent2
+    }
+
+    return undefined
+  }
+
+  return offsetParent1 || offsetParent2
+}
+
+function getMaxOffsetLeft(
+  offsetParent: HTMLElement | undefined,
+  utagsUl: HTMLElement,
+  utagsSizeFix: number
+) {
+  let maxOffsetRight: number
+
+  if (offsetParent && offsetParent.offsetWidth > 0) {
+    // X轴 scroll 时计算正确
+    if (offsetParent === utagsUl.offsetParent) {
+      maxOffsetRight = offsetParent.offsetWidth
+    } else {
+      maxOffsetRight =
+        offsetParent.offsetWidth -
+        getOffsetPosition(utagsUl.offsetParent as HTMLElement, offsetParent)
+          .left
+    }
+  } else {
+    // X轴 scroll 时会计算错误
+    maxOffsetRight =
+      document.body.offsetWidth -
+      getOffsetPosition(utagsUl.offsetParent as HTMLElement).left -
+      2
+  }
+
+  return maxOffsetRight - utagsUl.clientWidth - utagsSizeFix
+}
+
+// position: fixed -> offsetParent = null
+// position: static -> offsetParent = TD element or the ancestor element whitch has postion: (relative|absolute|fixed|sticky) or document.body
+// position: (relative|absolute|fixed|sticky) -> offsetParent = the ancestor element whitch has postion: (relative|absolute|fixed|sticky) or document.body
+// display: contents -> offsetParent = null, offsetWith = 0, offsetLeft = 0, offsetTop = 0
+
+function updateTagPosition(element: HTMLElement) {
+  const utagsUl = getUtagsUl(element)
+
+  if (!utagsUl || !hasClass(utagsUl, 'utags_ul')) {
+    return
+  }
+
+  // Update margin to occupy space
+  if (element.dataset.utags_absolute) {
+    const width = utagsUl.offsetWidth
+    if (width > 0) {
+      // If we haven't stored the original margin yet, store it
+      if (!element.dataset.utags_original_margin_right) {
+        const style = getComputedStyle(element)
+        const marginRight = Number.parseFloat(style.marginRight) || 0
+        element.dataset.utags_original_margin_right = String(marginRight)
+      }
+
+      const originalMargin = Number.parseFloat(
+        element.dataset.utags_original_margin_right
+      )
+      let currentMargin = originalMargin
+      if (element.style.marginRight) {
+        currentMargin = Number.parseFloat(element.style.marginRight)
+      }
+
+      const newMargin = originalMargin + width + 5 // Add 5px spacing
+
+      // Only update if changed significantly (avoid layout thrashing loop)
+      if (Math.abs(currentMargin - newMargin) > 1) {
+        element.style.marginRight = newMargin + 'px'
+      }
+    }
+  } else {
+    // Ensure `utagsUl` stays immediately after the target element, even if new nodes were inserted between them.
+    const previousElementSibling = utagsUl.previousElementSibling
+    const targetElement = getUtagsTargetElementByElement(element)
+    if (previousElementSibling !== targetElement) {
+      appendUtagsToElement(element, utagsUl)
+      ensureUtagsUlTracked(utagsUl)
+    }
+  }
+
+  if (!utagsUl.isConnected) {
+    appendUtagsToElement(element, utagsUl)
+    ensureUtagsUlTracked(utagsUl)
+  }
+
+  if (!utagsUl.offsetParent && !utagsUl.offsetHeight && !utagsUl.offsetWidth) {
+    return
+  }
+
+  const style = getComputedStyle(utagsUl)
+  if (style.position !== 'absolute') {
+    return
+  }
+
+  if (element.dataset.utags_target_selector) {
+    element =
+      $(element.dataset.utags_target_selector, element) ||
+      element.closest(element.dataset.utags_target_selector) ||
+      element
+  } else if (element.dataset.utags_position_selector) {
+    element =
+      $(element.dataset.utags_position_selector, element) ||
+      element.closest(element.dataset.utags_position_selector) ||
+      element
+  }
+
+  element.dataset.utags_fit_content = '1'
+
+  // 22 is the size of captain tag
+  const utagsSizeFix = hasClass(utagsUl, 'utags_ul_0') ? 22 : 0
+
+  const offsetParent =
+    element.offsetParent === utagsUl.offsetParent
+      ? (element.offsetParent as HTMLElement)
+      : getOutermostOffsetParent(element, utagsUl)
+
+  const offset = getOffsetPosition(element, offsetParent! || doc.body)
+
+  if (offsetParent !== utagsUl.offsetParent) {
+    const offset2 = getOffsetPosition(
+      utagsUl.offsetParent as HTMLElement,
+      offsetParent! || doc.body
+    )
+
+    offset.top -= offset2.top
+    offset.left -= offset2.left
+  }
+
+  // For debug
+  // if (1) {
+  //   const style = getComputedStyle(element)
+  //   element.dataset.offsetWidth = String(element.offsetWidth)
+  //   element.dataset.clientWidth = String(element.clientWidth)
+  //   element.dataset.offsetHeight = String(element.offsetHeight)
+  //   element.dataset.clientHeight = String(element.clientHeight)
+  //   element.dataset.offsetLeft = String(element.offsetLeft)
+  //   element.dataset.offsetTop = String(element.offsetTop)
+  //   element.dataset.offsetLeft2 = String(offset.left)
+  //   element.dataset.offsetTop2 = String(offset.top)
+  //   element.dataset.offsetParent = element.offsetParent?.outerHTML.replaceAll(
+  //     />[\s\S]*/gm,
+  //     ">"
+  //   )
+  //   element.dataset.display = style.display
+  //   utags.dataset.offsetParent = utags.offsetParent?.outerHTML.replaceAll(
+  //     />[\s\S]*/gm,
+  //     ">"
+  //   )
+  // }
+
+  // element is hidden
+  if (!element.offsetWidth && !element.clientWidth) {
+    utagsUl.style.top = '-9999px'
+    return
+  }
+
+  // version 6
+  const objectPosition = style.objectPosition
+
+  switch (objectPosition) {
+    // left-center
+    case '-100% 50%': {
+      utagsUl.style.left =
+        Math.max(offset.left - utagsUl.clientWidth - utagsSizeFix, 0) + 'px'
+      utagsUl.style.top =
+        offset.top +
+        ((element.clientHeight || element.offsetHeight) -
+          utagsUl.clientHeight -
+          utagsSizeFix) /
+          2 +
+        'px'
+      break
+    }
+
+    // left-top
+    case '0% -100%': {
+      utagsUl.style.left = offset.left + 'px'
+      utagsUl.style.top =
+        offset.top - utagsUl.clientHeight - utagsSizeFix + 'px'
+      break
+    }
+
+    // left-top
+    case '0% 0%': {
+      utagsUl.style.left = offset.left + 'px'
+      utagsUl.style.top = offset.top + 'px'
+      break
+    }
+
+    // left-bottom
+    case '0% 100%': {
+      utagsUl.style.left = offset.left + 'px'
+      utagsUl.style.top =
+        offset.top +
+        (element.clientHeight || element.offsetHeight) -
+        utagsUl.clientHeight -
+        utagsSizeFix +
+        'px'
+      break
+    }
+
+    // left-bottom, out of element box
+    case '0% 200%': {
+      utagsUl.style.left = offset.left + 'px'
+      utagsUl.style.top =
+        offset.top + (element.clientHeight || element.offsetHeight) + 'px'
+      break
+    }
+
+    // right-top
+    case '100% -100%': {
+      utagsUl.style.left =
+        offset.left +
+        (element.clientWidth || element.offsetWidth) -
+        utagsUl.clientWidth -
+        utagsSizeFix +
+        'px'
+      utagsUl.style.top =
+        offset.top - utagsUl.clientHeight - utagsSizeFix + 'px'
+      break
+    }
+
+    // right-top
+    case '100% 0%': {
+      let offsetLeft =
+        (element.clientWidth || element.offsetWidth) -
+        utagsUl.clientWidth -
+        utagsSizeFix
+      if (offsetLeft < 100) {
+        offsetLeft = element.clientWidth || element.offsetWidth
+      }
+
+      utagsUl.style.left =
+        Math.min(
+          offset.left + offsetLeft,
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top = offset.top + 'px'
+      break
+    }
+
+    // right-center
+    case '100% 50%': {
+      let offsetLeft =
+        (element.clientWidth || element.offsetWidth) -
+        utagsUl.clientWidth -
+        utagsSizeFix
+      if (offsetLeft < 100) {
+        offsetLeft = element.clientWidth || element.offsetWidth
+      }
+
+      utagsUl.style.left =
+        Math.min(
+          offset.left + offsetLeft,
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top =
+        offset.top +
+        ((element.clientHeight || element.offsetHeight) -
+          utagsUl.clientHeight -
+          utagsSizeFix) /
+          2 +
+        'px'
+      break
+    }
+
+    // right-bottom
+    case '100% 100%': {
+      let offsetLeft =
+        (element.clientWidth || element.offsetWidth) -
+        utagsUl.clientWidth -
+        utagsSizeFix
+      if (offsetLeft < 100) {
+        offsetLeft = element.clientWidth || element.offsetWidth
+      }
+
+      utagsUl.style.left =
+        Math.min(
+          offset.left + offsetLeft,
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top =
+        offset.top +
+        (element.clientHeight || element.offsetHeight) -
+        utagsUl.clientHeight -
+        utagsSizeFix +
+        'px'
+      break
+    }
+
+    // right-bottom, out of element box
+    case '100% 200%': {
+      utagsUl.style.left =
+        offset.left +
+        (element.clientWidth || element.offsetWidth) -
+        utagsUl.clientWidth -
+        utagsSizeFix +
+        'px'
+      utagsUl.style.top =
+        offset.top + (element.clientHeight || element.offsetHeight) + 'px'
+      break
+    }
+
+    // right-top, out of element box
+    case '200% 0%': {
+      utagsUl.style.left =
+        Math.min(
+          offset.left + (element.clientWidth || element.offsetWidth),
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top = offset.top + 'px'
+      break
+    }
+
+    // right-center, out of element box
+    case '200% 50%': {
+      utagsUl.style.left =
+        Math.min(
+          offset.left + (element.clientWidth || element.offsetWidth),
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top =
+        offset.top +
+        ((element.clientHeight || element.offsetHeight) -
+          utagsUl.clientHeight -
+          utagsSizeFix) /
+          2 +
+        'px'
+      break
+    }
+
+    // right-bottom, out of element box
+    case '200% 100%': {
+      utagsUl.style.left =
+        Math.min(
+          offset.left + (element.clientWidth || element.offsetWidth),
+          getMaxOffsetLeft(offsetParent, utagsUl, utagsSizeFix)
+        ) + 'px'
+      utagsUl.style.top =
+        offset.top +
+        (element.clientHeight || element.offsetHeight) -
+        utagsUl.clientHeight -
+        utagsSizeFix +
+        'px'
+      break
+    }
+
+    default: {
+      break
+    }
+  }
+
+  element.dataset.utags_fit_content = '0'
+}
+
+const tagPositionUpdateQueue: HTMLElement[] = []
+const tagPositionUpdateSet = new Set<HTMLElement>()
+let isProcessingTagPositionQueue = false
+
+function takeTagPositionTargetFromQueue() {
+  const target = tagPositionUpdateQueue.shift()
+  if (target) {
+    tagPositionUpdateSet.delete(target)
+  }
+
+  return target
+}
+
+function hasTagPositionTargetsInQueue() {
+  return tagPositionUpdateQueue.length > 0
+}
+
+function processTagPositionUpdatesIdle(deadline: IdleDeadline) {
+  while (
+    deadline.timeRemaining() > 1 &&
+    !doc.hidden &&
+    hasTagPositionTargetsInQueue()
+  ) {
+    const target = takeTagPositionTargetFromQueue()
+    if (!target) {
+      break
+    }
+
+    if (!target.isConnected) {
+      continue
+    }
+
+    updateTagPosition(target)
+  }
+
+  if (hasTagPositionTargetsInQueue()) {
+    requestIdleCallback(processTagPositionUpdatesIdle)
+    return
+  }
+
+  isProcessingTagPositionQueue = false
+}
+
+function scheduleTagPositionUpdates() {
+  if (isProcessingTagPositionQueue || !hasTagPositionTargetsInQueue()) {
+    return
+  }
+
+  isProcessingTagPositionQueue = true
+  requestIdleCallback(processTagPositionUpdatesIdle)
+}
+
+function enqueueTagPositionUpdate(target: HTMLElement) {
+  if (tagPositionUpdateSet.has(target)) {
+    return
+  }
+
+  tagPositionUpdateSet.add(target)
+  tagPositionUpdateQueue.push(target)
+  scheduleTagPositionUpdates()
+}
+
+function updateTagPositionForAllTargets() {
+  if (lastScannerResult.length === 0) {
+    return
+  }
+
+  for (const target of lastScannerResult) {
+    enqueueTagPositionUpdate(target)
+  }
+}
+
+function updateTagPositionForAllTaggedTargets() {
+  if (lastScannerResult.length === 0) {
+    return
+  }
+
+  for (const target of lastScannerResult) {
+    if (!target.dataset.utags) {
+      continue
+    }
+
+    enqueueTagPositionUpdate(target)
+  }
+}
+
+function checkVimiumHint() {
+  if ($('#vimium-hint-marker-container,#vimiumHintMarkerContainer')) {
+    addClass(doc.body, 'utags_show_all')
+    if (!hasClass(doc.documentElement, 'utags_vimium_hint')) {
+      addClass(doc.documentElement, 'utags_vimium_hint')
+      updateTagPositionForAllTargets()
+    }
+  } else if (hasClass(doc.documentElement, 'utags_vimium_hint')) {
+    removeClass(doc.documentElement, 'utags_vimium_hint')
+    hideAllUtagsInArea()
+  }
+}
+
+async function main() {
+  await initSettings(() => {
+    const settingsTable = getSettingsTable()
+    return {
+      id: 'utags',
+      title: i('settings.title'),
+      footer: `
+    <p>${i('settings.information')}</p>
+    <p>
+    <a href="https://github.com/utags/utags/issues" target="_blank">
+    ${i('settings.report')}
+    </a></p>
+    <p>Made with ❤️ by
+    <a href="https://www.pipecraft.net/" target="_blank">
+      Pipecraft
+    </a></p>`,
+      settingsTable,
+      availableLocales: getAvailableLocales(),
+      async onValueChange() {
+        visitedOnSettingsChange()
+        onSettingsChange()
+      },
+      onViewUpdate(settingsMainView) {
+        let item: HTMLElement | undefined = $(
+          `[data-key="useVisitedFunction_${host}"]`,
+          settingsMainView
+        )
+
+        if (!isAvailableOnCurrentSite() && item) {
+          item.style.display = 'none'
+          item.parentElement!.style.display = 'none'
+        }
+
+        item = $(
+          `[data-key="displayEffectOfTheVisitedContent_${host}"]`,
+          settingsMainView
+        )
+        if (item) {
+          item.style.display = getSettingsValue(`useVisitedFunction_${host}`)
+            ? 'flex'
+            : 'none'
+        }
+
+        item = $(`[data-key="customStyleValue"]`, settingsMainView)
+        if (item) {
+          // FIXME: data-key should on the parent element of textarea
+          item.parentElement!.style.display = getSettingsValue(`customStyle`)
+            ? 'block'
+            : 'none'
+        }
+
+        item = $(`.bes_tip`, settingsMainView)
+        if (item) {
+          item.style.display = getSettingsValue(`customStyle`)
+            ? 'block'
+            : 'none'
+        }
+
+        item = $(`[data-key="customStyleValue_${host}"]`, settingsMainView)
+        if (item) {
+          // FIXME: data-key should on the parent element of textarea
+          item.parentElement!.style.display = getSettingsValue(
+            `customStyle_${host}`
+          )
+            ? 'block'
+            : 'none'
+        }
+
+        item = $(`[data-key="customRuleValue_${host}"]`, settingsMainView)
+        if (item) {
+          customRuleTextAreaElem = item as HTMLTextAreaElement
+          // FIXME: data-key should on the parent element of textarea
+          item.parentElement!.style.display = getSettingsValue(
+            `enableCustomRule_${host}`
+          )
+            ? 'block'
+            : 'none'
+        }
+      },
+    }
+  })
+
+  if (!getSettingsValue(`enableCurrentSite_${host}`)) {
+    return
+  }
+
+  setupWebappBridge()
+
+  // Register bookmark list menu command for userscript
+  await registerMenuCommand(`🔖 ${i('menu.bookmarkList')}`, () => {
+    // Open https://utags.link/ in new tab or focus existing tab
+    const url = 'https://utags.link/'
+
+    // For userscript environment, simply open in new tab
+    window.open(url, 'utags_bookmarks')
+  })
+
+  // Register hide/unhide all tags menu command for userscript (with dynamic title)
+  await registerOrUpdateHideAllTagsMenu()
+
+  // Initialize the star handler with required dependencies
+  // initStarHandler(showCurrentPageLinkUtagsPrompt)
+
+  await initStorage()
+
+  visitedOnSettingsChange()
+  onSettingsChange()
+
+  setTimeout(outputData, 1)
+
+  await updateAddTagsToCurrentPageMenuCommand()
+
+  bindDocumentEvents(eventManager)
+  bindWindowEvents(eventManager)
+
+  // For SPA navigation
+  let lastLocation = location.href
+  eventManager.addEventListener(globalThis, 'locationchange', () => {
+    if (lastLocation === location.href) {
+      return
+    }
+
+    lastLocation = location.href
+    void updateAddTagsToCurrentPageMenuCommand()
+  })
+
+  // Add cleanup mechanism for page unload
+  const cleanup = () => {
+    eventManager.removeAllEventListeners()
+    observer.disconnect()
+    // Clear global variables
+    clearUtagsUlRegistry()
+    // Clear cached data to free memory
+    clearCachedUrlMap()
+    clearVisitedCache()
+    clearTagManagerCache()
+    // Clear DOM references to prevent memory leaks from circular references
+    clearDomReferences()
+    // Clear all managed timers to prevent memory leaks
+    clearAllTimers()
+  }
+
+  // Listen for page unload events
+  // FIXME: issue on safari
+  // eventManager.addEventListener(globalThis, 'beforeunload', cleanup)
+  // eventManager.addEventListener(globalThis, 'pagehide', cleanup)
+  // TODO: re-init on page show event for Safari
+
+  const monitoredAttributes = new Set([
+    'href',
+    'data-utags_link',
+    'data-utags_title',
+    'data-utags_type',
+    'data-utags_exclude',
+  ])
+
+  // eslint-disable-next-line @typescript-eslint/no-restricted-types
+  function isMonitoredAttribute(attributeName: string | null | undefined) {
+    return attributeName && monitoredAttributes.has(attributeName)
+  }
+
+  const observer = new MutationObserver(async (mutationsList) => {
+    // console.debug('mutation', Date.now(), mutationsList)
+    let shouldUpdate = false
+    for (const mutationRecord of mutationsList) {
+      if (
+        mutationRecord.type === 'attributes' &&
+        isMonitoredAttribute(mutationRecord.attributeName)
+      ) {
+        shouldUpdate = true
+        break
+      }
+
+      if (shouldUpdateUtagsWhenNodeUpdated(mutationRecord.addedNodes)) {
+        shouldUpdate = true
+        break
+      }
+
+      if (shouldUpdateUtagsWhenNodeUpdated(mutationRecord.removedNodes)) {
+        shouldUpdate = true
+        break
+      }
+    }
+
+    // console.debug('shouldUpdate', shouldUpdate)
+
+    if (shouldUpdate) {
+      // Clean up immediately. Some app like tictok re-render while mouse over something
+      // cleanUnusedUtags()
+      // displayTagsThrottled()
+    }
+
+    checkVimiumHint()
+  })
+
+  // runWhenBodyExists(() => {
+  //   displayTagsThrottled()
+  //   observer.observe(doc.body, {
+  //     childList: true,
+  //     subtree: true,
+  //     attributeFilter: [
+  //       'href',
+  //       'data-utags_link',
+  //       'data-utags_title',
+  //       'data-utags_type',
+  //       'data-utags_exclude',
+  //     ],
+  //   })
+  // })
+
+  const documentElementObserver = new MutationObserver((mutationsList) => {
+    for (const mutationRecord of mutationsList) {
+      if (mutationRecord.type === 'attributes') {
+        updateDocumentElementAttributes()
+        break
+      }
+    }
+
+    // Re-apply combined style when style element have been removed
+    ensureCombinedStyleForDocument()
+    checkVimiumHint()
+  })
+
+  documentElementObserver.observe(doc.documentElement, {
+    attributes: true,
+    childList: true,
+  })
+
+  // To fix issues on reddit, add mouseover event
+  // addEventListener(doc, 'mouseover', (event: Event) => {
+  //   const target = event.target as HTMLElement
+  //   if (
+  //     target &&
+  //     (target.tagName === 'A' || target.dataset.utags !== undefined)
+  //   ) {
+  //     displayTagsThrottled()
+  //   }
+  // })
+
+  // For debug
+  // eslint-disable-next-line n/prefer-global/process
+  if (process.env.PLASMO_TAG === 'dev') {
+    registerDebuggingHotkey()
+  }
+}
+
+if (
+  document.contentType === 'text/html' &&
+  doc.documentElement.dataset.utags === undefined &&
+  (globalThis === (top as unknown as typeof globalThis) ||
+    !EXCLUDED_SUBFRAME_HOSTS.has(host))
+) {
+  // Set host for CSS selector. See 042-discuz.scss.
+  doc.documentElement.dataset.utags = host
+
+  polyfillRequestIdleCallback()
+  setupConsole()
+
+  scanDom({
+    onNodeMatched(node) {
+      enqueueScannedNode(node)
+    },
+    onScanCompleted(nodes) {
+      console.debug('Scan completed', nodes.length)
+      lastScannerResult = nodes
+    },
+  })
+
+  console.log('Start init ContentScript', host, location.href)
+
+  void main()
+}
