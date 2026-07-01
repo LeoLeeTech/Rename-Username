@@ -1,8 +1,9 @@
 /**
- * HTTP proxy for UTags webapp to bypass CORS restrictions
+ * Webapp 桥接模块：监听页面发来的 HTTP_REQUEST/PING 等 postMessage 消息。
+ * 对需要跨域的请求，它会转发给 background 脚本执行，再把结果回传给网页。
  */
 
-// Type definitions
+// Webapp 桥接消息的数据类型定义。
 type HttpRequestPayload = {
   method: string
   url: string
@@ -322,9 +323,7 @@ function messageListener(event: MessageEvent): void {
   }
 
   const message: HttpRequestMessage | PingMessage | undefined = event.data as
-    | HttpRequestMessage
-    | PingMessage
-    | undefined
+    HttpRequestMessage | PingMessage | undefined
   try {
     // Validate message structure
     if (

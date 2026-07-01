@@ -1,3 +1,7 @@
+/**
+ * 内容脚本辅助函数：放置和页面扫描、标签展示有关的轻量工具。
+ * 这里会判断 DOM 更新是否需要重新扫描，并把存储中的标签数据转换成页面可显示的数据。
+ */
 import { splitTags } from 'utags-utils'
 
 import { getElementUtags } from './modules/dom-reference-manager'

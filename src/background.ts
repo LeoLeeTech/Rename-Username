@@ -1,9 +1,10 @@
 /**
- * UTags HTTP Proxy - Browser Extension Background Script
- * Handles actual HTTP requests using fetch API with full CORS bypass
+ * 后台脚本：运行在浏览器插件的 background/service worker 环境。
+ * 当前主要用于接收内容脚本发来的 HTTP_REQUEST 消息，在扩展后台执行 fetch，
+ * 从而给页面侧的 webapp bridge 提供跨域请求代理能力，并记录请求统计。
  */
 
-// Type definitions
+// HTTP 代理消息的数据类型定义。
 type HttpRequestPayload = {
   method: string
   url: string

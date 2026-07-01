@@ -1,3 +1,4 @@
+// ShadowRoot 构建后处理脚本：把独立的 shadow-root.*.js 包进 IIFE，避免变量泄漏到页面全局作用域。
 import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"

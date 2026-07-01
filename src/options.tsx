@@ -1,3 +1,7 @@
+/**
+ * 插件选项页：浏览器扩展详情页里的 options 页面。
+ * 当前只放了少量跳转链接；真正的站点设置面板由内容脚本通过 browser-extension-settings 渲染。
+ */
 function IndexOptions() {
   return (
     <div

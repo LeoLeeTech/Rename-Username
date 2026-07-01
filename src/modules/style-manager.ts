@@ -1,3 +1,7 @@
+/**
+ * 样式管理模块：把通用 content.scss 和当前网站专属 SCSS 合并后注入页面。
+ * 同时兼容普通 document 和 ShadowRoot，避免标签样式在 Shadow DOM 中丢失。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addElement, doc } from 'browser-extension-utils'
 import baseStyleText from 'data-text:../content.scss'

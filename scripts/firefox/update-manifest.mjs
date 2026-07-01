@@ -1,3 +1,4 @@
+// Firefox 构建后处理脚本：分别处理 MV2 和 MV3 产物的 manifest，清理空 CSS 和不需要的资源声明。
 import fs from "node:fs"
 
 const filePath = "build/firefox-mv2-prod/manifest.json"

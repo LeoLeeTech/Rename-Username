@@ -1,3 +1,7 @@
+/**
+ * 网站适配入口：汇总站点配置，按当前 hostname 选择对应适配器。
+ * 每个适配器负责把当前网站的用户、帖子、视频、仓库等元素转换成统一的标签 key/meta。
+ */
 import {
   $,
   $$,
@@ -536,7 +540,6 @@ function createUTagsScannerOptions(
           if (options?.onNodeMatched) {
             options.onNodeMatched(element)
           }
-
         }
       } else if (action === 'delete') {
         cleanupUtags(htmlNode)

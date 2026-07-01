@@ -1,3 +1,7 @@
+/**
+ * 扫描队列模块：把 DOM 扫描发现的候选节点排队处理。
+ * 这样可以避免页面变化频繁时同步处理太多节点，也能在扫描结束时统一刷新标签显示。
+ */
 export type ScannedNode = HTMLElement
 
 type ProcessNodeFn = (node: ScannedNode) => void

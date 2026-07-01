@@ -1,3 +1,4 @@
+// Chrome 构建后处理脚本：清理 Plasmo 生成的 manifest，移除空 CSS 和不需要的 web_accessible_resources。
 import fs from "node:fs"
 
 const filePath = "build/chrome-mv3-prod/manifest.json"

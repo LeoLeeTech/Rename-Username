@@ -1,3 +1,7 @@
+/**
+ * 全局事件绑定模块：集中处理网页上的点击、键盘、鼠标和 history 路由变化。
+ * 标签按钮被点击后，会在这里打开输入弹窗、保存标签，并触发页面重新扫描/刷新。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   $,

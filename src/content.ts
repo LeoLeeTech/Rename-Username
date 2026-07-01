@@ -1,3 +1,8 @@
+/**
+ * 内容脚本入口：这是浏览器插件注入到网页里的主程序。
+ * 它负责初始化设置、扫描页面 DOM、把标签按钮插入到目标元素旁边、
+ * 绑定点击/滚动/菜单命令等页面事件，并把各个功能模块串起来。
+ */
 import { getPrefferedLocale } from 'browser-extension-i18n'
 import {
   getSettingsValue,

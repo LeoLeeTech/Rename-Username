@@ -1,3 +1,8 @@
+/**
+ * 书签/标签主存储模块：负责读写 extension.utags.urlmap。
+ * 当前每个 URL 对应一条记录，tags 以英文逗号分隔字符串保存，meta 保存标题、类型和时间戳等信息。
+ * 其他模块通过 getBookmark/saveBookmark 访问这里，不直接操作底层 storage。
+ */
 import {
   addValueChangeListener,
   getValue,

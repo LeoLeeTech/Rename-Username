@@ -1,3 +1,7 @@
+/**
+ * 标签统计存储模块：维护最近添加、最常用等候选标签列表。
+ * 主书签数据不在这里，这里只保存为了输入提示和菜单展示而派生出来的标签索引。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   addValueChangeListener,

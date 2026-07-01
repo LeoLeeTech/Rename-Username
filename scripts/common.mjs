@@ -1,3 +1,4 @@
+// 构建脚本公共工具：提供 esbuild/sass 相关辅助逻辑和带随机符号的日志输出。
 import fs from "node:fs"
 import * as esbuild from "esbuild"
 import * as sass from "sass"

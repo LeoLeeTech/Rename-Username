@@ -1,3 +1,7 @@
+/**
+ * 高级标签输入弹窗：单击页面上的标签按钮后打开的主要编辑界面。
+ * 它展示当前标签、置顶标签、常用标签、最近标签，并在确认后返回逗号分隔的标签字符串。
+ */
 import { getSettingsValue, showSettings } from 'browser-extension-settings'
 import {
   $,

@@ -1,3 +1,7 @@
+/**
+ * 同步适配模块：负责和 utags.link 这类 webapp 通过 window.postMessage 通信。
+ * 它把本地书签数据序列化后提供给网页，也可以接收网页上传的数据并写回本地存储。
+ */
 import {
   addValueChangeListener,
   getValue,
@@ -8,7 +12,7 @@ import { parseInt10 } from 'browser-extension-utils'
 import { deserializeBookmarks, serializeBookmarks } from '../storage/bookmarks'
 import { isProduction, isUserscript } from '../utils'
 
-// Message types for communication with the webapp
+// 与 webapp 通信的消息类型。
 type MessageType =
   | 'PING'
   | 'DISCOVER_UTAGS_TARGETS'
