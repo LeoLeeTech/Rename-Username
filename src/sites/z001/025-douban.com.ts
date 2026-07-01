@@ -22,8 +22,6 @@ export default (() => {
 
   return {
     matches: /douban\.com/,
-    listNodesSelectors: [],
-    conditionNodesSelectors: [],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '.tabs',

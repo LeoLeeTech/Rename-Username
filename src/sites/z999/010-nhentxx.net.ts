@@ -41,14 +41,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // thumb
-      '.gallery',
-    ],
-    conditionNodesSelectors: [
-      // thumb title
-      '.gallery a.cover',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

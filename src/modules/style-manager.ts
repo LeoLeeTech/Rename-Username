@@ -13,33 +13,12 @@ const registeredShadowRoots = new Set<ShadowRoot>()
 let sharedCSSStyleSheet: CSSStyleSheet | undefined
 let sharedCSSStyleSheetText = ''
 
-function getCustomStyles(): string {
-  const host = location.host
-  let styles = ''
-
-  const customEnabled = getSettingsValue<boolean>('customStyle')
-  const customValue = getSettingsValue<string>('customStyleValue') || ''
-  if (customEnabled && customValue) {
-    styles += '\n' + customValue
-  }
-
-  const siteCustomEnabled = getSettingsValue<boolean>(`customStyle_${host}`)
-  const siteCustomValue =
-    getSettingsValue<string>(`customStyleValue_${host}`) || ''
-  if (siteCustomEnabled && siteCustomValue) {
-    styles += '\n' + siteCustomValue
-  }
-
-  return styles
-}
-
 export function buildCombinedStyle(): string {
   const host = location.host
   const siteEnabled = getSettingsValue<boolean>(`enableCurrentSite_${host}`)
   const siteStyle = siteEnabled ? getCurrentSiteStyle() || '' : ''
-  const customStyles = siteEnabled ? getCustomStyles() : ''
 
-  return [baseStyleText, siteStyle, customStyles].filter(Boolean).join('\n')
+  return [baseStyleText, siteStyle].filter(Boolean).join('\n')
 }
 
 function ensureStyleInRoot(root: Document | ShadowRoot, cssText: string) {

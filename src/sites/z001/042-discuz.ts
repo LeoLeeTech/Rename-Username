@@ -159,37 +159,6 @@ export function Discuz(options?: {
     }
   }
 
-  this.listNodesSelectors = [
-    //
-    '#threadlist table tbody',
-    '#postlist .comiis_vrx',
-    // 四级社 > comments
-    '#postlist .otherfloor',
-    // 四级社
-    '.nex_forum_lists',
-  ]
-  this.conditionNodesSelectors = [
-    // bbs.tampermonkey.net.cn
-    '#threadlist table tbody h2 a',
-    // bbs.tampermonkey.net.cn
-    '#threadlist table tbody .km_user a',
-    '#threadlist table tbody a[href*="&filter=typeid&typeid="]',
-    '#threadlist table tbody a[href*="thread-"]',
-    // www.tsdm39.com
-    '#threadlist table tbody a[href*="forum.php?mod=viewthread&tid="]',
-    '#threadlist table tbody a[href*="space-uid-"]',
-    // www.tsdm39.com
-    '#threadlist table tbody a[href*="home.php?mod=space&uid="]',
-    '#postlist .comiis_vrx .authi a',
-    // 四级社 > comments
-    '#postlist .otherfloor .authi a',
-    // 四级社
-    // author
-    '.nex_forum_lists .nex_threads_author a',
-    // 四级社
-    // post title
-    '.nex_forum_lists .nex_forumtit_top a',
-  ]
   this.validate = (element: HTMLAnchorElement, href: string) => {
     if (!href.startsWith(currentPrefix)) {
       return true

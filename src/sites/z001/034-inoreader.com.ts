@@ -31,26 +31,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // ".article_tile",
-      // ".article_magazine",
-      '.ar',
-    ],
-    conditionNodesSelectors: [
-      // Card view
-      '.article_tile .article_tile_footer_feed_title a',
-      '.article_tile a.article_title_link',
-      // Magazine view
-      '.article_magazine .article_magazine_feed_title a',
-      '.article_magazine a.article_magazine_title_link',
-      // Column view
-      '.ar .column_view_title a',
-      // List view
-      '.ar .article_title_wrapper a',
-      // Expanded view
-      '.ar.article_card .article_sub_title a',
-      '.ar.article_card a.article_title_link',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

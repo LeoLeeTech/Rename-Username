@@ -323,12 +323,6 @@
       }
     }
   }
-
-  /* 主题列表最后一个需要显示， */
-  [data-utags_list_node]:last-of-type {
-    display: var(--utags-list-node-display) !important;
-  }
-
   /* 覆盖通知列表第二列内容 */
   .user-menu.revamped .menu-tabs-container {
     z-index: 91;

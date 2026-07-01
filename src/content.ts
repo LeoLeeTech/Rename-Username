@@ -25,7 +25,6 @@ import {
   setAttribute,
   setStyle,
   throttle,
-  uniq,
   type RegisterMenuCommandOptions,
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
@@ -83,7 +82,6 @@ import {
 import { setupWebappBridge } from './modules/webapp-bridge'
 import {
   getCanonicalUrl,
-  getListNodes,
   isScannerBusy,
   postProcess,
   scanDom,
@@ -236,17 +234,6 @@ const getSettingsTable = (): SettingsTable => {
         }
       : {}),
 
-    showHidedItems: {
-      title: i('settings.showHidedItems'),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
-    noOpacityEffect: {
-      title: i('settings.noOpacityEffect'),
-      defaultValue: false,
-      group: groupNumber,
-    },
-
     [`useVisitedFunction_${host}`]: {
       title: i('settings.useVisitedFunction'),
       defaultValue: false,
@@ -262,7 +249,6 @@ const getSettingsTable = (): SettingsTable => {
         [i('settings.displayEffectOfTheVisitedContent.showtagonly')]: '1',
         [i('settings.displayEffectOfTheVisitedContent.changecolor')]: '4',
         [i('settings.displayEffectOfTheVisitedContent.translucent')]: '2',
-        [i('settings.displayEffectOfTheVisitedContent.hide')]: '3',
       },
       group: groupNumber,
     },
@@ -332,38 +318,6 @@ const getSettingsTable = (): SettingsTable => {
       group: groupNumber,
     },
 
-    customStyle: {
-      title: i('settings.customStyle'),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
-    customStyleValue: {
-      title: 'Custom style value',
-      defaultValue: i('settings.customStyleDefaultValue'),
-      placeholder: i('settings.customStyleDefaultValue'),
-      type: 'textarea',
-      group: groupNumber,
-    },
-    customStyleTip: {
-      title: i('settings.customStyleExamples'),
-      type: 'tip',
-      tipContent: i('settings.customStyleExamplesContent'),
-      group: groupNumber,
-    },
-
-    [`customStyle_${host}`]: {
-      title: i(`settings.customStyleCurrentSite`),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
-    [`customStyleValue_${host}`]: {
-      title: 'Custom style value',
-      defaultValue: '',
-      placeholder: i('settings.customStyleDefaultValue'),
-      type: 'textarea',
-      group: groupNumber,
-    },
-
     [`enableCustomRule_${host}`]: {
       title: i('settings.enableCurrentSiteCustomRule'),
       defaultValue: false,
@@ -408,24 +362,6 @@ const getSettingsTable = (): SettingsTable => {
 // Styles are centrally managed by style-manager now
 
 function updateDocumentElementAttributes() {
-  if (getSettingsValue('showHidedItems')) {
-    if (!hasClass(doc.documentElement, 'utags_no_hide')) {
-      addClass(doc.documentElement, 'utags_no_hide')
-      updateTagPositionForAllTaggedTargets()
-    }
-  } else if (hasClass(doc.documentElement, 'utags_no_hide')) {
-    removeClass(doc.documentElement, 'utags_no_hide')
-    updateTagPositionForAllTaggedTargets()
-  }
-
-  if (getSettingsValue('noOpacityEffect')) {
-    if (!hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
-      addClass(doc.documentElement, 'utags_no_opacity_effect')
-    }
-  } else if (hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
-    removeClass(doc.documentElement, 'utags_no_opacity_effect')
-  }
-
   {
     const newValue =
       getSettingsValue<string>(`displayEffectOfTheVisitedContent_${host}`) || ''
@@ -934,50 +870,6 @@ async function displayTags() {
   }
 
   emojiTags = await getEmojiTags()
-
-  // console.debug("displayTags")
-  const listNodes = getListNodes()
-  for (const node of listNodes) {
-    if (node.dataset.utags_list_node === undefined) {
-      // Flag list nodes first
-      node.dataset.utags_list_node = ''
-    }
-  }
-
-  for (const node of listNodes) {
-    const conditionNodes = $$('[data-utags_condition_node]', node)
-    const tagsArray: string[] = []
-    for (const node2 of conditionNodes) {
-      if (!node2.dataset.utags) {
-        continue
-      }
-
-      if (node2.closest('[data-utags_list_node]') !== node) {
-        // Nested list node
-        continue
-      }
-
-      tagsArray.push(node2.dataset.utags)
-    }
-
-    // The list node and the condition node are the same element
-    if (node.dataset.utags_condition_node !== undefined && node.dataset.utags) {
-      tagsArray.push(node.dataset.utags)
-    }
-
-    let listNodeValue: string
-    if (tagsArray.length === 1) {
-      listNodeValue = ',' + tagsArray[0] + ','
-    } else if (tagsArray.length > 1) {
-      listNodeValue = ',' + uniq(tagsArray.join(',').split(',')).join(',') + ','
-    } else {
-      listNodeValue = ''
-    }
-
-    if (node.dataset.utags_list_node !== listNodeValue) {
-      node.dataset.utags_list_node = listNodeValue
-    }
-  }
 
   // cleanUnusedUtags()
 
@@ -1541,31 +1433,6 @@ async function main() {
         if (item) {
           item.style.display = getSettingsValue(`useVisitedFunction_${host}`)
             ? 'flex'
-            : 'none'
-        }
-
-        item = $(`[data-key="customStyleValue"]`, settingsMainView)
-        if (item) {
-          // FIXME: data-key should on the parent element of textarea
-          item.parentElement!.style.display = getSettingsValue(`customStyle`)
-            ? 'block'
-            : 'none'
-        }
-
-        item = $(`.bes_tip`, settingsMainView)
-        if (item) {
-          item.style.display = getSettingsValue(`customStyle`)
-            ? 'block'
-            : 'none'
-        }
-
-        item = $(`[data-key="customStyleValue_${host}"]`, settingsMainView)
-        if (item) {
-          // FIXME: data-key should on the parent element of textarea
-          item.parentElement!.style.display = getSettingsValue(
-            `customStyle_${host}`
-          )
-            ? 'block'
             : 'none'
         }
 

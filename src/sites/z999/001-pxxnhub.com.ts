@@ -126,39 +126,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Search result
-      'ul.search-video-thumbs li',
-
-      // Related videos
-      'ul.videos li',
-
-      // Comments
-      '.videoViewPage .commentBlock',
-
-      // Categories
-      'ul.categoriesListSection li',
-    ],
-    conditionNodesSelectors: [
-      // Search result
-      // Channel
-      'ul.search-video-thumbs li .usernameWrap a',
-      // Video title
-      'ul.search-video-thumbs li .vidTitleWrapper a',
-
-      // Related videos
-      'ul.videos li .usernameWrap a',
-      'ul.videos li .vidTitleWrapper a',
-
-      // Channel > Videos
-      'ul.videos li .title a',
-
-      // Comments
-      '.videoViewPage .commentBlock .usernameWrap a',
-
-      // Categories
-      'ul.categoriesListSection li .categoryTitleWrapper a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       const hrefAttr = getHrefAttribute(element)
       if (!hrefAttr || hrefAttr === 'null' || hrefAttr === '#') {

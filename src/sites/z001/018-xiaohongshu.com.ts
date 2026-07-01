@@ -88,18 +88,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      '.feeds-container section',
-      // replies
-      '.comment-item',
-    ],
-    conditionNodesSelectors: [
-      // author
-      '.feeds-container section .author-wrapper .author',
-      '.feeds-container section .cover',
-      // replies
-      '.comment-item .author-wrapper .author a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

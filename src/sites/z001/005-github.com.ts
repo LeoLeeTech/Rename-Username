@@ -165,8 +165,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [],
-    conditionNodesSelectors: [],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix)) {
         if (/since|until/.test(href)) {

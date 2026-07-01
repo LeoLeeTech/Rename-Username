@@ -82,20 +82,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      'ul.DiscussionList-discussions li',
-      '.hotDiscussion-content ul li',
-      // replies
-      '.PostStream .PostStream-item',
-    ],
-    conditionNodesSelectors: [
-      // topic title
-      'ul.DiscussionList-discussions li a',
-      '.hotDiscussion-content ul li a',
-
-      // replies
-      '.PostStream .PostStream-item .PostUser-name a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

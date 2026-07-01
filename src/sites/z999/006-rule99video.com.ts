@@ -92,16 +92,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      //
-      '.list-comments .item',
-      '.thumbs .item',
-    ],
-    conditionNodesSelectors: [
-      //
-      '.list-comments .item .comment-info .inner a',
-      '.thumbs .item a.th',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         if ($('header', element.parentElement!)) {

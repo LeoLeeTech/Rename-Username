@@ -24,14 +24,6 @@ export default (() => {
         setUtagsAttributes(element, { key, type: 'user' })
       }
     },
-    listNodesSelectors: [
-      // feed
-      '[data-testid="cellInnerDiv"]',
-    ],
-    conditionNodesSelectors: [
-      // feed
-      '[data-testid="cellInnerDiv"] [data-testid="User-Name"] a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix) || href.startsWith(prefix2)) {
         // Remove prefix

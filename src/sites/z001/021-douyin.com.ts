@@ -87,14 +87,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // 视频评论区
-      '[data-e2e="comment-item"]',
-    ],
-    conditionNodesSelectors: [
-      // 视频评论区 > 用户名
-      '[data-e2e="comment-item"] .comment-item-info-wrap a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.includes('www.douyin.com')) {
         return true

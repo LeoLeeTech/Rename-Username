@@ -82,20 +82,6 @@ export default (() => {
         addVisited(key)
       }
     },
-    listNodesSelectors: [
-      'ul.post-list li.post-list-item',
-      // comments
-      'ul.comments li.content-item',
-    ],
-    conditionNodesSelectors: [
-      // topic title
-      'ul.post-list li.post-list-item .post-title a',
-      'ul.post-list li.post-list-item .info-author a',
-      'ul.post-list li.post-list-item a.post-category',
-
-      // comments
-      'ul.comments li.content-item a.author-name',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

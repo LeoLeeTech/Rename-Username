@@ -51,17 +51,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: ['.script-list > li', '.discussion-list-container'],
-    conditionNodesSelectors: [
-      // script title
-      '.script-list li .script-link',
-      // script author
-      '.script-list li .script-list-author a',
-      '.discussion-list-container .script-link',
-      '.discussion-list-container .discussion-title',
-      // Discussion author
-      '.discussion-list-container .discussion-meta-item:nth-child(2) > a',
-    ],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '.sidebar',

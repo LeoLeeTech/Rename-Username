@@ -41,14 +41,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Vidio thumb
-      '.vl-item',
-    ],
-    conditionNodesSelectors: [
-      // Vidio thumb title
-      '.vl-item a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

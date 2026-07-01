@@ -76,18 +76,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // blog title
-      'ul li.module-list-item',
-      // related posts
-      '#related_entries ul li',
-    ],
-    conditionNodesSelectors: [
-      // blog title
-      'ul li.module-list-item a',
-      // related posts
-      '#related_entries ul li a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (
         !href.startsWith(CANONICAL_BASE_URL) &&

@@ -51,18 +51,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Artists
-      '.card-list__items > a.user-card',
-      '.post-card',
-    ],
-    conditionNodesSelectors: [
-      // Artists
-      '.card-list__items > a.user-card',
-      '.post-card a',
-      // post card with user id
-      '.post-card[data-user]',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       const hrefAttr = getHrefAttribute(element)
 

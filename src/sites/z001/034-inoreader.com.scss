@@ -27,12 +27,6 @@
       margin-top: -4px !important;
     }
   }
-
-  /* 防止标题很长时，标题被截断 */
-  .article_tile[data-utags_list_node^=","] .article_tile_content_wraper {
-    position: unset;
-  }
-
   /* Column view */
   .ar .column_view_title a,
   /* Card view */

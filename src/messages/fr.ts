@@ -2,82 +2,16 @@ export const messages = {
   'settings.enableCurrentSite': 'Activer UTags sur le site actuel',
   'settings.enableCurrentSiteCustomRule': 'Activer les règles de correspondance personnalisées pour le site web actuel',
   'settings.customRuleValue': 'Règles de correspondance personnalisées',
-  'settings.showHidedItems': "Afficher les éléments masqués (contenu marqué avec les tags 'block', 'hide')",
-  'settings.noOpacityEffect': "Supprimer l'effet de transparence (contenu marqué avec les tags 'ignore', 'clickbait', 'promotion')",
   'settings.useVisitedFunction': 'Activer la fonction de marquage du contenu de navigation sur le site web actuel',
   'settings.displayEffectOfTheVisitedContent': "Effet d'affichage du contenu visité",
   'settings.displayEffectOfTheVisitedContent.recordingonly': 'Enregistrer uniquement, ne pas afficher de marque',
   'settings.displayEffectOfTheVisitedContent.showtagonly': 'Afficher uniquement la marque',
   'settings.displayEffectOfTheVisitedContent.changecolor': 'Changer la couleur du titre',
   'settings.displayEffectOfTheVisitedContent.translucent': 'Translucide',
-  'settings.displayEffectOfTheVisitedContent.hide': 'Masquer',
   'settings.pinnedTags': 'Ajoutez les tags que vous souhaitez épingler, séparés par des virgules',
-  'settings.pinnedTagsDefaultValue': 'block, hide, ignore, clickbait, promotion',
+  'settings.pinnedTagsDefaultValue': '',
   'settings.pinnedTagsPlaceholder': 'foo, bar',
   'settings.emojiTags': 'Ajoutez les tags emoji, séparés par des virgules',
-  'settings.customStyle': 'Activer le style personnalisé pour tous les sites web',
-  'settings.customStyleCurrentSite': 'Activer le style personnalisé pour le site web actuel',
-  'settings.customStyleDefaultValue': `/* Style personnalisé */
-body {
-  /* Couleur du texte du tag */
-  --utags-text-tag-color: white;
-  /* Couleur de la bordure du tag */
-  --utags-text-tag-border-color: red;
-  /* Couleur de l'arrière-plan du tag */
-  --utags-text-tag-background-color: red;
-}
-
-/* Style du tag pour le label 'TEST' */
-.utags_text_tag[data-utags_tag="TEST"] {
-  /* Couleur du texte du tag */
-  --utags-text-tag-color: white;
-  /* Couleur de la bordure du tag */
-  --utags-text-tag-border-color: orange;
-  /* Couleur de l'arrière-plan du tag */
-  --utags-text-tag-background-color: orange;
-}`,
-  'settings.customStyleExamples': 'Exemples',
-  'settings.customStyleExamplesContent': `<p>Exemples de style personnalisé</p>
-  <p>
-  <pre>/* Style personnalisé */
-body {
-  /* Couleur du texte du tag */
-  --utags-text-tag-color: white;
-  /* Couleur de la bordure du tag */
-  --utags-text-tag-border-color: red;
-  /* Couleur de l'arrière-plan du tag */
-  --utags-text-tag-background-color: red;
-}
-
-/* Style du tag pour le label 'TEST' */
-.utags_text_tag[data-utags_tag="TEST"] {
-  /* Couleur du texte du tag */
-  --utags-text-tag-color: white;
-  /* Couleur de la bordure du tag */
-  --utags-text-tag-border-color: orange;
-  /* Couleur de l'arrière-plan du tag */
-  --utags-text-tag-background-color: orange;
-}
-
-[data-utags_list_node*=",bar,"] {
-  /* Couleur d'arrière-plan des entrées de la liste contenant le tag 'bar' */
-  background-color: aqua;
-}
-
-body {
-  /* Couleur du titre des publications visitées */
-  --utags-visited-title-color: red;
-}
-
-/* Mode sombre */
-[data-utags_darkmode="1"] body {
-  /* Couleur du titre des publications visitées */
-  --utags-visited-title-color: yellow;
-}
-</pre>
-  </p>
-  <p><a href="https://github.com/utags/utags/tree/main/custom-style-examples">Plus d'exemples</a></p>
-  `,
   'settings.enableTagStyleInPrompt': 'Activer le style des tags dans la fenêtre de saisie des tags',
   'settings.useSimplePrompt': 'Utiliser une méthode simple pour ajouter des tags',
   'settings.openTagsPage': 'Liste des tags',

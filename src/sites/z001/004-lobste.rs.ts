@@ -3,8 +3,6 @@ import defaultSite from '../default'
 export default (() => {
   return {
     matches: /lobste\.rs|dto\.pipecraft\.net|tilde\.news|journalduhacker\.net/,
-    listNodesSelectors: [],
-    conditionNodesSelectors: [],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '#nav',

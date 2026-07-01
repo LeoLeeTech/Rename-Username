@@ -89,30 +89,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Main page
-      'ytd-rich-item-renderer',
-
-      // Search result
-      'ytd-video-renderer',
-
-      // Suggests
-      'yt-lockup-view-model',
-    ],
-    conditionNodesSelectors: [
-      // Main page
-      // Title
-      'ytd-rich-item-renderer a.yt-lockup-metadata-view-model__title',
-      // Author
-      'ytd-rich-item-renderer yt-content-metadata-view-model a',
-
-      // Search result
-      'ytd-video-renderer .ytd-video-renderer h3',
-      'ytd-video-renderer .ytd-channel-name, a',
-
-      // Suggests
-      'yt-lockup-view-model h3.yt-lockup-metadata-view-model__heading-reset a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix) || href.startsWith(prefix2)) {
         let key = getUserProfileUrl(href, true)

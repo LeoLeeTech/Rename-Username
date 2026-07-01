@@ -103,16 +103,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // videos
-      '.tw-tower [data-a-target^="video-tower-card-"]',
-      '.tw-transition-group .tw-transition',
-    ],
-    conditionNodesSelectors: [
-      // videos
-      '.tw-tower [data-a-target^="video-tower-card-"] a',
-      '.tw-transition-group .tw-transition a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

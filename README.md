@@ -31,9 +31,7 @@ npm run build:firefox-mv3
 - `package.json`：Plasmo 扩展配置和 npm 脚本
 
 # 支持网站
-
-支持的网站包括：
-
+```
 V2EX (www.v2ex.com)
 Greasy Fork (greasyfork.org and sleazyfork.org)
 Hacker News (news.ycombinator.com)
@@ -66,4 +64,6 @@ Keylol 其乐 (keylol.com)
 Discourse (meta.discourse.org)
 Open AI (community.openai.com)
 Cloudflare (community.cloudflare.com)
-等网站。如果希望添加更多网站，请点击这里。https://github.com/utags/utags/issues
+```
+
+

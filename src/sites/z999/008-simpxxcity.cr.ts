@@ -96,18 +96,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Post list
-      '.structItem--thread',
-      // Comments
-      'article.message--post[itemtype="https://schema.org/Comment"]',
-    ],
-    conditionNodesSelectors: [
-      // Post list
-      '.structItem--thread .structItem-cell--main a',
-      // Comments
-      'article.message--post[itemtype="https://schema.org/Comment"] .message-userDetails a.username',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       href = normalizeDomain(href)
 

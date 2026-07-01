@@ -74,32 +74,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // Posts
-      'article.item-list',
-      // Aside > Don’t miss out
-      'aside .widget-container > .post-thumbnail',
-      // Aside > Don’t miss out
-      'aside .widget-container > .post-thumbnail + h3',
-      // Aside > Recent posts
-      'aside .widget-container li',
-      // Post page > View more
-      '.yarpp a.yarpp-thumbnail',
-    ],
-    conditionNodesSelectors: [
-      // Posts > tag
-      'article.item-list .post-box-title a',
-      // Posts > tag
-      'article.item-list a[rel="tag"]',
-      // Aside > Don’t miss out
-      'aside .widget-container > .post-thumbnail a',
-      // Aside > Don’t miss out
-      'aside .widget-container > .post-thumbnail + h3 a',
-      // Aside > Recent posts
-      'aside .widget-container li h3 a',
-      // Post page > View more
-      '.yarpp a.yarpp-thumbnail .yarpp-thumbnail-title',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

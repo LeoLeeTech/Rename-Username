@@ -37,16 +37,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      '.css-ulyotp-DivCommentContentContainer',
-      '.css-1gstnae-DivCommentItemWrapper',
-      '.css-x6y88p-DivItemContainerV2',
-    ],
-    conditionNodesSelectors: [
-      '.css-ulyotp-DivCommentContentContainer a[href^="/@"]',
-      '.css-1gstnae-DivCommentItemWrapper a[href^="/@"]',
-      '.css-x6y88p-DivItemContainerV2 a[href^="/@"]',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

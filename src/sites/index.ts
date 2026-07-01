@@ -6,7 +6,6 @@ import {
   getAttribute,
   isUrl,
   runWhenBodyExists,
-  uniq,
 } from 'browser-extension-utils'
 import { getTrimmedTitle, trimTitle } from 'utags-utils'
 
@@ -79,8 +78,6 @@ import misskon_com from './z999/012-misskon.com'
 
 type Site = {
   matches: RegExp
-  listNodesSelectors?: string[]
-  conditionNodesSelectors?: string[]
   matchedNodesSelectors?: string[]
   validate?: (element: UtagsHTMLElement, href: string) => boolean
   excludeSelectors?: string[]
@@ -181,12 +178,6 @@ function joinSelectors(selectors: string[] | undefined) {
 const hostname = location.hostname
 const currentSite: Site = matchedSite(hostname)
 
-const listNodesSelector = joinSelectors(currentSite.listNodesSelectors)
-
-const conditionNodesSelector = joinSelectors(
-  currentSite.conditionNodesSelectors
-)
-
 let matchedNodesSelector = joinSelectors(
   currentSite.matchedNodesSelectors &&
     currentSite.matchedNodesSelectors.length > 0
@@ -232,31 +223,12 @@ const validMediaSelector = joinSelectors(currentSite.validMediaSelectors)
 
 const validateFunction = currentSite.validate || defaultSite.validate
 
-// console.log([
-//   currentSite,
-//   "listNodesSelector: " + listNodesSelector,
-//   "conditionNodesSelector: " + conditionNodesSelector,
-//   "matchedNodesSelector: " + matchedNodesSelector,
-//   "excludeSelector: " + excludeSelector,
-//   "validMediaSelector: " + validMediaSelector,
-// ])
-
 export function getCurrentSiteStyle(): string | undefined {
   if (typeof currentSite.getStyle === 'function') {
     return currentSite.getStyle()
   }
 
   return undefined
-}
-
-export function getListNodes() {
-  // Style injection is centrally managed by style-manager
-
-  return listNodesSelector ? $$(listNodesSelector) : []
-}
-
-export function getConditionNodes() {
-  return conditionNodesSelector ? $$(conditionNodesSelector) : []
 }
 
 export function getCanonicalUrl(url: string | undefined) {
@@ -565,13 +537,6 @@ function createUTagsScannerOptions(
             options.onNodeMatched(element)
           }
 
-          if (
-            conditionNodesSelector &&
-            element.matches(conditionNodesSelector) &&
-            element.dataset.utags_condition_node === undefined
-          ) {
-            element.dataset.utags_condition_node = ''
-          }
         }
       } else if (action === 'delete') {
         cleanupUtags(htmlNode)

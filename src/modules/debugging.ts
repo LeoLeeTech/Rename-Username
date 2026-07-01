@@ -7,7 +7,6 @@ import {
   removeEventListener,
 } from 'browser-extension-utils'
 
-import { storageTest } from '../storage/storage-test'
 import {
   clearManagedInterval,
   createInterval,
@@ -113,7 +112,6 @@ let lastKey = ''
 let keydownCount = 0
 
 export function registerDebuggingHotkey() {
-  storageTest()
   startAutoShowAllUtags()
   isAutoShowAllUtagsMode = true
   addEventListener(

@@ -126,26 +126,6 @@ export default (() => {
         }
       }
     },
-    // listNodesSelectors: [
-    //   // Post list
-    //   '[data-main-left] ul.card li',
-    //   // Comments
-    //   '[data-main-left].utags_no_hide > div > div.card article',
-    //   // Comments Flat view
-    //   '[data-main-left]:not(.utags_no_hide) > div > div.card',
-    //   // Right sidebar
-    //   '[data-right-sidebar] .card-body > h4 + div > div',
-    // ],
-    // conditionNodesSelectors: [
-    //   // Post list
-    //   '[data-main-left] ul.card li a:not(time + div a):not(.utags_text_tag)',
-    //   // Comments
-    //   '[data-main-left].utags_no_hide > div > div.card article address > div > a[rel="author"]',
-    //   // Comments Flat view
-    //   '[data-main-left]:not(.utags_no_hide) > div > div.card article address > div > a[rel="author"]',
-    //   // Right sidebar
-    //   '[data-right-sidebar] .card-body > h4 + div > div a',
-    // ],
     validate(element: HTMLAnchorElement, href: string) {
       href = normalizeDomain(href)
 

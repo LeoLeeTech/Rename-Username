@@ -79,8 +79,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: ['.script-list li', '.discussion-list-container'],
-    conditionNodesSelectors: [],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '.pagetop',

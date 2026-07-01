@@ -5,8 +5,6 @@ import defaultSite from '../default'
 export default (() => {
   return {
     matches: /myanimelist\.net/,
-    listNodesSelectors: [],
-    conditionNodesSelectors: [],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '#headerSmall',

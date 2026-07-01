@@ -65,14 +65,6 @@ export default (() => {
         }
       }
     },
-    listNodesSelectors: [
-      // thumb
-      '.gallery-content > div',
-    ],
-    conditionNodesSelectors: [
-      // thumb title
-      '.gallery-content > div a',
-    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

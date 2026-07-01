@@ -162,17 +162,6 @@ export function deleteUrlParameters(
   return url.toString()
 }
 
-/*
-let testUrl = "https://example.com?foo=1&bar=2&foo=3&hoo=11"
-console.log(deleteUrlParameters(testUrl, ["", "bar"]))
-
-console.log(deleteUrlParameters(testUrl, "*"))
-
-console.log(deleteUrlParameters(testUrl, "foo"))
-
-console.log(deleteUrlParameters(testUrl, "*", ["bar"]))
-*/
-
 export function getUrlParameters(
   urlString: string,
   keys: string[] | string,
@@ -200,23 +189,6 @@ export function getUrlParameters(
 
   return result
 }
-
-/*
-let testUrl = "https://example.com?foo=1&bar=2&foo=3&hoo=11&car=&go#boo=5"
-console.log(getUrlParameters(testUrl, ["", "bar"]))
-
-console.log(getUrlParameters(testUrl, "*"))
-
-console.log(getUrlParameters(testUrl, "foo"))
-
-console.log(getUrlParameters(testUrl, ["bar"]))
-
-console.log(getUrlParameters(testUrl, ["bar", "foo", "boo"]))
-
-console.log(getUrlParameters(testUrl, ["bar", "foo", "car", "go"]))
-
-console.log(getUrlParameters(testUrl, ["bar", "foo", "car", "go"], true))
-*/
 
 type BookmarkItem = [string, BookmarkTagsAndMetadata]
 
