@@ -18,7 +18,7 @@ export const messages = {
   'settings.title': 'Rename',
   'settings.information': '設定を変更した後、ページを再読み込みすると有効になります',
   'settings.report': '問題を報告',
-  'prompt.addTags': '[UTags] タグを入力してください。複数のタグはカンマで区切ってください',
+  'prompt.addTags': '请输入新名字',
   'prompt.pinnedTags': 'ピン留め',
   'prompt.mostUsedTags': '最近よく使用',
   'prompt.recentAddedTags': '最新追加',

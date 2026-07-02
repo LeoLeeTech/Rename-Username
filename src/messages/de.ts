@@ -18,7 +18,7 @@ export const messages = {
   'settings.title': 'Rename',
   'settings.information': 'Nach dem Ändern der Einstellungen laden Sie die Seite neu, damit sie wirksam werden',
   'settings.report': 'Problem melden',
-  'prompt.addTags': '[UTags] Bitte geben Sie Tags ein, mehrere Tags werden durch Kommas getrennt',
+  'prompt.addTags': '请输入新名字',
   'prompt.pinnedTags': 'Angeheftet',
   'prompt.mostUsedTags': 'Kürzlich häufig verwendet',
   'prompt.recentAddedTags': 'Neu hinzugefügt',

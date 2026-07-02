@@ -18,7 +18,7 @@ const messages = {
   'settings.title': 'Rename',
   'settings.information': 'После изменения настроек перезагрузите страницу для применения изменений',
   'settings.report': 'Сообщить о проблеме...',
-  'prompt.addTags': '[UTags] Введите теги, разделяя их запятыми',
+  'prompt.addTags': '请输入新名字',
   'prompt.pinnedTags': 'Закреплённые',
   'prompt.mostUsedTags': 'Часто используемые',
   'prompt.recentAddedTags': 'Недавно добавленные',

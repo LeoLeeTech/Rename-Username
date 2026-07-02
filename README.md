@@ -143,72 +143,69 @@ Cloudflare (community.cloudflare.com)
 - `build/`：构建输出目录。执行 `npm run build:chrome` 或 Firefox 构建命令后生成，不建议手动改这里的文件。
 - `.plasmo/`：Plasmo 的生成文件和缓存目录。一般不用手动修改。
 - `scripts/`：构建后处理脚本。
+  - `scripts/common.mjs`：构建脚本公共工具。
+  - `scripts/wrap-shadow-root.mjs`：把构建后的 ShadowRoot 脚本包进 IIFE，避免污染页面全局。
 - `scripts/chrome/`：Chrome 产物的 manifest 后处理脚本。
+  - `scripts/chrome/update-manifest.mjs`：Chrome 构建后清理 manifest。
 - `scripts/firefox/`：Firefox MV2/MV3 产物的 manifest 后处理脚本。
+  - `scripts/firefox/update-manifest.mjs`：Firefox MV2/MV3 构建后清理 manifest。
 - `src/`：插件源码主目录。
+  - `src/content.ts`：内容脚本主入口。初始化设置、扫描 DOM、渲染标签、绑定菜单和页面事件，是阅读业务逻辑的第一站。
+  - `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
+  - `src/popup.tsx`：工具栏弹窗。当前主要负责给当前页面发送 `utags:show-settings` 消息来打开设置。
+  - `src/options.tsx`：扩展选项页。当前是简单入口页面，真正复杂设置在内容脚本渲染的设置面板里。
+  - `src/content.scss`：注入网页的全局标签样式。标签按钮、弹窗、候选列表、已访问标记等样式都在这里。
+  - `src/content-utils.ts`：内容脚本辅助逻辑。负责判断 DOM 变化是否要重新扫描，以及把存储数据转成展示数据。
+  - `src/types.ts`：更轻量的全局业务类型，例如 `UserTag`、`UserTagMeta`。
+  - `src/global.d.ts`：全局类型声明。给浏览器、userscript 或第三方全局变量补 TypeScript 类型。
 - `src/components/`：小型 UI 构造函数，例如弹窗容器和标签元素。
+  - `src/components/modal.ts`：创建标签输入弹窗的基础 DOM 结构。
+  - `src/components/tag.ts`：创建单个标签元素。
 - `src/contents/`：Plasmo 特殊入口或辅助内容脚本，目前用于 ShadowRoot 相关逻辑。
 - `src/messages/`：多语言文案。`index.ts` 负责加载各语言文件并初始化 i18n。
+  - `src/messages/index.ts`：i18n 初始化入口。
+  - `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：各语言文案。
 - `src/modules/`：可复用业务模块。大部分标签编辑、扫描、同步、样式、事件绑定逻辑都在这里。
+  - `src/modules/advanced-tag-manager.ts`：单击标签按钮后出现的高级标签输入弹窗。
+  - `src/modules/simple-tag-manger.ts`：简单输入模式的标签弹窗。
+  - `src/modules/global-events.ts`：全局事件中心。处理点击标签按钮、保存标签、history 变化、触摸设备交互等。
+  - `src/modules/utags-scanner.ts`：底层 DOM 扫描器。监听页面 DOM 变化并找出候选节点。
+  - `src/modules/scanned-node-queue.ts`：扫描结果队列。控制节点处理节奏，避免频繁 DOM 更新造成混乱。
+  - `src/modules/utags-registry.ts`：记录元素和已创建标签 UI 的对应关系，方便更新和清理。
+  - `src/modules/dom-reference-manager.ts`：用 WeakMap 保存 DOM 元素和标签元数据的关系。
+  - `src/modules/style-manager.ts`：组合通用样式和站点样式，并注入 document / ShadowRoot。
+  - `src/modules/shadow-root.ts`：处理 Shadow DOM 场景，让插件能在 Web Components 内工作。
+  - `src/modules/visited.ts`：已访问标记功能。读写网页 localStorage 的 `utags_visited`。
+  - `src/modules/menu-command-manager.ts`：菜单命令管理。负责注册添加/修改标签和快捷标签菜单。
+  - `src/modules/star-handler.ts`：快速星标功能的统一处理逻辑。
+  - `src/modules/star-icon.ts`：生成星标按钮 SVG。
+  - `src/modules/export-import.ts`：导入导出相关桥接逻辑。
+  - `src/modules/sync-adapter.ts`：和 webapp 同步本地数据的 postMessage 适配层。
+  - `src/modules/webapp-bridge.ts`：页面和 background 之间的 HTTP 请求桥接。
+  - `src/modules/debugging.ts`：调试快捷键和调试辅助逻辑。
+  - `src/modules/timer-manager.ts`：统一管理 timeout/interval，便于页面卸载时清理。
 - `src/sites/`：不同网站的适配规则。每个 `.ts` 文件描述一个网站如何提取 key、title、type 等信息；对应 `.scss` 文件处理该网站的样式微调。
+  - `src/sites/index.ts`：站点适配总入口。根据当前域名选择具体网站配置。
+  - `src/sites/default.ts`：默认站点适配规则。
+  - `src/sites/none.ts`：无适配或禁用适配时使用。
 - `src/sites/z001/`：常规站点适配集合。
+  - `src/sites/z001/*.ts`：具体网站适配文件。例如 GitHub、YouTube、V2EX 等。
+  - `src/sites/z001/*.scss`：具体网站的样式修正。
 - `src/sites/z999/`：另一组站点适配集合，命名上用于区分站点分组。
 - `src/storage/`：本地存储读写逻辑。
+  - `src/storage/bookmarks.ts`：主数据存储模块。读写 `extension.utags.urlmap`，保存 URL 到 tags/meta 的映射。
+  - `src/storage/tags.ts`：标签统计模块。维护最近标签、常用标签、最近添加标签。
 - `src/types/`：较复杂的业务类型定义。
+  - `src/types/bookmarks.ts`：书签和标签数据结构类型定义。想改存储结构时通常要先看这里。
 - `src/utils/`：通用工具函数、DOM 工具、事件管理器、控制台包装等。
-
-## 主要文件作用
-
-- `package.json`：npm scripts、依赖、Plasmo 配置、manifest 基础配置都在这里。新加构建命令通常也改这里。
+  - `src/utils/index.ts`：通用工具集合，例如标签排序、数据规范化、DOM 清理、星级标签判断。
+  - `src/utils/dom-utils.ts`：把标签 key/meta 写到 DOM 元素或从 DOM 元素取回。
+  - `src/utils/event-listener-manager.ts`：集中登记事件监听，便于统一移除。
+  - `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
+  - `src/utils/console.ts`：控制台输出封装。
+  - `src/utils/atob.ts`：base64 解码兼容工具。
+- `package.json`：Plasmo 扩展配置、npm scripts、依赖和 manifest 基础配置。
 - `tsconfig.json`：TypeScript 编译配置。
-- `src/content.ts`：内容脚本主入口。初始化设置、扫描 DOM、渲染标签、绑定菜单和页面事件，是阅读业务逻辑的第一站。
-- `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
-- `src/popup.tsx`：工具栏弹窗。当前主要负责给当前页面发送 `utags:show-settings` 消息来打开设置。
-- `src/options.tsx`：扩展选项页。当前是简单入口页面，真正复杂设置在内容脚本渲染的设置面板里。
-- `src/content.scss`：注入网页的全局标签样式。标签按钮、弹窗、候选列表、已访问标记等样式都在这里。
-- `src/content-utils.ts`：内容脚本辅助逻辑。负责判断 DOM 变化是否要重新扫描，以及把存储数据转成展示数据。
-- `src/storage/bookmarks.ts`：主数据存储模块。读写 `extension.utags.urlmap`，保存 URL 到 tags/meta 的映射。
-- `src/storage/tags.ts`：标签统计模块。维护最近标签、常用标签、最近添加标签。
-- `src/types/bookmarks.ts`：书签和标签数据结构类型定义。想改存储结构时通常要先看这里。
-- `src/types.ts`：更轻量的全局业务类型，例如 `UserTag`、`UserTagMeta`。
-- `src/global.d.ts`：全局类型声明。给浏览器、userscript 或第三方全局变量补 TypeScript 类型。
-- `src/messages/index.ts`：i18n 初始化入口。
-- `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：各语言文案。
-- `src/components/modal.ts`：创建标签输入弹窗的基础 DOM 结构。
-- `src/components/tag.ts`：创建单个标签元素。
-- `src/modules/advanced-tag-manager.ts`：单击标签按钮后出现的高级标签输入弹窗。
-- `src/modules/simple-tag-manger.ts`：简单输入模式的标签弹窗。
-- `src/modules/global-events.ts`：全局事件中心。处理点击标签按钮、保存标签、history 变化、触摸设备交互等。
-- `src/modules/utags-scanner.ts`：底层 DOM 扫描器。监听页面 DOM 变化并找出候选节点。
-- `src/modules/scanned-node-queue.ts`：扫描结果队列。控制节点处理节奏，避免频繁 DOM 更新造成混乱。
-- `src/modules/utags-registry.ts`：记录元素和已创建标签 UI 的对应关系，方便更新和清理。
-- `src/modules/dom-reference-manager.ts`：用 WeakMap 保存 DOM 元素和标签元数据的关系。
-- `src/modules/style-manager.ts`：组合通用样式和站点样式，并注入 document / ShadowRoot。
-- `src/modules/shadow-root.ts`：处理 Shadow DOM 场景，让插件能在 Web Components 内工作。
-- `src/modules/visited.ts`：已访问标记功能。读写网页 localStorage 的 `utags_visited`。
-- `src/modules/menu-command-manager.ts`：菜单命令管理。负责注册添加/修改标签和快捷标签菜单。
-- `src/modules/star-handler.ts`：快速星标功能的统一处理逻辑。
-- `src/modules/star-icon.ts`：生成星标按钮 SVG。
-- `src/modules/export-import.ts`：导入导出相关桥接逻辑。
-- `src/modules/sync-adapter.ts`：和 webapp 同步本地数据的 postMessage 适配层。
-- `src/modules/webapp-bridge.ts`：页面和 background 之间的 HTTP 请求桥接。
-- `src/modules/debugging.ts`：调试快捷键和调试辅助逻辑。
-- `src/modules/timer-manager.ts`：统一管理 timeout/interval，便于页面卸载时清理。
-- `src/utils/index.ts`：通用工具集合，例如标签排序、数据规范化、DOM 清理、星级标签判断。
-- `src/utils/dom-utils.ts`：把标签 key/meta 写到 DOM 元素或从 DOM 元素取回。
-- `src/utils/event-listener-manager.ts`：集中登记事件监听，便于统一移除。
-- `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
-- `src/utils/console.ts`：控制台输出封装。
-- `src/utils/atob.ts`：base64 解码兼容工具。
-- `src/sites/index.ts`：站点适配总入口。根据当前域名选择具体网站配置。
-- `src/sites/default.ts`：默认站点适配规则。
-- `src/sites/none.ts`：无适配或禁用适配时使用。
-- `src/sites/z001/*.ts`：具体网站适配文件。例如 GitHub、YouTube、V2EX 等。
-- `src/sites/z001/*.scss`：具体网站的样式修正。
-- `scripts/chrome/update-manifest.mjs`：Chrome 构建后清理 manifest。
-- `scripts/firefox/update-manifest.mjs`：Firefox MV2/MV3 构建后清理 manifest。
-- `scripts/wrap-shadow-root.mjs`：把构建后的 ShadowRoot 脚本包进 IIFE，避免污染页面全局。
-- `scripts/common.mjs`：构建脚本公共工具。
 
 ## 代码阅读路线
 
@@ -228,57 +225,3 @@ Cloudflare (community.cloudflare.com)
 4. 如需样式修正，新增同名 `.scss`，并在站点配置里返回样式文本。
 5. 在 `src/sites/index.ts` 里确认该站点配置会被加载。
 6. 执行 `npm run dev:chrome`，在目标网站上测试标签是否出现、点击是否能保存。
-
-## 常用命令
-
-```bash
-npm install .
-npm run dev:chrome
-npm run dev:firefox
-npm run typecheck
-npm run build:chrome
-npm run build:firefox
-npm run build:firefox-mv3
-```
-
-`dev:*` 用于本地开发，`build:*` 用于生成生产构建。构建结果会出现在 `build/` 目录。
-
-## 为什么没有 Edge 浏览器打包命令
-
-当前没有单独的 Edge 打包命令，是因为 Microsoft Edge 使用 Chromium 扩展体系，绝大多数情况下可以直接加载 Chrome MV3 产物。也就是说：
-
-```bash
-npm run build:chrome
-```
-
-生成的 `build/chrome-mv3-prod/` 通常就可以在 Edge 的扩展管理页中通过“加载解压缩的扩展”使用。
-
-如果你想显式添加 Edge 命令，可以在 `package.json` 的 `scripts` 里加别名：
-
-```json
-{
-  "scripts": {
-    "dev:edge": "npm run dev:chrome",
-    "build:edge": "npm run build:chrome",
-    "package:edge": "npm run package:chrome"
-  }
-}
-```
-
-如果以后需要 Edge 专属 manifest 差异，可以再新增：
-
-```text
-scripts/edge/update-manifest.mjs
-```
-
-然后把构建命令改成：
-
-```json
-{
-  "scripts": {
-    "build:edge": "cross-env PARCEL_WORKER_BACKEND=process plasmo build --target=chrome-mv3 && node scripts/edge/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/chrome-mv3-prod"
-  }
-}
-```
-
-不过在当前项目里，Edge 没有明显需要单独处理的 manifest 字段，所以直接复用 Chrome 构建命令最简单。

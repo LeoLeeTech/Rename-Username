@@ -18,7 +18,7 @@ export const messages = {
   'settings.title': 'Rename',
   'settings.information': '更改设置后，重新加载页面即可生效',
   'settings.report': '反馈问题',
-  'prompt.addTags': '[UTags] 请输入标签，多个标签以逗号分隔',
+  'prompt.addTags': '请输入新名字',
   'prompt.pinnedTags': '置顶',
   'prompt.mostUsedTags': '最近常用',
   'prompt.recentAddedTags': '最新添加',
