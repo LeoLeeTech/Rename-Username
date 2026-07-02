@@ -34,6 +34,7 @@ import {
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
 import type { PlasmoCSConfig } from 'plasmo'
+
 import {
   buildTagsForDisplay,
   shouldUpdateUtagsWhenNodeUpdated,
@@ -1314,10 +1315,10 @@ async function main() {
     <a href="https://github.com/utags/utags/issues" target="_blank">
     ${i('settings.report')}
     </a></p>
-    <p>Made with ❤️ by
-    <a href="https://www.pipecraft.net/" target="_blank">
-      Pipecraft
-    </a></p>`,
+    <p>Open Source on the 
+        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+          LeoLeeTech/Rename
+        </a></p>`,
       settingsTable,
       availableLocales: getAvailableLocales(),
       async onValueChange() {

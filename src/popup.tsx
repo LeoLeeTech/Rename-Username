@@ -45,24 +45,10 @@ function IndexPopup() {
         style={{ marginTop: 8, marginBottom: 20, width: '100%' }}>
         {i('prompt.settings')}
       </button>
-      <ul
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          listStyleType: 'none',
-          padding: 16,
-        }}>
-        <li>
-          🔖{' '}
-          <a href="https://utags.link/" target="_blank">
-            书签列表
-          </a>
-        </li>
-      </ul>
       <footer>
-        Made with ❤️ by{' '}
-        <a href="https://www.pipecraft.net/" target="_blank">
-          Pipecraft
+        Open Source on the{' '}
+        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+          LeoLeeTech/Rename
         </a>
       </footer>
     </div>
