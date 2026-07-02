@@ -18,7 +18,7 @@ export const messages = {
   'settings.title': 'Rename',
   'settings.information': 'Sau khi thay đổi cài đặt, hãy tải lại trang để có hiệu lực',
   'settings.report': 'Báo cáo vấn đề',
-  'prompt.addTags': '请输入新名字',
+  'prompt.addTags': 'Vui lòng nhập tên mới',
   'prompt.pinnedTags': 'Đã ghim',
   'prompt.mostUsedTags': 'Gần đây sử dụng thường xuyên',
   'prompt.recentAddedTags': 'Vừa thêm',

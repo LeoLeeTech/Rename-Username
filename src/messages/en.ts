@@ -18,7 +18,7 @@ const messages = {
   'settings.title': 'Rename',
   'settings.information': 'After changing the settings, reload the page to take effect',
   'settings.report': 'Report and Issue...',
-  'prompt.addTags': '请输入新名字',
+  'prompt.addTags': 'Please enter a new name',
   'prompt.pinnedTags': 'Pinned',
   'prompt.mostUsedTags': 'Recently commonly used',
   'prompt.recentAddedTags': 'Newly added',

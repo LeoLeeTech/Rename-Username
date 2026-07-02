@@ -18,7 +18,7 @@ export const messages = {
   'settings.title': 'Rename',
   'settings.information': 'Dopo aver modificato le impostazioni, ricarica la pagina perché abbiano effetto',
   'settings.report': 'Segnala problema',
-  'prompt.addTags': '请输入新名字',
+  'prompt.addTags': 'Inserisci un nuovo nome',
   'prompt.pinnedTags': 'Fissato',
   'prompt.mostUsedTags': 'Recentemente usato frequentemente',
   'prompt.recentAddedTags': 'Appena aggiunto',
