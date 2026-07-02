@@ -222,17 +222,22 @@
     .utags_captain_tag2 {
       width: var(--utags-captain-tag-size) !important;
       height: var(--utags-captain-tag-size) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       padding: 1px 0 0 1px !important;
       background: none !important;
       color: var(--utags-captain-tag-color) !important;
       border: none !important;
+      overflow: hidden !important;
 
       &::before {
         content: none !important;
       }
 
       svg {
-        fill: currentColor !important;
+        width: 100% !important;
+        height: 100% !important;
         vertical-align: -3px;
         margin: 0 !important;
         padding: 0 !important;
@@ -240,9 +245,6 @@
 
       * {
         color: inherit !important;
-        fill: currentColor !important;
-        width: unset;
-        height: unset;
       }
     }
 
