@@ -34,7 +34,6 @@ import {
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
 import type { PlasmoCSConfig } from 'plasmo'
-import createTag from './components/tag'
 import {
   buildTagsForDisplay,
   shouldUpdateUtagsWhenNodeUpdated,
@@ -213,8 +212,6 @@ const isQuickStarAvailable = () => {
 
   return false
 }
-
-const isTagManager = location.href.includes('utags.pipecraft.net/tags/')
 
 const getSettingsTable = (): SettingsTable => {
   let groupNumber = 1
@@ -583,6 +580,15 @@ function appendUtagsToElement(
   target.after(utagsUl)
 }
 
+function replaceElementTextWithNewName(element: HTMLElement, newName: string) {
+  const target = getUtagsTargetElementByElement(element)
+  if (target.dataset.utags_original_text === undefined) {
+    target.dataset.utags_original_text = target.textContent || ''
+  }
+
+  target.textContent = newName || target.dataset.utags_original_text || ''
+}
+
 function appendNewNameToPage(
   element: HTMLElement,
   key: string,
@@ -605,6 +611,7 @@ function appendNewNameToPage(
       element.dataset.utags === newName &&
       key === getAttribute(existingUtagsUl, 'data-utags_key')
     ) {
+      replaceElementTextWithNewName(element, newName)
       if (!existingUtagsUl.isConnected) {
         appendUtagsToElement(element, existingUtagsUl)
         ensureUtagsUlTracked(existingUtagsUl)
@@ -653,17 +660,6 @@ function appendNewNameToPage(
   li.append(a)
   utagsUl.append(li)
 
-  if (newName) {
-    li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
-    const a = createTag(newName, {
-      isEmoji: false,
-      noLink: isTagManager,
-      enableSelect: isTagManager,
-    })
-    li.append(a)
-    utagsUl.append(li)
-  }
-
   registerElementUtagsUl(element, utagsUl)
   utagsUl.dataset.utags_id = utagsId
   if (element.dataset.utags_absolute) {
@@ -682,6 +678,7 @@ function appendNewNameToPage(
     appendUtagsToElement(element, utagsUl)
   }
 
+  replaceElementTextWithNewName(element, newName)
   setAttribute(element, 'data-utags', newName)
   /* Fix v2ex polish start */
   // 为了防止阻塞渲染页面，延迟执行
