@@ -1,12 +1,11 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, doc, setAttribute } from 'browser-extension-utils'
 import styleText from 'data-text:./027-discourse.scss'
-import { getTrimmedTitle, splitTags } from 'utags-utils'
+import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { getBookmark } from '../../storage/bookmarks'
 import type { UserTagMeta, UtagsHTMLElement } from '../../types'
-import { containsStarRatingTag, removeStarRatingTags } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import {
   cleanupUtags,
@@ -368,14 +367,11 @@ export default (() => {
             if (formattedTitle) meta.title = formattedTitle
             if (formattedDescription) meta.description = formattedDescription
             const bookmark = getBookmark(key)
-            const tags = splitTags(bookmark.tags || '')
-            const hasStar = containsStarRatingTag(tags)
-            const tobeTags = hasStar
-              ? removeStarRatingTags(tags)
-              : ['★', ...tags]
+            const hasStar = bookmark.newName === '★'
+            const tobeName = hasStar ? '' : '★'
             bookmarkElement.dataset.utags_key = key
             bookmarkElement.dataset.utags_meta = JSON.stringify(meta)
-            bookmarkElement.dataset.utags_tags = tobeTags.join(',')
+            bookmarkElement.dataset.utags_new_name = tobeName
 
             if (hasStar) {
               bookmarkElement.classList.add('starred')

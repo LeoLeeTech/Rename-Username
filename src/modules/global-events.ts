@@ -13,17 +13,13 @@ import {
   isTouchScreen,
   removeClass,
 } from 'browser-extension-utils'
-import { splitTags } from 'utags-utils'
-
 import { i } from '../messages'
-import { saveTags } from '../storage/bookmarks'
+import { saveNewName } from '../storage/bookmarks'
 import { type NullOrUndefined, type UserTag, type UserTagMeta } from '../types'
-import { filterTags, sortTags } from '../utils'
 import { type EventListenerManager } from '../utils/event-listener-manager'
 import { advancedPrompt } from './advanced-tag-manager'
 import { simplePrompt } from './simple-tag-manger'
 import { createInterval } from './timer-manager'
-import { addVisited, removeVisited, TAG_VISITED } from './visited'
 
 const numberLimitOfShowAllUtagsInArea = 10
 let lastShownArea: HTMLElement | undefined
@@ -180,39 +176,22 @@ function bindDocumentEventsInternal(
 
           setTimeout(async () => {
             const key = captainTag.dataset.utags_key
-            const tags = captainTag.dataset.utags_tags || ''
+            const newName = captainTag.dataset.utags_new_name || ''
             const meta: UserTagMeta | undefined = captainTag.dataset.utags_meta
               ? (JSON.parse(captainTag.dataset.utags_meta) as UserTagMeta)
               : undefined
             const myPrompt = getSettingsValue('useSimplePrompt')
               ? simplePrompt
               : advancedPrompt
-            const newTags = (await myPrompt(i('prompt.addTags'), tags)) as
+            const nextNewName = (await myPrompt(i('prompt.addTags'), newName)) as
               string | NullOrUndefined
 
             isPromptShown = false
 
             captainTag.focus()
             // eslint-disable-next-line eqeqeq
-            if (key && newTags != undefined) {
-              const newTagsArray = sortTags(
-                filterTags(splitTags(newTags), TAG_VISITED),
-                []
-              )
-
-              if (
-                tags.includes(TAG_VISITED) &&
-                !newTags.includes(TAG_VISITED)
-              ) {
-                removeVisited(key)
-              } else if (
-                !tags.includes(TAG_VISITED) &&
-                newTags.includes(TAG_VISITED)
-              ) {
-                addVisited(key)
-              }
-
-              await saveTags(key, newTagsArray.join(','), meta)
+            if (key && nextNewName != undefined) {
+              await saveNewName(key, nextNewName, meta)
             }
           })
         } else if (textTag) {

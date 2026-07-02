@@ -21,7 +21,6 @@ const messages = {
   'prompt.addTags': 'Please enter a new name',
   'prompt.pinnedTags': 'Pinned',
   'prompt.mostUsedTags': 'Recently commonly used',
-  'prompt.recentAddedTags': 'Newly added',
   'prompt.copy': 'Copy',
   'prompt.cancel': 'Cancel',
   'prompt.ok': 'OK',

@@ -267,23 +267,23 @@ function isBookmarkTagsAndMetadata(
   return (
     value !== null &&
     typeof value === 'object' &&
-    'tags' in value &&
-    typeof (value as BookmarkTagsAndMetadata).tags === 'string'
+    'newName' in value &&
+    typeof (value as BookmarkTagsAndMetadata).newName === 'string'
   )
 }
 
 /**
  * Sort bookmark properties to ensure consistent structure
- * Places tags first, followed by other properties, with meta always at the end
- * @param value - Bookmark data with tags and metadata
+ * Places newName first, followed by other properties, with meta always at the end
+ * @param value - Bookmark data with new name and metadata
  * @returns Sorted bookmark object with consistent property order
  */
 function sortBookmarkProperties(
   value: BookmarkTagsAndMetadata
 ): BookmarkTagsAndMetadata {
-  const { tags, meta, ...rest } = value
+  const { newName, meta, ...rest } = value
   return {
-    tags,
+    newName,
     ...rest,
     meta,
   }

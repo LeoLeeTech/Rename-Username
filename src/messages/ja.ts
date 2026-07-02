@@ -21,7 +21,6 @@ export const messages = {
   'prompt.addTags': '新しい名前を入力してください',
   'prompt.pinnedTags': 'ピン留め',
   'prompt.mostUsedTags': '最近よく使用',
-  'prompt.recentAddedTags': '最新追加',
   'prompt.copy': 'コピー',
   'prompt.cancel': 'キャンセル',
   'prompt.ok': '確認',

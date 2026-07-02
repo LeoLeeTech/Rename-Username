@@ -1,6 +1,6 @@
 /**
  * 书签/标签主存储模块：负责读写 extension.utags.urlmap。
- * 当前每个 URL 对应一条记录，tags 以英文逗号分隔字符串保存，meta 保存标题、类型和时间戳等信息。
+ * 当前每个 URL 对应一条记录，newName 保存新名字字符串，meta 保存标题、类型和时间戳等信息。
  * 其他模块通过 getBookmark/saveBookmark 访问这里，不直接操作底层 storage。
  */
 import {
@@ -9,20 +9,15 @@ import {
   setPolling,
   setValue,
 } from 'browser-extension-storage'
-import { addEventListener, doc, isUrl, uniq } from 'browser-extension-utils'
-import {
-  normalizeCreated,
-  normalizeUpdated,
-  splitTags,
-  trimTitle,
-} from 'utags-utils'
+import { addEventListener, doc, isUrl } from 'browser-extension-utils'
+import { normalizeCreated, normalizeUpdated, trimTitle } from 'utags-utils'
 
 import type {
   BookmarkMetadata,
   BookmarksData,
   BookmarkTagsAndMetadata,
 } from '../types/bookmarks.js'
-import { addRecentTags } from './tags.js'
+import { addRecentNames } from './tags.js'
 
 /**
  * The bookmarks store.
@@ -94,7 +89,7 @@ type BookmarksStoreV3 = {
 
 // V3 changed to BookmarkTagsAndMetadata
 type TagsAndMeta = {
-  tags: string
+  newName: string
   meta?: ItemMeta
 }
 
@@ -121,7 +116,7 @@ const storageKey = 'extension.utags.urlmap'
 /** Cache for URL map data to improve performance */
 let cachedUrlMap: BookmarksData = {}
 let addValueChangeListenerInitialized = false
-let tagsValueChangeListener: () => void | undefined
+let newNameValueChangeListener: () => void | undefined
 
 /**
  * Clears the cached URL map to free memory
@@ -258,27 +253,26 @@ export async function getCachedUrlMap(): Promise<BookmarksData> {
 export function getBookmark(key: string): BookmarkTagsAndMetadata {
   return (
     cachedUrlMap[key] || {
-      tags: '',
+      newName: '',
       meta: { created: 0, updated: 0 },
     }
   )
 }
 
-// Alias for backward compatibility
-export const getTags = getBookmark
+export const getNewName = getBookmark
 
 /**
- * Saves or updates a bookmark with tags and metadata
+ * Saves or updates a bookmark with new name and metadata
  * @param key URL of the bookmark
- * @param tags Array of tags to associate with the bookmark
+ * @param newName New name to associate with the bookmark
  * @param meta Additional metadata for the bookmark
  */
 export async function saveBookmark(
   key: string,
-  tags: string,
+  newName: string,
   meta: Record<string, any> | undefined
 ): Promise<void> {
-  console.log('saveBookmark', key, tags, meta)
+  console.log('saveBookmark', key, newName, meta)
   const now = Date.now()
   const bookmarksStore = await getBookmarksStore()
   const urlMap = bookmarksStore.data
@@ -291,9 +285,8 @@ export async function saveBookmark(
     extensionVersion: currentExtensionVersion,
   }
 
-  const newTags = mergeTags(splitTags(tags), [])
-  const newTagsValue = stringifyTags(newTags)
-  let oldTags: string[] = []
+  newName = newName.trim()
+  let oldNewName = ''
 
   if (!isValidKey(key)) {
     if (urlMap[key]) {
@@ -301,13 +294,13 @@ export async function saveBookmark(
       delete urlMap[key]
       changed = true
     }
-  } else if (newTags.length === 0) {
-    // Mark as deleted bookmark if no tags are provided
+  } else if (!newName) {
+    // Mark as deleted bookmark if no new name is provided
     const existingData = urlMap[key]
     if (existingData) {
-      oldTags = splitTags(existingData.tags || '')
-      if (!oldTags.includes(DELETED_BOOKMARK_TAG)) {
-        existingData.tags = stringifyTags([...oldTags, DELETED_BOOKMARK_TAG])
+      oldNewName = existingData.newName || ''
+      if (oldNewName !== DELETED_BOOKMARK_TAG) {
+        existingData.newName = DELETED_BOOKMARK_TAG
         existingData.meta = {
           ...existingData.meta,
           updated2: now,
@@ -323,7 +316,7 @@ export async function saveBookmark(
     // Update or create bookmark
     const existingData = urlMap[key] || {}
     const existingDataStr = JSON.stringify(existingData)
-    oldTags = splitTags(existingData.tags || '')
+    oldNewName = existingData.newName || ''
 
     const title =
       trimTitle(meta?.title as string) || trimTitle(existingData.meta?.title)
@@ -348,7 +341,7 @@ export async function saveBookmark(
     }
 
     const newData = {
-      tags: newTagsValue,
+      newName,
       meta: newMeta,
     }
     const newDataStr = JSON.stringify(newData)
@@ -364,15 +357,14 @@ export async function saveBookmark(
   if (changed) {
     bookmarksStore.meta.updated = now
     await persistBookmarksStore(bookmarksStore)
-    await addRecentTags(newTags, oldTags)
+    await addRecentNames([newName], oldNewName ? [oldNewName] : [])
   }
 }
 
-// Alias for backward compatibility
-export const saveTags = saveBookmark
+export const saveNewName = saveBookmark
 
-export function addTagsValueChangeListener(func: () => void) {
-  tagsValueChangeListener = func
+export function addNewNameValueChangeListener(func: () => void) {
+  newNameValueChangeListener = func
 }
 
 /**
@@ -394,34 +386,12 @@ function isValidKey(key: string): boolean {
 }
 
 /**
- * Validates if the provided value is a valid tags array
- * @param tags Value to validate
- * @returns boolean indicating if value is a valid tags array
+ * Validates if the provided value is a valid new name
+ * @param newName Value to validate
+ * @returns boolean indicating if value is a valid new name
  */
-function isValidTags(tags: unknown): boolean {
-  return typeof tags === 'string'
-}
-
-/**
- * Merges two arrays of tags, removing duplicates and empty values
- * @param tags First array of tags
- * @param tags2 Second array of tags
- * @returns Merged and cleaned array of tags
- */
-function mergeTags(tags: string[], tags2: string[]): string[] {
-  const array1 = tags || []
-  const array2 = tags2 || []
-
-  return uniq(
-    array1
-      .concat(array2)
-      .map((tag) => (tag ? String(tag).trim() : tag))
-      .filter(Boolean)
-  )
-}
-
-function stringifyTags(tags: string[]): string {
-  return mergeTags(tags, []).join(',')
+function isValidNewName(newName: unknown): boolean {
+  return typeof newName === 'string'
 }
 
 /**
@@ -433,8 +403,8 @@ function filterDeleted(data: BookmarksData): BookmarksData {
   const filteredData: BookmarksData = {}
 
   for (const [key, bookmark] of Object.entries(data)) {
-    // Check if the bookmark contains the '._DELETED_' tag
-    if (!splitTags(bookmark.tags || '').includes(DELETED_BOOKMARK_TAG)) {
+    // Check if the bookmark is marked as deleted
+    if (bookmark.newName !== DELETED_BOOKMARK_TAG) {
       filteredData[key] = bookmark
     }
   }
@@ -470,9 +440,9 @@ async function migrateV2toV3(bookmarksStore: BookmarksStoreV2) {
       continue
     }
 
-    if (!bookmarkV2.tags || !isValidTags(bookmarkV2.tags)) {
+    if (!bookmarkV2.newName || !isValidNewName(bookmarkV2.newName)) {
       console.warn(
-        `Migration: Invalid tags for key ${key}: ${String(bookmarkV2.tags)}`
+        `Migration: Invalid newName for key ${key}: ${String(bookmarkV2.newName)}`
       )
       continue
     }
@@ -532,7 +502,7 @@ async function migrateV2toV3(bookmarksStore: BookmarksStoreV2) {
       updated: normalizedUpdated,
     }
     const bookmarkV3: BookmarkTagsAndMetadata = {
-      tags: bookmarkV2.tags,
+      newName: bookmarkV2.newName,
       meta,
     }
     bookmarksStoreNew.data[key] = bookmarkV3
@@ -589,9 +559,9 @@ async function migrateV3_fixV0_13_0TimestampBug(
       continue
     }
 
-    if (!bookmarkOld.tags || !isValidTags(bookmarkOld.tags)) {
+    if (!bookmarkOld.newName || !isValidNewName(bookmarkOld.newName)) {
       console.warn(
-        `Migration: Invalid tags for key ${key}: ${String(bookmarkOld.tags)}`
+        `Migration: Invalid newName for key ${key}: ${String(bookmarkOld.newName)}`
       )
       continue
     }
@@ -612,7 +582,7 @@ async function migrateV3_fixV0_13_0TimestampBug(
       updated: normalizedUpdated,
     }
     const bookmarkNew: BookmarkTagsAndMetadata = {
-      tags: bookmarkOld.tags,
+      newName: bookmarkOld.newName,
       meta,
     }
     bookmarksStoreNew.data[key] = bookmarkNew
@@ -700,8 +670,8 @@ export async function initBookmarksStore(): Promise<void> {
 
   console.log('Bookmarks store initialized')
 
-  if (tagsValueChangeListener) {
-    tagsValueChangeListener()
+  if (newNameValueChangeListener) {
+    newNameValueChangeListener()
   }
 
   if (!addValueChangeListenerInitialized) {

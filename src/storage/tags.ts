@@ -20,8 +20,6 @@ const STORAGE_KEY_RECENT_TAGS = 'extension.utags.recenttags'
 
 const STORAGE_KEY_MOST_USED_TAGS = 'extension.utags.mostusedtags'
 
-const STORAGE_KEY_RECENT_ADDED_TAGS = 'extension.utags.recentaddedtags'
-
 /**
  * Calculates a weighted score based on current timestamp
  * Used for tag ranking and sorting
@@ -33,31 +31,31 @@ function getScore(weight = 1): number {
 }
 
 /**
- * Adds new tags to the recent tags list and updates related tag collections
- * @param newTags Array of new tags to add
- * @param oldTags Array of existing tags to compare against
+ * Adds new names to the recent names list and updates related collections
+ * @param newNames Array of new names to add
+ * @param oldNames Array of existing names to compare against
  */
-export async function addRecentTags(
-  newTags: string[],
-  oldTags: string[]
+export async function addRecentNames(
+  newNames: string[],
+  oldNames: string[]
 ): Promise<void> {
-  if (newTags.length === 0) return
+  if (newNames.length === 0) return
 
-  // Filter out tags that already exist in oldTags
-  const uniqueNewTags =
-    oldTags?.length > 0
-      ? newTags.filter((tag) => tag && !oldTags.includes(tag))
-      : newTags.filter(Boolean)
+  // Filter out names that already exist in oldNames
+  const uniqueNewNames =
+    oldNames?.length > 0
+      ? newNames.filter((name) => name && !oldNames.includes(name))
+      : newNames.filter(Boolean)
 
-  if (uniqueNewTags.length === 0) return
+  if (uniqueNewNames.length === 0) return
 
-  // Retrieve existing recent tags or initialize new array
+  // Retrieve existing recent names or initialize new array
   const recentTags: RecentTag[] = await getRecentTags()
   const score = getScore()
 
-  // Add new tags with current score
-  for (const tag of uniqueNewTags) {
-    recentTags.push({ tag, score })
+  // Add new names with current score
+  for (const name of uniqueNewNames) {
+    recentTags.push({ tag: name, score })
   }
 
   // Maintain maximum size of recent tags list
@@ -67,16 +65,14 @@ export async function addRecentTags(
 
   // Update storage and related tag collections
   await setValue(STORAGE_KEY_RECENT_TAGS, recentTags)
-  await generateMostUsedAndRecentAddedTags(recentTags)
+  await generateMostUsedTags(recentTags)
 }
 
 /**
- * Generates most used and recently added tags from the recent tags collection
+ * Generates most used tags from the recent tags collection
  * @param recentTags Array of recent tags with scores
  */
-async function generateMostUsedAndRecentAddedTags(
-  recentTags: RecentTag[]
-): Promise<void> {
+async function generateMostUsedTags(recentTags: RecentTag[]): Promise<void> {
   // Aggregate tag scores
   const tagScores: Record<string, RecentTag> = {}
 
@@ -102,23 +98,7 @@ async function generateMostUsedAndRecentAddedTags(
     .map((tag) => tag.tag)
     .slice(0, 200) // Limit to top 200 tags
 
-  // Generate recent added tags list (unique, maintaining order)
-  const recentAddedTags = Array.from(
-    new Set(
-      recentTags
-        .map((tag) => tag.tag)
-        .reverse()
-        .filter(Boolean)
-    )
-  ).slice(0, 200) // Limit to latest 200 tags
-
-  // Update storage
-  await Promise.all([
-    setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags),
-    setValue(STORAGE_KEY_RECENT_ADDED_TAGS, recentAddedTags),
-  ])
-  // await setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags)
-  // await setValue(STORAGE_KEY_RECENT_ADDED_TAGS, recentAddedTags)
+  await setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags)
 }
 
 export async function getRecentTags(): Promise<RecentTag[]> {
@@ -132,15 +112,6 @@ export async function getRecentTags(): Promise<RecentTag[]> {
  */
 export async function getMostUsedTags(): Promise<string[]> {
   const values = await getValue<string[]>(STORAGE_KEY_MOST_USED_TAGS)
-  return Array.isArray(values) ? values : []
-}
-
-/**
- * Retrieves the list of recently added tags
- * @returns Array of recently added tag strings
- */
-export async function getRecentAddedTags(): Promise<string[]> {
-  const values = await getValue<string[]>(STORAGE_KEY_RECENT_ADDED_TAGS)
   return Array.isArray(values) ? values : []
 }
 

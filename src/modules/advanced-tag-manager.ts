@@ -13,24 +13,18 @@ import {
   removeClass,
   removeEventListener,
 } from 'browser-extension-utils'
-import { splitTags } from 'utags-utils'
 
 import createModal from '../components/modal'
 import createTag from '../components/tag'
 import { i } from '../messages'
-import {
-  getMostUsedTags,
-  getPinnedTags,
-  getRecentAddedTags,
-} from '../storage/tags'
-import { copyText, sortTags } from '../utils'
+import { getMostUsedTags, getPinnedTags } from '../storage/tags'
+import { copyText } from '../utils'
 import { createTimeout } from './timer-manager'
 
 let pinnedTags: string[]
 let mostUsedTags: string[]
-let recentAddedTags: string[]
 let displayedTags = new Set()
-let currentTags = new Set<string>()
+let currentNewName = ''
 let disableTagStyleInPrompt = false
 
 /**
@@ -40,30 +34,15 @@ let disableTagStyleInPrompt = false
 export function clearTagManagerCache(): void {
   pinnedTags = []
   mostUsedTags = []
-  recentAddedTags = []
   displayedTags = new Set()
-  currentTags = new Set()
+  currentNewName = ''
 }
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-types
 function onSelect(selected: string | null, input: HTMLInputElement) {
   if (selected) {
     input.value = ''
-
-    const tags = splitTags(selected)
-    for (const tag of tags) {
-      currentTags.add(tag)
-    }
-
-    updateLists()
-  }
-}
-
-function removeTag(tag: string | undefined) {
-  if (tag) {
-    tag = tag.trim()
-    currentTags.delete(tag)
-
+    currentNewName = selected.trim()
     updateLists()
   }
 }
@@ -89,14 +68,6 @@ function updateLists(container?: HTMLElement) {
   )
   if (ul2) {
     updateCandidateTagList(ul2, mostUsedTags)
-  }
-
-  const ul3 = $(
-    '.utags_modal_content ul.utags_select_list.utags_recent_added',
-    container
-  )
-  if (ul3) {
-    updateCandidateTagList(ul3, recentAddedTags)
   }
 }
 
@@ -151,11 +122,10 @@ function getPreviousList(parentElement: HTMLElement) {
 function updateCurrentTagList(ul: HTMLElement) {
   ul.textContent = ''
 
-  const sortedTags = sortTags([...currentTags], [])
-  for (const tag of sortedTags) {
-    displayedTags.add(tag)
+  if (currentNewName) {
+    displayedTags.add(currentNewName)
     const li = addElement(ul, 'li')
-    const a = createTag(tag, { isEmoji: false, noLink: true })
+    const a = createTag(currentNewName, { isEmoji: false, noLink: true })
     if (li) li.append(a)
   }
 }
@@ -180,7 +150,7 @@ function removeAllActive(type?: number) {
 }
 
 async function copyCurrentTags(input: HTMLInputElement) {
-  const value = sortTags([...currentTags], []).join(', ')
+  const value = currentNewName
   await copyText(value)
   input.value = value
   input.focus()
@@ -210,15 +180,15 @@ function createPromptView(
     textContent: message,
   })
 
-  const currentTagsWrapper = addElement(content, 'div', {
+  const currentNewNameWrapper = addElement(content, 'div', {
     class: 'utags_current_tags_wrapper',
   })
-  addElement(currentTagsWrapper, 'span', {
+  addElement(currentNewNameWrapper, 'span', {
     textContent: '',
     style: 'display: none;',
     'data-utags': '',
   })
-  addElement(currentTagsWrapper, 'ul', {
+  addElement(currentNewNameWrapper, 'ul', {
     class: 'utags_current_tags utags_ul',
     'data-utags_exclude': '',
   })
@@ -226,7 +196,7 @@ function createPromptView(
   let enableCloseModalOnBlur = false
   const input = addElement(content, 'input', {
     type: 'text',
-    placeholder: 'foo, bar',
+    placeholder: 'name',
     onblur(event: FocusEvent) {
       // console.log('onblur', event.relatedTarget, doc.activeElement, Date.now())
       // relatedTarget is null when Escape key pressed
@@ -283,7 +253,7 @@ function createPromptView(
     }
   }
 
-  addElement(currentTagsWrapper, 'button', {
+  addElement(currentNewNameWrapper, 'button', {
     type: 'button',
     class: 'utags_button_copy',
     tabIndex: '0',
@@ -310,13 +280,6 @@ function createPromptView(
       'utags_select_list utags_most_used' +
       (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
     'data-utags_list_name': i('prompt.mostUsedTags'),
-  })
-
-  addElement(listWrapper, 'ul', {
-    class:
-      'utags_select_list utags_recent_added' +
-      (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
-    'data-utags_list_name': i('prompt.recentAddedTags'),
   })
 
   updateLists(content)
@@ -348,7 +311,7 @@ function createPromptView(
   }
 
   const okHandler = () => {
-    closeModal(Array.from(currentTags).join(','))
+    closeModal(currentNewName)
   }
 
   addElement(buttonWrapper, 'button', {
@@ -365,7 +328,8 @@ function createPromptView(
     tabIndex: '0',
     textContent: i('prompt.ok'),
     onclick() {
-      onSelect(input.value.trim(), input)
+      currentNewName = input.value.trim()
+      updateLists()
       okHandler()
     },
   })
@@ -403,7 +367,9 @@ function createPromptView(
         if (current) {
           onSelect(current.textContent, input)
         } else if (input.value.trim()) {
-          onSelect(input.value.trim(), input)
+          currentNewName = input.value.trim()
+          input.value = ''
+          updateLists()
         } else {
           okHandler()
         }
@@ -596,7 +562,8 @@ function createPromptView(
       }
 
       if (target.closest('.utags_modal_content ul.utags_current_tags li a')) {
-        removeTag(target.dataset.utags_tag)
+        currentNewName = ''
+        updateLists()
       }
     } else {
       closeModal()
@@ -646,8 +613,7 @@ export async function advancedPrompt(
 ) {
   pinnedTags = await getPinnedTags()
   mostUsedTags = await getMostUsedTags()
-  recentAddedTags = await getRecentAddedTags()
-  currentTags = new Set(splitTags(value))
+  currentNewName = value || ''
   disableTagStyleInPrompt = !getSettingsValue<boolean>('enableTagStyleInPrompt')
 
   return new Promise((resolve) => {

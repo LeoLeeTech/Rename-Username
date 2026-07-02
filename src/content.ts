@@ -34,8 +34,6 @@ import {
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
 import type { PlasmoCSConfig } from 'plasmo'
-import { splitTags } from 'utags-utils'
-
 import createTag from './components/tag'
 import {
   buildTagsForDisplay,
@@ -94,13 +92,13 @@ import {
   type ScanDomOptions,
 } from './sites/index'
 import {
-  addTagsValueChangeListener,
+  addNewNameValueChangeListener,
   clearCachedUrlMap,
-  getTags,
+  getNewName,
   initBookmarksStore,
 } from './storage/bookmarks'
 import type { UserTag, UserTagMeta } from './types'
-import { generateUtagsId, sortTags } from './utils'
+import { generateUtagsId } from './utils'
 import { setupConsole } from './utils/console.js'
 import { EventListenerManager } from './utils/event-listener-manager'
 
@@ -425,17 +423,12 @@ function showCurrentPageLinkUtagsPrompt(
     const element = $('#utags_current_page_link + ul.utags_ul button')!
     if (element) {
       if (tag) {
-        const currentTags = splitTags(element.dataset.utags_tags)
         if (remove) {
-          if (currentTags.includes(tag)) {
-            element.dataset.utags_tags = currentTags
-              .filter((t) => t !== tag)
-              .join(', ')
+          if (element.dataset.utags_new_name === tag) {
+            element.dataset.utags_new_name = ''
           }
-        } else if (!currentTags.includes(tag)) {
-          element.dataset.utags_tags = sortTags([...currentTags, tag], []).join(
-            ', '
-          )
+        } else if (element.dataset.utags_new_name !== tag) {
+          element.dataset.utags_new_name = tag
         }
       }
 
@@ -468,11 +461,12 @@ async function updateAddTagsToCurrentPageMenuCommand() {
     return
   }
 
-  const object = getTags(key)
-  const tags = splitTags(object.tags)
+  const object = getNewName(key)
+  const newName = object.newName || ''
+  const currentNames = newName ? [newName] : []
 
-  await menuCommandManager.updateMenuCommand(tags)
-  await menuCommandManager.updateQuickTagMenuCommands(tags)
+  await menuCommandManager.updateMenuCommand(currentNames)
+  await menuCommandManager.updateQuickTagMenuCommands(currentNames)
 }
 
 const scrollBoundElements = new WeakSet<HTMLElement>()
@@ -589,10 +583,10 @@ function appendUtagsToElement(
   target.after(utagsUl)
 }
 
-function appendTagsToPage(
+function appendNewNameToPage(
   element: HTMLElement,
   key: string,
-  tags: string[],
+  newName: string,
   meta: UserTagMeta | undefined
 ) {
   let utagsId = element.dataset.utags_id
@@ -608,7 +602,7 @@ function appendTagsToPage(
   if (existingUtagsUl) {
     if (
       hasClass(existingUtagsUl, 'utags_ul') &&
-      element.dataset.utags === tags.join(',') &&
+      element.dataset.utags === newName &&
       key === getAttribute(existingUtagsUl, 'data-utags_key')
     ) {
       if (!existingUtagsUl.isConnected) {
@@ -629,7 +623,7 @@ function appendTagsToPage(
   // For example: https://www.zhipin.com/
   const tagName = element.dataset.utags_ul_type === 'ol' ? 'ol' : 'ul'
   const utagsUl = createElement(tagName, {
-    class: tags.length === 0 ? 'utags_ul utags_ul_0' : 'utags_ul utags_ul_1',
+    class: newName ? 'utags_ul utags_ul_1' : 'utags_ul utags_ul_0',
     'data-utags_key': key,
     'data-utags_exclude': '',
   })
@@ -642,13 +636,12 @@ function appendTagsToPage(
     title: 'Add tags',
     'data-utags_tag': '🏷️',
     'data-utags_key': key,
-    'data-utags_tags': tags.join(', '),
+    'data-utags_new_name': newName,
     'data-utags_meta': meta ? JSON.stringify(meta) : '',
     'data-utags_exclude': '',
-    class:
-      tags.length === 0
-        ? 'utags_text_tag utags_captain_tag'
-        : 'utags_text_tag utags_captain_tag2',
+    class: newName
+      ? 'utags_text_tag utags_captain_tag2'
+      : 'utags_text_tag utags_captain_tag',
   })
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-tags-fill" viewBox="0 0 16 16">
 <path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
@@ -660,9 +653,9 @@ function appendTagsToPage(
   li.append(a)
   utagsUl.append(li)
 
-  for (const tag of tags) {
+  if (newName) {
     li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
-    const a = createTag(tag, {
+    const a = createTag(newName, {
       isEmoji: false,
       noLink: isTagManager,
       enableSelect: isTagManager,
@@ -689,7 +682,7 @@ function appendTagsToPage(
     appendUtagsToElement(element, utagsUl)
   }
 
-  setAttribute(element, 'data-utags', tags.join(','))
+  setAttribute(element, 'data-utags', newName)
   /* Fix v2ex polish start */
   // 为了防止阻塞渲染页面，延迟执行
   // 20260327: 删掉此逻辑
@@ -776,9 +769,9 @@ function processNodeForDisplay(node: HTMLElement) {
     return
   }
 
-  const { key, tags, meta } = result
+  const { key, newName, meta } = result
 
-  appendTagsToPage(node, key, tags, meta)
+  appendNewNameToPage(node, key, newName, meta)
 }
 
 configureScannedNodeProcessor(processNodeForDisplay)
@@ -833,7 +826,7 @@ async function initStorage() {
     void updateAddTagsToCurrentPageMenuCommand()
   }
 
-  addTagsValueChangeListener(onStorageChange)
+  addNewNameValueChangeListener(onStorageChange)
   addVisitedValueChangeListener(onStorageChange)
 }
 

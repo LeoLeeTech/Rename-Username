@@ -21,7 +21,6 @@ export const messages = {
   'prompt.addTags': '请输入新名字',
   'prompt.pinnedTags': '置顶',
   'prompt.mostUsedTags': '最近常用',
-  'prompt.recentAddedTags': '最新添加',
   'prompt.copy': '复制',
   'prompt.cancel': '取消',
   'prompt.ok': '确认',

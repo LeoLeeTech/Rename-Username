@@ -21,7 +21,6 @@ const messages = {
   'prompt.addTags': 'Введите новое имя',
   'prompt.pinnedTags': 'Закреплённые',
   'prompt.mostUsedTags': 'Часто используемые',
-  'prompt.recentAddedTags': 'Недавно добавленные',
   'prompt.copy': 'Копировать',
   'prompt.cancel': 'Отмена',
   'prompt.ok': 'ОК',

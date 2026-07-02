@@ -21,7 +21,6 @@ export const messages = {
   'prompt.addTags': '새 이름을 입력하세요',
   'prompt.pinnedTags': '고정',
   'prompt.mostUsedTags': '최근 자주 사용',
-  'prompt.recentAddedTags': '최근 추가',
   'prompt.copy': '복사',
   'prompt.cancel': '취소',
   'prompt.ok': '확인',

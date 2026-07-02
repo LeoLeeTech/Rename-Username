@@ -21,7 +21,6 @@ export const messages = {
   'prompt.addTags': 'Vui lòng nhập tên mới',
   'prompt.pinnedTags': 'Đã ghim',
   'prompt.mostUsedTags': 'Gần đây sử dụng thường xuyên',
-  'prompt.recentAddedTags': 'Vừa thêm',
   'prompt.copy': 'Sao chép',
   'prompt.cancel': 'Hủy',
   'prompt.ok': 'Xác nhận',

@@ -1,12 +1,11 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, getAttribute } from 'browser-extension-utils'
 import styleText from 'data-text:./012-youtube.com.scss'
-import { getTrimmedTitle, splitTags } from 'utags-utils'
+import { getTrimmedTitle } from 'utags-utils'
 
 import { getStarIconSvg } from '../../modules/star-icon'
 import { getBookmark } from '../../storage/bookmarks'
 import type { UserTagMeta } from '../../types'
-import { containsStarRatingTag, removeStarRatingTags } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
@@ -193,12 +192,11 @@ export default (() => {
           const meta: UserTagMeta = { type }
           if (title) meta.title = title
           const bookmark = getBookmark(key)
-          const tags = splitTags(bookmark.tags || '')
-          const hasStar = containsStarRatingTag(tags)
-          const tobeTags = hasStar ? removeStarRatingTags(tags) : ['★', ...tags]
+          const hasStar = bookmark.newName === '★'
+          const tobeName = hasStar ? '' : '★'
           bookmarkElement.dataset.utags_key = key
           bookmarkElement.dataset.utags_meta = JSON.stringify(meta)
-          bookmarkElement.dataset.utags_tags = tobeTags.join(',')
+          bookmarkElement.dataset.utags_new_name = tobeName
 
           if (hasStar) {
             bookmarkElement.classList.add('starred')

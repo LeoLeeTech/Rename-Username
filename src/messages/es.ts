@@ -21,7 +21,6 @@ export const messages = {
   'prompt.addTags': 'Introduce un nuevo nombre',
   'prompt.pinnedTags': 'Fijado',
   'prompt.mostUsedTags': 'Recientemente usado frecuentemente',
-  'prompt.recentAddedTags': 'Recién agregado',
   'prompt.copy': 'Copiar',
   'prompt.cancel': 'Cancelar',
   'prompt.ok': 'Confirmar',
