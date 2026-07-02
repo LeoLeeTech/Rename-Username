@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Bật UTags trên trang web hiện tại',
+  'settings.enableCurrentSite': 'Bật Rename trên trang web hiện tại',
   'settings.enableCurrentSiteCustomRule': 'Bật quy tắc khớp tùy chỉnh cho trang web hiện tại',
   'settings.customRuleValue': 'Quy tắc khớp tùy chỉnh',
   'settings.useVisitedFunction': 'Kích hoạt chức năng gắn tag nội dung điều hướng trên trang web hiện tại',

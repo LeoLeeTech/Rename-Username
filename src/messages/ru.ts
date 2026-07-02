@@ -1,5 +1,5 @@
 const messages = {
-  'settings.enableCurrentSite': 'Включить UTags на текущем сайте',
+  'settings.enableCurrentSite': 'Включить Rename на текущем сайте',
   'settings.enableCurrentSiteCustomRule': 'Включить пользовательские правила соответствия для текущего веб-сайта',
   'settings.customRuleValue': 'Пользовательские правила соответствия',
   'settings.useVisitedFunction': 'Включить функцию отметки просмотренного контента на текущем сайте',

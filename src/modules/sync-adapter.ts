@@ -65,7 +65,7 @@ type BrowserExtensionResponse<T extends MessageType> = {
   error?: string
 }
 
-const SCRIPT_NAME = '[UTags Extension Sync Adapter]'
+const SCRIPT_NAME = '[Rename Extension Sync Adapter]'
 
 let MY_EXTENSION_ID: string | undefined // Example ID, should be unique per script/extension
 let MY_EXTENSION_NAME: string | undefined
@@ -157,7 +157,7 @@ async function checkUserscriptAvailable(): Promise<boolean> {
     return true
   } catch (error) {
     // If GM.xmlHttpRequest throws an exception, userscript might be disabled
-    console.warn('[UTags] Userscript may be disabled:', error)
+    console.warn('[Rename] Userscript may be disabled:', error)
     return false
   }
 }
@@ -452,7 +452,7 @@ async function initExtensionId(): Promise<void> {
   }
 
   MY_EXTENSION_ID = storedId
-  MY_EXTENSION_NAME = `UTags ${type}${tag}`
+  MY_EXTENSION_NAME = `Rename ${type}${tag}`
   // MY_EXTENSION_ID = 'utags-extension'
   console.log('initExtensionId', MY_EXTENSION_ID, MY_EXTENSION_NAME)
 }

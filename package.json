@@ -2,15 +2,19 @@
   "name": "rename",
   "displayName": "Rename",
   "displayName:zh-CN": "Rename",
-  "version": "0.34.2",
-  "description": "Browser extension for custom user labels on websites.",
+  "version": "0.0.1",
+  "description": "Rename text on websites and keep custom names locally in your browser.",
   "type": "module",
-  "author": "Pipecraft",
+  "author": "LeoLeeTech",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/utags/utags/issues"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeoLeeTech/Rename.git"
   },
-  "homepage": "https://github.com/utags/utags#readme",
+  "bugs": {
+    "url": "https://github.com/LeoLeeTech/Rename/issues"
+  },
+  "homepage": "https://github.com/LeoLeeTech/Rename#readme",
   "scripts": {
     "format": "prettier --write .",
     "typecheck": "tsc --noemit",
@@ -24,6 +28,7 @@
     "build:firefox-mv3": "cross-env PARCEL_WORKER_BACKEND=process plasmo build --target=firefox-mv3 && node scripts/firefox/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/firefox-mv3-prod && addons-linter build/firefox-mv3-prod/",
     "package": "run-s package:*",
     "package:chrome": "plasmo package",
+    "package:edge": "npm run package:chrome && cp build/chrome-mv3-prod.zip build/edge-mv3-prod.zip",
     "package:firefox": "plasmo package --target=firefox-mv2 && addons-linter build/firefox-mv2-prod.zip",
     "package:firefox-mv3": "plasmo package --target=firefox-mv3 && addons-linter build/firefox-mv3-prod.zip"
   },
@@ -64,7 +69,7 @@
     ],
     "browser_specific_settings": {
       "gecko": {
-        "id": "{a0b2a0f8-83a5-449a-8e47-3b257da0bb37}",
+        "id": "{9c02e4b9-03a5-4bc3-bd19-44e0ff68eb70}",
         "data_collection_permissions": {
           "required": [
             "none"

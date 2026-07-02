@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '現在のウェブサイトでUTagsを有効にする',
+  'settings.enableCurrentSite': '現在のウェブサイトでRenameを有効にする',
   'settings.enableCurrentSiteCustomRule': '現在のウェブサイトのカスタムマッチングルールを有効にする',
   'settings.customRuleValue': 'カスタムマッチングルール',
   'settings.useVisitedFunction': '現在のウェブサイトで閲覧コンテンツのタグ機能を有効にする',

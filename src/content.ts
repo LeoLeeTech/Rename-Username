@@ -266,18 +266,6 @@ const getSettingsTable = (): SettingsTable => {
       group: groupNumber,
     },
 
-    openTagsPage: {
-      title: i('settings.openTagsPage'),
-      type: 'externalLink',
-      url: 'https://utags.link/',
-      group: ++groupNumber,
-    },
-    openDataPage: {
-      title: i('settings.openDataPage'),
-      type: 'externalLink',
-      url: 'https://utags.link/',
-      group: groupNumber,
-    },
   }
 }
 
@@ -1312,7 +1300,7 @@ async function main() {
       footer: `
     <p>${i('settings.information')}</p>
     <p>
-    <a href="https://github.com/utags/utags/issues" target="_blank">
+    <a href="https://github.com/LeoLeeTech/Rename/issues" target="_blank">
     ${i('settings.report')}
     </a></p>
     <p>Open Source on the 

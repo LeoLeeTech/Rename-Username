@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'UTags auf der aktuellen Website aktivieren',
+  'settings.enableCurrentSite': 'Rename auf der aktuellen Website aktivieren',
   'settings.enableCurrentSiteCustomRule': 'Benutzerdefinierte Übereinstimmungsregeln für die aktuelle Website aktivieren',
   'settings.customRuleValue': 'Benutzerdefinierte Übereinstimmungsregeln',
   'settings.useVisitedFunction': 'Browsing-Inhalts-Tagging auf der aktuellen Website aktivieren',

@@ -1,5 +1,5 @@
 const messages = {
-  'settings.enableCurrentSite': 'Enable UTags on the current website',
+  'settings.enableCurrentSite': 'Enable Rename on the current website',
   'settings.enableCurrentSiteCustomRule': 'Enable custom matching rules for the current website',
   'settings.customRuleValue': 'Custom matching rules',
   'settings.useVisitedFunction': 'Enable browsing content tagging on the current website',

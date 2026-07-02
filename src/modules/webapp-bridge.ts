@@ -134,7 +134,7 @@ function handleHttpRequestExtension(
   const { id, payload } = message
   const { method, url } = payload
 
-  console.log(`[UTags Extension] Processing HTTP request: ${method} ${url}`)
+  console.log(`[Rename Extension] Processing HTTP request: ${method} ${url}`)
 
   // Forward request to background script
   chrome.runtime
@@ -154,7 +154,7 @@ function handleHttpRequestExtension(
     // eslint-disable-next-line promise/prefer-await-to-then
     .catch((error: unknown) => {
       console.error(
-        '[UTags Extension] Error communicating with background script:',
+        '[Rename Extension] Error communicating with background script:',
         error
       )
       sendHttpError(id, 'Extension communication error', event, error)
@@ -173,7 +173,7 @@ function handleHttpRequestUserscript(
   const { id, payload } = message
   const { method, url, headers, body, timeout } = payload
 
-  console.log(`[UTags Extension] Processing HTTP request: ${method} ${url}`)
+  console.log(`[Rename Extension] Processing HTTP request: ${method} ${url}`)
 
   const normalizedMethod = normalizeHttpMethod(method)
   if (!normalizedMethod) {
@@ -197,7 +197,7 @@ function handleHttpRequestUserscript(
     timeout: timeout || 30_000,
     onload(response) {
       console.log(
-        `[UTags Extension] HTTP request successful: ${response.status}`
+        `[Rename Extension] HTTP request successful: ${response.status}`
       )
 
       // Parse response headers
@@ -225,7 +225,7 @@ function handleHttpRequestUserscript(
       )
     },
     onerror(error) {
-      console.error(`[UTags Extension] HTTP request failed:`, error)
+      console.error(`[Rename Extension] HTTP request failed:`, error)
       sendHttpError(
         id,
         error && typeof error.statusText === 'string'
@@ -236,7 +236,7 @@ function handleHttpRequestUserscript(
       )
     },
     ontimeout() {
-      console.error(`[UTags Extension] HTTP request timeout`)
+      console.error(`[Rename Extension] HTTP request timeout`)
       sendHttpError(id, 'Request timeout', event)
     },
   })
@@ -300,7 +300,7 @@ function sendHttpError(
  * @param {MessageEvent} event - The message event
  */
 function handlePing(message: PingMessage, event: MessageEvent): void {
-  console.log('[UTags Extension] Received ping, sending pong')
+  console.log('[Rename Extension] Received ping, sending pong')
 
   const pongMessage: PongMessage = {
     type: 'PONG',
@@ -340,7 +340,7 @@ function messageListener(event: MessageEvent): void {
       return
     }
 
-    console.log(`[UTags Extension] Received message:`, message.type)
+    console.log(`[Rename Extension] Received message:`, message.type)
 
     switch (message.type) {
       case 'PING': {
@@ -356,11 +356,11 @@ function messageListener(event: MessageEvent): void {
       // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       default: {
         // @ts-expect-error log invalid types
-        console.log(`[UTags Extension] Unknown message type: ${message.type}`)
+        console.log(`[Rename Extension] Unknown message type: ${message.type}`)
       }
     }
   } catch (error) {
-    console.error('[UTags Extension] Error handling message:', error)
+    console.error('[Rename Extension] Error handling message:', error)
     // Send error response if we have a valid message with ID
     if (message && message.id) {
       sendHttpError(
@@ -380,7 +380,7 @@ export function setupWebappBridge(): void {
   // Setup message listener
   window.addEventListener('message', messageListener)
   // Announce extension availability
-  console.log('[UTags Extension] ready for HTTP proxy requests')
+  console.log('[Rename Extension] ready for HTTP proxy requests')
 }
 
 // Optional: Send a ready signal to webapp
@@ -391,7 +391,7 @@ export function setupWebappBridge(): void {
 //     source: 'utags-extension',
 //     id: `ready-${Date.now()}`,
 //     payload: {
-//       name: 'UTags HTTP Proxy Extension',
+//       name: 'Rename HTTP Proxy Extension',
 //       version: '1.0.0',
 //     },
 //   }

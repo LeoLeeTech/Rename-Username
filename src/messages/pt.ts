@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Habilitar UTags no site atual',
+  'settings.enableCurrentSite': 'Habilitar Rename no site atual',
   'settings.enableCurrentSiteCustomRule': 'Ativar regras de correspondência personalizadas para o site atual',
   'settings.customRuleValue': 'Regras de correspondência personalizadas',
   'settings.useVisitedFunction': 'Ativar função de marcação de conteúdo de navegação no site atual',
