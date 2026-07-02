@@ -438,59 +438,6 @@
     }
   }
 
-  .utags_current_tags_wrapper {
-    display: flex;
-    justify-content: space-between;
-
-    .utags_button_copy {
-      cursor: pointer;
-      font-size: 10px;
-      line-height: 1;
-      height: 18px;
-      padding: 0 6px;
-      border-radius: 2px;
-      color: var(--utags-action-button-text-color);
-      background-color: var(--utags-action-button-bg-color);
-      border: 1px solid var(--utags-action-button-border-color);
-      text-shadow: none;
-      text-align: center;
-      font-family: revert;
-    }
-  }
-
-  :not(#utags_should_has_higher_specificity):not(
-      #utags_should_has_higher_specificity
-    )
-    ul.utags_current_tags {
-    list-style-type: none;
-    margin: 0;
-    padding: 0 0 10px 0 !important;
-    display: flex !important;
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    &:empty,
-    &:empty + button {
-      display: none !important;
-    }
-
-    li .utags_text_tag:hover {
-      --utags-text-tag-color: #000;
-      --utags-text-tag-border-color: #000;
-      --utags-text-tag-background-color: unset;
-      opacity: 0.5;
-      text-decoration: line-through !important;
-    }
-
-    li .utags_text_tag[data-utags_tag=":visited"]:hover {
-      --utags-text-tag-background-color: var(
-        --utags-visited-tag-background-color
-      );
-      --utags-text-tag-border-color: var(--utags-visited-tag-background-color);
-      opacity: 0.3;
-    }
-  }
-
   .utags_list_wrapper {
     display: flex;
     justify-content: space-between;

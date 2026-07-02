@@ -1,6 +1,6 @@
 /**
- * 高级标签输入弹窗：单击页面上的标签按钮后打开的主要编辑界面。
- * 它展示当前标签、置顶标签、常用标签、最近标签，并在确认后返回逗号分隔的标签字符串。
+ * 高级重命名弹窗：单击页面上的 Rename 按钮后打开的主要编辑界面。
+ * 它展示置顶名称和常用名称候选项，并在确认后返回用户输入的新名称字符串。
  */
 import { getSettingsValue, showSettings } from 'browser-extension-settings'
 import {
@@ -15,10 +15,8 @@ import {
 } from 'browser-extension-utils'
 
 import createModal from '../components/modal'
-import createTag from '../components/tag'
 import { i } from '../messages'
 import { getMostUsedTags, getPinnedTags } from '../storage/tags'
-import { copyText } from '../utils'
 import { createTimeout } from './timer-manager'
 
 let pinnedTags: string[]
@@ -41,17 +39,16 @@ export function clearTagManagerCache(): void {
 // eslint-disable-next-line @typescript-eslint/no-restricted-types
 function onSelect(selected: string | null, input: HTMLInputElement) {
   if (selected) {
-    input.value = ''
     currentNewName = selected.trim()
+    input.value = currentNewName
     updateLists()
   }
 }
 
 function updateLists(container?: HTMLElement) {
   displayedTags = new Set()
-  const ul1 = $('.utags_modal_content ul.utags_current_tags', container)
-  if (ul1) {
-    updateCurrentTagList(ul1)
+  if (currentNewName) {
+    displayedTags.add(currentNewName)
   }
 
   const ul = $(
@@ -119,17 +116,6 @@ function getPreviousList(parentElement: HTMLElement) {
   return parentPrevious
 }
 
-function updateCurrentTagList(ul: HTMLElement) {
-  ul.textContent = ''
-
-  if (currentNewName) {
-    displayedTags.add(currentNewName)
-    const li = addElement(ul, 'li')
-    const a = createTag(currentNewName, { isEmoji: false, noLink: true })
-    if (li) li.append(a)
-  }
-}
-
 /**
  * @param type 0, 1, 2
  */
@@ -147,14 +133,6 @@ function removeAllActive(type?: number) {
       removeClass(li, 'utags_active2')
     }
   }
-}
-
-async function copyCurrentTags(input: HTMLInputElement) {
-  const value = currentNewName
-  await copyText(value)
-  input.value = value
-  input.focus()
-  input.select()
 }
 
 function stopEventPropagation(event: Event) {
@@ -180,22 +158,10 @@ function createPromptView(
     textContent: message,
   })
 
-  const currentNewNameWrapper = addElement(content, 'div', {
-    class: 'utags_current_tags_wrapper',
-  })
-  addElement(currentNewNameWrapper, 'span', {
-    textContent: '',
-    style: 'display: none;',
-    'data-utags': '',
-  })
-  addElement(currentNewNameWrapper, 'ul', {
-    class: 'utags_current_tags utags_ul',
-    'data-utags_exclude': '',
-  })
-
   let enableCloseModalOnBlur = false
   const input = addElement(content, 'input', {
     type: 'text',
+    value,
     placeholder: 'name',
     onblur(event: FocusEvent) {
       // console.log('onblur', event.relatedTarget, doc.activeElement, Date.now())
@@ -252,16 +218,6 @@ function createPromptView(
       input.select()
     }
   }
-
-  addElement(currentNewNameWrapper, 'button', {
-    type: 'button',
-    class: 'utags_button_copy',
-    tabIndex: '0',
-    textContent: i('prompt.copy'),
-    async onclick() {
-      await copyCurrentTags(input)
-    },
-  })
 
   const listWrapper = addElement(content, 'div', {
     class: 'utags_list_wrapper',
@@ -368,8 +324,7 @@ function createPromptView(
           onSelect(current.textContent, input)
         } else if (input.value.trim()) {
           currentNewName = input.value.trim()
-          input.value = ''
-          updateLists()
+          okHandler()
         } else {
           okHandler()
         }
@@ -559,11 +514,6 @@ function createPromptView(
       focusToInput()
       if (target.closest('.utags_modal_content ul.utags_select_list li')) {
         onSelect(target.textContent, input)
-      }
-
-      if (target.closest('.utags_modal_content ul.utags_current_tags li a')) {
-        currentNewName = ''
-        updateLists()
       }
     } else {
       closeModal()
