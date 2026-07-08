@@ -31,8 +31,8 @@ function IndexOptions() {
         </li>
       </ul>
       <footer>
-        Open Source on the {' '}
-        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+        Open Source on the{' '}
+        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
           LeoLeeTech/Rename
         </a>
       </footer>

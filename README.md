@@ -1,6 +1,6 @@
 # Rename Username Browser Extension
 
-Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename`。
+Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename-Username`。
 
 ## 安装依赖
 

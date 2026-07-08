@@ -264,7 +264,6 @@ const getSettingsTable = (): SettingsTable => {
       type: 'textarea',
       group: groupNumber,
     },
-
   }
 }
 
@@ -1299,11 +1298,11 @@ async function main() {
       footer: `
     <p>${i('settings.information')}</p>
     <p>
-    <a href="https://github.com/LeoLeeTech/Rename/issues" target="_blank">
+    <a href="https://github.com/LeoLeeTech/Rename-Username/issues" target="_blank">
     ${i('settings.report')}
     </a></p>
     <p>Open Source on the 
-        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
           LeoLeeTech/Rename
         </a></p>`,
       settingsTable,

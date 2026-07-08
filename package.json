@@ -9,12 +9,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LeoLeeTech/Rename.git"
+    "url": "git+https://github.com/LeoLeeTech/Rename-Username.git"
   },
   "bugs": {
-    "url": "https://github.com/LeoLeeTech/Rename/issues"
+    "url": "https://github.com/LeoLeeTech/Rename-Username/issues"
   },
-  "homepage": "https://github.com/LeoLeeTech/Rename#readme",
+  "homepage": "https://github.com/LeoLeeTech/Rename-Username#readme",
   "scripts": {
     "format": "prettier --write .",
     "typecheck": "tsc --noemit",
