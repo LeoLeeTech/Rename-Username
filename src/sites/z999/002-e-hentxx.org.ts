@@ -9,10 +9,8 @@ import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
 
 export default (() => {
-  // eslint-disable-next-line no-restricted-globals
-  const xx = atob('YWk=')
-  const prefix = `https://e-hent${xx}.org/`
-  const prefix2 = `https://exhent${xx}.org/`
+  const prefix = 'https://e-hentai.org/'
+  const prefix2 = 'https://exhentai.org/'
 
   function getPostUrl(url: string) {
     if (url.startsWith(prefix)) {

@@ -3,13 +3,13 @@ import styleText from 'data-text:./011-hito99mi.la.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
-import { xmxi } from '../../utils/atob'
+import { MI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
 
 export default (() => {
-  const prefix = `https://hito${xmxi}.la/`
+  const prefix = `https://hito${MI_DOMAIN_SUFFIX}.la/`
   const galleryExcludePrefixPattern = /^(reader|tag|artist|group|type|series)/
 
   function getCanonicalUrl(url: string) {

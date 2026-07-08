@@ -3,13 +3,13 @@ import styleText from 'data-text:./010-nhentxx.net.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
-import { xaxi } from '../../utils/atob'
+import { AI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
 
 export default (() => {
-  const prefix = `https://nhent${xaxi}.net/`
+  const prefix = `https://nhent${AI_DOMAIN_SUFFIX}.net/`
 
   function getGalleryUrl(url: string, exact = false): string | undefined {
     if (url.startsWith(prefix)) {

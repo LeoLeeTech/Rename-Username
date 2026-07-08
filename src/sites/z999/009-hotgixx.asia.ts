@@ -3,13 +3,13 @@ import styleText from 'data-text:./009-hotgixx.asia.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
-import { xgxixrl } from '../../utils/atob'
+import { GIRL_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
 
 export default (() => {
-  const prefix = `https://hot${xgxixrl}.asia/`
+  const prefix = `https://hot${GIRL_DOMAIN_SUFFIX}.asia/`
 
   function getVideoUrl(url: string, exact = false): string | undefined {
     if (url.startsWith(prefix)) {

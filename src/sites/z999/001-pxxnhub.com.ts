@@ -11,11 +11,7 @@ import { getHrefAttribute, setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
 
 export default (() => {
-  // 'or'
-  // eslint-disable-next-line no-restricted-globals
-  const xx = atob('b3I=')
-  // magix to define pxxnhub.com
-  const hostname = `p${xx}nhub.com`
+  const hostname = 'pornhub.com'
   const prefix = `https://www.${hostname}/`
 
   function getUserProfileUrl(href: string, exact = false) {

@@ -205,8 +205,7 @@ const isQuickStarAvailable = () => {
     host === 'idcflare.com' ||
     // FIXME: 临时关闭 youtube.com 的快速收藏功能
     // host.includes('youtube.com') ||
-    // eslint-disable-next-line no-restricted-globals
-    host.includes(`p${atob('b3I=')}nhub.com`)
+    host.includes('pornhub.com')
   ) {
     return true
   }

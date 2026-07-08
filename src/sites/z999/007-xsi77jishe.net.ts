@@ -1,4 +1,4 @@
-import { s1j1 } from '../../utils/atob'
+import { SIJI_DOMAIN_PART } from '../../utils/domain-parts'
 import { Discuz } from '../z001/042-discuz'
 
 const discuz = new Discuz({
@@ -6,7 +6,7 @@ const discuz = new Discuz({
   normalizeDomainFn(url: string) {
     return url.replace(
       /^https:\/\/(xs[i1]jishe\.\w+|s[j1]s47\.\w+|s[j1]slt\.cc)/,
-      `https://x${s1j1}she.net`
+      `https://x${SIJI_DOMAIN_PART}she.net`
     )
   },
   validateDefaultReturnValue: false,
