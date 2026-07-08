@@ -1,8 +1,8 @@
 import { setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./030-keylol.com.scss'
 
 import { setUtags } from '../../utils/dom-utils'
 import defaultSite from '../default'
+import styleText from './030-keylol.com.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

@@ -5,13 +5,13 @@ import {
   parseInt10,
   setAttribute,
 } from 'browser-extension-utils'
-import styleText from 'data-text:./001-v2ex.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './001-v2ex.scss?inline'
 
 export default (() => {
   function getCanonicalUrl(url: string) {

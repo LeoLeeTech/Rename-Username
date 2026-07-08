@@ -3,6 +3,11 @@ declare module 'css:*' {
   export default cssText
 }
 
+declare module 'data-text:*.scss' {
+  const cssText: string
+  export default cssText
+}
+
 declare const unsafeWindow: (Window & typeof globalThis) | undefined
 
 declare function GM_registerMenuCommand(

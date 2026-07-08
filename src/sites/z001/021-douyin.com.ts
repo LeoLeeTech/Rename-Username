@@ -1,5 +1,4 @@
 import { $, $$, hasClass } from 'browser-extension-utils'
-import styleText from 'data-text:./021-douyin.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import {
@@ -9,6 +8,7 @@ import {
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './021-douyin.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.douyin.com/'

@@ -1,6 +1,5 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, getAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./012-youtube.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { getStarIconSvg } from '../../modules/star-icon'
@@ -9,6 +8,7 @@ import type { UserTagMeta } from '../../types'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './012-youtube.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.youtube.com/'

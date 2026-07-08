@@ -2,7 +2,6 @@
 
 Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename-Username`。
 
-
 # 支持网站
 
 ```
@@ -42,21 +41,21 @@ Cloudflare (community.cloudflare.com)
 
 # 开发者导览
 
-这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 Plasmo 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename Username 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
+这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 WXT 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename Username 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
 
 ## 目录
 
 - `src/`：扩展源码
-- `scripts/`：构建后处理脚本
-- `assets/`：扩展资源
-- `package.json`：Plasmo 扩展配置和 npm 脚本
-
+- `entrypoints/`：WXT 扩展入口
+- `public/`：扩展静态资源
+- `package.json`：WXT npm 脚本和依赖
+- `wxt.config.ts`：WXT 配置和 manifest 基础信息
 
 ## 当前项目使用的技术栈
 
 - TypeScript：项目主要源码语言。大部分业务文件都是 `.ts`，React 页面是 `.tsx`。
 - React：用于插件 popup 页面和 options 页面，也就是浏览器工具栏弹窗和扩展选项页。
-- Plasmo：浏览器插件开发框架。它负责识别 `src/content.ts`、`src/background.ts`、`src/popup.tsx`、`src/options.tsx` 这些约定入口，并生成 Chrome/Firefox 扩展产物。Edge 可以复用 Chrome MV3 产物。
+- WXT：浏览器插件开发框架。它负责识别 `entrypoints/` 下的 content、background、popup、options 入口，并生成 Chrome/Firefox 扩展产物。Edge 可以复用 Chrome MV3 产物。
 - WebExtension API：代码里会使用 `chrome` / `browser` 扩展 API，例如发送消息、读取当前标签页、background 通信、扩展本地存储等。
 - Content Script：`src/content.ts` 是最重要的入口。它运行在网页上下文旁边，负责扫描 DOM、插入标签 UI、打开设置面板、响应用户点击。
 - Background / Service Worker：`src/background.ts` 是后台脚本，目前主要作为 HTTP 请求代理，接收内容脚本消息后在后台执行 `fetch`。
@@ -110,16 +109,14 @@ Cloudflare (community.cloudflare.com)
 
 ## 文件夹作用
 
-- `assets/`：插件图标等静态资源。Plasmo 会把图标处理成不同尺寸并放入构建产物。
-- `build/`：构建输出目录。执行 `npm run build:chrome` 或 Firefox 构建命令后生成，不建议手动改这里的文件。
-- `.plasmo/`：Plasmo 的生成文件和缓存目录。一般不用手动修改。
-- `scripts/`：构建后处理脚本。
-  - `scripts/common.mjs`：构建脚本公共工具。
-  - `scripts/wrap-shadow-root.mjs`：把构建后的 ShadowRoot 脚本包进 IIFE，避免污染页面全局。
-- `scripts/chrome/`：Chrome 产物的 manifest 后处理脚本。
-  - `scripts/chrome/update-manifest.mjs`：Chrome 构建后清理 manifest。
-- `scripts/firefox/`：Firefox MV2/MV3 产物的 manifest 后处理脚本。
-  - `scripts/firefox/update-manifest.mjs`：Firefox MV2/MV3 构建后清理 manifest。
+- `entrypoints/`：WXT 入口目录。
+  - `entrypoints/content.ts`：普通 isolated world content script 入口，加载 `src/content.ts`。
+  - `entrypoints/shadow-root.content.ts`：main world content script 入口，负责 ShadowRoot 拦截逻辑。
+  - `entrypoints/background.ts`：background service worker 入口，加载 `src/background.ts`。
+  - `entrypoints/popup.html`、`entrypoints/options.html`：WXT HTML 入口，手动挂载 React 页面。
+- `public/`：插件图标等静态资源。WXT 会原样复制到构建产物。
+- `.output/`：WXT 构建输出目录。执行 `npm run build` 后生成，不建议手动改这里的文件。
+- `.wxt/`：WXT 生成的类型和缓存目录。一般不用手动修改。
 - `src/`：插件源码主目录。
 - `src/content.ts`：内容脚本主入口。初始化设置、扫描 DOM、替换页面文本、绑定菜单和页面事件，是阅读业务逻辑的第一站。
   - `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
@@ -132,7 +129,7 @@ Cloudflare (community.cloudflare.com)
 - `src/components/`：小型 UI 构造函数，例如弹窗容器和标签元素。
   - `src/components/modal.ts`：创建标签输入弹窗的基础 DOM 结构。
   - `src/components/tag.ts`：创建单个标签元素。
-- `src/contents/`：Plasmo 特殊入口或辅助内容脚本，目前用于 ShadowRoot 相关逻辑。
+- ShadowRoot 相关入口已迁移到 `entrypoints/shadow-root.content.ts`，具体逻辑仍在 `src/modules/shadow-root.ts`。
 - `src/messages/`：多语言文案。`index.ts` 负责加载各语言文件并初始化 i18n。
   - `src/messages/index.ts`：i18n 初始化入口。
   - `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：各语言文案。
@@ -175,6 +172,6 @@ Cloudflare (community.cloudflare.com)
   - `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
   - `src/utils/console.ts`：控制台输出封装。
   - `src/utils/atob.ts`：base64 解码兼容工具。
-- `package.json`：Plasmo 扩展配置、npm scripts、依赖和 manifest 基础配置。
+- `package.json`：WXT npm scripts 和依赖。
+- `wxt.config.ts`：WXT 配置、manifest 基础配置，以及兼容旧 `data-text:` SCSS 导入的 Vite 插件。
 - `tsconfig.json`：TypeScript 编译配置。
-

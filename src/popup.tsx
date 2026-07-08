@@ -2,6 +2,8 @@
  * 插件弹窗页面：点击浏览器工具栏里的插件图标时显示。
  * 这里提供一个入口，把消息发给当前标签页的内容脚本，让内容脚本打开设置面板。
  */
+import { createRoot } from 'react-dom/client'
+
 import { i } from './messages'
 
 function IndexPopup() {
@@ -56,3 +58,8 @@ function IndexPopup() {
 }
 
 export default IndexPopup
+
+const root = document.querySelector('#root')
+if (root) {
+  createRoot(root).render(<IndexPopup />)
+}

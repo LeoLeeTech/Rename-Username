@@ -1,11 +1,11 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./040-2libra.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './040-2libra.com.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

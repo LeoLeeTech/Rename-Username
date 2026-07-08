@@ -1,6 +1,5 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, doc, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./027-discourse.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
@@ -13,6 +12,7 @@ import {
   removeUtagsAttributes,
   setUtagsAttributes,
 } from '../../utils/index'
+import styleText from './027-discourse.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

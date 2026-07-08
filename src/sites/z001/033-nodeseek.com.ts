@@ -1,5 +1,4 @@
 import { $, $$, doc, hasClass } from 'browser-extension-utils'
-import styleText from 'data-text:./033-nodeseek.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
@@ -10,6 +9,7 @@ import {
   setUtagsAttributes,
 } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './033-nodeseek.com.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

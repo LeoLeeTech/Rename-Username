@@ -1,9 +1,9 @@
 import { $, $$, removeAttribute, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./013-bilibili.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
+import styleText from './013-bilibili.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.bilibili.com/'

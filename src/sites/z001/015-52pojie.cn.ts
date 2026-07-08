@@ -1,6 +1,5 @@
-import styleText from 'data-text:./015-52pojie.cn.scss'
-
 import defaultSite from '../default'
+import styleText from './015-52pojie.cn.scss?inline'
 
 export default (() => {
   return {
