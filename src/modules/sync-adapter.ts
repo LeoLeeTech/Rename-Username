@@ -10,7 +10,7 @@ import {
 import { parseInt10 } from 'browser-extension-utils'
 
 import { deserializeBookmarks, serializeBookmarks } from '../storage/bookmarks'
-import { isProduction, isUserscript } from '../utils'
+import { isProduction } from '../utils'
 
 // 与 webapp 通信的消息类型。
 type MessageType =
@@ -124,42 +124,6 @@ async function saveMetadata(metadata: SyncMetadata): Promise<void> {
  */
 async function loadMetadata(): Promise<SyncMetadata | undefined> {
   return getValue(SYNC_STORAGE_KEY_METADATA)
-}
-
-/**
- * Check if userscript is currently available by testing GM.xmlHttpRequest
- * @returns Promise<boolean> - true if userscript is available, false if script manager is disabled
- */
-async function checkUserscriptAvailable(): Promise<boolean> {
-  try {
-    // Check if GM object exists
-    if (typeof GM === 'undefined' || !GM.xmlHttpRequest) {
-      return false
-    }
-
-    // Test GM.xmlHttpRequest availability by making a simple request
-    await new Promise<void>((resolve, reject) => {
-      ;(GM as any).xmlHttpRequest({
-        method: 'GET',
-        url: 'http://localhost/',
-        onload(response) {
-          resolve()
-        },
-        onerror(error) {
-          resolve()
-        },
-        ontimeout() {
-          resolve()
-        },
-        timeout: 3000, // 3 second timeout
-      })
-    })
-    return true
-  } catch (error) {
-    // If GM.xmlHttpRequest throws an exception, userscript might be disabled
-    console.warn('[Rename] Userscript may be disabled:', error)
-    return false
-  }
 }
 
 /**
@@ -280,31 +244,6 @@ const messageHandler = async (event: MessageEvent) => {
 
   try {
     const actionType = message.type
-
-    // Skip userscript availability check for discovery and ping messages,
-    // or when not running in userscript environment
-    const shouldCheckUserscript =
-      isUserscript &&
-      actionType !== DISCOVER_MESSAGE_TYPE &&
-      actionType !== PING_MESSAGE_TYPE
-
-    if (shouldCheckUserscript) {
-      const isUserscriptAvailable = await checkUserscriptAvailable()
-      if (!isUserscriptAvailable) {
-        console.warn(
-          `${SCRIPT_NAME} Userscript not available, sending error response`
-        )
-        const errorResponse: BrowserExtensionResponse<MessageType> = {
-          type: message.type,
-          source: SOURCE_EXTENSION,
-          id: message.id,
-          extensionId: MY_EXTENSION_ID,
-          error: 'Userscript not available or disabled',
-        }
-        ;(event.source as Window).postMessage(errorResponse, event.origin)
-        return
-      }
-    }
 
     let responsePayload: ResponsePayloadMap[MessageType] | undefined
     let error: string | undefined
@@ -440,19 +379,18 @@ const messageHandler = async (event: MessageEvent) => {
 }
 
 async function initExtensionId(): Promise<void> {
-  const type = isUserscript ? 'Userscript' : 'Extension'
   // eslint-disable-next-line n/prefer-global/process
   const tag = isProduction ? '' : ` - ${process.env.PLASMO_TAG!.toUpperCase()}`
 
   let storedId: string | undefined = await getValue(STORAGE_KEY_EXTENSION_ID)
 
   if (!storedId) {
-    storedId = `utags-${type.toLowerCase()}-${crypto.randomUUID()}`
+    storedId = `utags-extension-${crypto.randomUUID()}`
     await setValue(STORAGE_KEY_EXTENSION_ID, storedId)
   }
 
   MY_EXTENSION_ID = storedId
-  MY_EXTENSION_NAME = `Rename ${type}${tag}`
+  MY_EXTENSION_NAME = `Rename Extension${tag}`
   // MY_EXTENSION_ID = 'utags-extension'
   console.log('initExtensionId', MY_EXTENSION_ID, MY_EXTENSION_NAME)
 }

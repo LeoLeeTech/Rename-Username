@@ -67,40 +67,6 @@ type BackgroundResponse = {
   details?: any
 }
 
-type GMXMLHttpRequestResponse = {
-  status: number
-  statusText: string
-  responseText: string
-  responseHeaders?: string
-}
-
-type GMXMLHttpRequestOptions = {
-  method: string
-  url: string
-  headers?: Record<string, string>
-  data?: string
-  timeout?: number
-  onload: (response: GMXMLHttpRequestResponse) => void
-  onerror: (error: any) => void
-  ontimeout: () => void
-}
-
-type AllowedHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
-
-function normalizeHttpMethod(method: string): AllowedHttpMethod | undefined {
-  const upper = method.toUpperCase()
-  if (
-    upper === 'GET' ||
-    upper === 'POST' ||
-    upper === 'PUT' ||
-    upper === 'DELETE'
-  ) {
-    return upper
-  }
-
-  return undefined
-}
-
 /**
  * Handle HTTP request message from webapp
  * @param {HttpRequestMessage} message - The HTTP request message
@@ -110,16 +76,7 @@ function handleHttpRequest(
   message: HttpRequestMessage,
   event: MessageEvent
 ): void {
-  if (
-    // eslint-disable-next-line n/prefer-global/process
-    process.env.PLASMO_TARGET === 'chrome-mv3' ||
-    // eslint-disable-next-line n/prefer-global/process
-    process.env.PLASMO_TARGET === 'firefox-mv2'
-  ) {
-    handleHttpRequestExtension(message, event)
-  } else {
-    handleHttpRequestUserscript(message, event)
-  }
+  handleHttpRequestExtension(message, event)
 }
 
 /**
@@ -166,82 +123,6 @@ function handleHttpRequestExtension(
  * @param {HttpRequestMessage} message - The HTTP request message
  * @param {MessageEvent} event - The message event
  */
-function handleHttpRequestUserscript(
-  message: HttpRequestMessage,
-  event: MessageEvent
-): void {
-  const { id, payload } = message
-  const { method, url, headers, body, timeout } = payload
-
-  console.log(`[Rename Extension] Processing HTTP request: ${method} ${url}`)
-
-  const normalizedMethod = normalizeHttpMethod(method)
-  if (!normalizedMethod) {
-    sendHttpError(id, `Unsupported HTTP method: ${method}`, event)
-    return
-  }
-
-  // Use GM.xmlHttpRequest or fallback to GM_xmlhttpRequest
-  const gmRequest = GM?.xmlHttpRequest || GM_xmlhttpRequest
-
-  if (!gmRequest) {
-    sendHttpError(id, 'GM.xmlHttpRequest not available', event)
-    return
-  }
-
-  void gmRequest({
-    method: normalizedMethod,
-    url,
-    headers: headers || {},
-    data: body,
-    timeout: timeout || 30_000,
-    onload(response) {
-      console.log(
-        `[Rename Extension] HTTP request successful: ${response.status}`
-      )
-
-      // Parse response headers
-      const responseHeaders: Record<string, string> = {}
-      if (response.responseHeaders) {
-        const headerLines = response.responseHeaders.split('\r\n')
-        for (const line of headerLines) {
-          const [key, value] = line.split(': ')
-          if (key && value) {
-            responseHeaders[key.toLowerCase()] = value
-          }
-        }
-      }
-
-      sendHttpResponse(
-        id,
-        {
-          ok: response.status >= 200 && response.status < 300,
-          status: response.status,
-          statusText: response.statusText ?? '',
-          headers: responseHeaders,
-          body: response.responseText ?? '',
-        },
-        event
-      )
-    },
-    onerror(error) {
-      console.error(`[Rename Extension] HTTP request failed:`, error)
-      sendHttpError(
-        id,
-        error && typeof error.statusText === 'string'
-          ? (error.statusText as string)
-          : 'Network error',
-        event,
-        error
-      )
-    },
-    ontimeout() {
-      console.error(`[Rename Extension] HTTP request timeout`)
-      sendHttpError(id, 'Request timeout', event)
-    },
-  })
-}
-
 /**
  * Send HTTP response back to webapp
  * @param {string} requestId - The original request ID

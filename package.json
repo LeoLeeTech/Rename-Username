@@ -18,19 +18,9 @@
   "scripts": {
     "format": "prettier --write .",
     "typecheck": "tsc --noemit",
-    "dev": "run-p dev:*",
-    "dev:chrome": "plasmo dev",
-    "dev:firefox": "sleep 2 && plasmo dev --target=firefox-mv2",
-    "dev:firefox-mv3": "sleep 2 && plasmo dev --target=firefox-mv3",
-    "build": "run-s build:*",
-    "build:chrome": "cross-env PARCEL_WORKER_BACKEND=process plasmo build && node scripts/chrome/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/chrome-mv3-prod",
-    "build:firefox": "cross-env PARCEL_WORKER_BACKEND=process plasmo build --target=firefox-mv2 && node scripts/firefox/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/firefox-mv2-prod && addons-linter build/firefox-mv2-prod/",
-    "build:firefox-mv3": "cross-env PARCEL_WORKER_BACKEND=process plasmo build --target=firefox-mv3 && node scripts/firefox/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/firefox-mv3-prod && addons-linter build/firefox-mv3-prod/",
-    "package": "run-s package:*",
-    "package:chrome": "plasmo package",
-    "package:edge": "npm run package:chrome && cp build/chrome-mv3-prod.zip build/edge-mv3-prod.zip",
-    "package:firefox": "plasmo package --target=firefox-mv2 && addons-linter build/firefox-mv2-prod.zip",
-    "package:firefox-mv3": "plasmo package --target=firefox-mv3 && addons-linter build/firefox-mv3-prod.zip"
+    "dev": "plasmo dev",
+    "build": "PARCEL_WORKER_BACKEND=process plasmo build && node scripts/chrome/update-manifest.mjs && node scripts/wrap-shadow-root.mjs build/chrome-mv3-prod",
+    "package": "plasmo package"
   },
   "dependencies": {
     "browser-extension-i18n": "^0.1.3",
@@ -49,10 +39,6 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "addons-linter": "^10.3.0",
-    "cross-env": "^10.1.0",
-    "esbuild": "0.27.4",
-    "npm-run-all": "^4.1.5",
     "prettier": "^3.7.4",
     "sass": "^1.99.0",
     "typescript": "^5.9.3"
@@ -64,16 +50,6 @@
     "host_permissions": [
       "https://*/*",
       "http://*/*"
-    ],
-    "browser_specific_settings": {
-      "gecko": {
-        "id": "{9c02e4b9-03a5-4bc3-bd19-44e0ff68eb70}",
-        "data_collection_permissions": {
-          "required": [
-            "none"
-          ]
-        }
-      }
-    }
+    ]
   }
 }

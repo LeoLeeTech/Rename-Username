@@ -1,9 +1,7 @@
 node_modules/**
 LICENSE
 .plasmo/**
-build/chrome-*/**
-build/firefox-*/**
-build/*-dev/**
+build/**
 *.min.js
 tsconfig.json
 tsconfig.tsbuildinfo

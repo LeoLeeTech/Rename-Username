@@ -4,14 +4,19 @@
     ".plasmo/index.d.ts",
     "src/**/*.ts",
     "src/**/*.d.ts",
-    "src/**/*.tsx",
+    "src/**/*.tsx"
   ],
-  "exclude": ["node_modules/**", "build/**"],
+  "exclude": [
+    "node_modules/**",
+    "build/**"
+  ],
   "compilerOptions": {
     "moduleResolution": "bundler",
     "paths": {
-      "~*": ["./src/*"],
+      "~*": [
+        "./src/*"
+      ]
     },
     "strictNullChecks": true
-  },
+  }
 }

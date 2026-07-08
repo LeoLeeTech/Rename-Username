@@ -109,21 +109,12 @@ export const config: PlasmoCSConfig = {
   all_frames: true,
 }
 
-if (
-  // eslint-disable-next-line n/prefer-global/process
-  process.env.PLASMO_TARGET === 'chrome-mv3' ||
-  // eslint-disable-next-line n/prefer-global/process
-  process.env.PLASMO_TARGET === 'firefox-mv2'
-) {
-  // Receive popup trigger to show settings in the content context
-  const runtime =
-    (globalThis as any).chrome?.runtime ?? (globalThis as any).browser?.runtime
-  runtime?.onMessage?.addListener((message: any) => {
-    if (message?.type === 'utags:show-settings') {
-      void showSettings()
-    }
-  })
-}
+// Receive popup trigger to show settings in the content context.
+chrome.runtime?.onMessage?.addListener((message: any) => {
+  if (message?.type === 'utags:show-settings') {
+    void showSettings()
+  }
+})
 
 const EXCLUDED_SUBFRAME_HOSTS = new Set([
   'challenges.cloudflare.com',
@@ -1353,16 +1344,13 @@ async function main() {
 
   setupWebappBridge()
 
-  // Register bookmark list menu command for userscript
+  // Register bookmark list menu command.
   await registerMenuCommand(`🔖 ${i('menu.bookmarkList')}`, () => {
-    // Open https://utags.link/ in new tab or focus existing tab
     const url = 'https://utags.link/'
-
-    // For userscript environment, simply open in new tab
     window.open(url, 'utags_bookmarks')
   })
 
-  // Register hide/unhide all tags menu command for userscript (with dynamic title)
+  // Register hide/unhide all tags menu command with dynamic title.
   await registerOrUpdateHideAllTagsMenu()
 
   // Initialize the star handler with required dependencies

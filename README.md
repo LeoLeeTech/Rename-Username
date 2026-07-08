@@ -11,17 +11,14 @@ npm install .
 ## 开发
 
 ```bash
-npm run dev:chrome
-npm run dev:firefox
+npm run dev
 ```
 
 ## 构建
 
 ```bash
-npm run build:chrome
-npm run build:firefox
-npm run build:firefox-mv3
-npm run package:edge
+npm run build
+npm run package
 ```
 
 ## 目录
@@ -29,7 +26,7 @@ npm run package:edge
 - `src/`：扩展源码
 - `scripts/`：构建后处理脚本
 - `assets/`：扩展资源
-- `package.json`：Plasmo 扩展配置和 npm 脚本
+- `package.json`：扩展配置和 npm 脚本
 
 # 支持网站
 
@@ -76,7 +73,7 @@ Cloudflare (community.cloudflare.com)
 
 - TypeScript：项目主要源码语言。大部分业务文件都是 `.ts`，React 页面是 `.tsx`。
 - React：用于插件 popup 页面和 options 页面，也就是浏览器工具栏弹窗和扩展选项页。
-- Plasmo：浏览器插件开发框架。它负责识别 `src/content.ts`、`src/background.ts`、`src/popup.tsx`、`src/options.tsx` 这些约定入口，并生成 Chrome/Firefox 扩展产物。Edge 可以复用 Chrome MV3 产物。
+- Plasmo：当前迁移到 WXT 前仍在使用的浏览器插件开发框架。它负责识别 `src/content.ts`、`src/background.ts`、`src/popup.tsx`、`src/options.tsx` 这些约定入口，并生成 Chrome MV3 扩展产物。
 - WebExtension API：代码里会使用 `chrome` / `browser` 扩展 API，例如发送消息、读取当前标签页、background 通信、扩展本地存储等。
 - Content Script：`src/content.ts` 是最重要的入口。它运行在网页上下文旁边，负责扫描 DOM、插入标签 UI、打开设置面板、响应用户点击。
 - Background / Service Worker：`src/background.ts` 是后台脚本，目前主要作为 HTTP 请求代理，接收内容脚本消息后在后台执行 `fetch`。
@@ -87,8 +84,6 @@ Cloudflare (community.cloudflare.com)
 - browser-extension-utils：DOM 查询、事件绑定、菜单注册、工具函数等封装。
 - utags-utils：URL 标准化、标签拆分、标题裁剪等通用工具。
 - Sass：SCSS 编译依赖。
-- npm-run-all：用于并行或串行执行 npm scripts，例如 `run-p dev:*`、`run-s build:*`。
-- cross-env：让 npm scripts 里的环境变量写法兼容不同系统。
 - TypeScript compiler：通过 `npm run typecheck` 执行 `tsc --noemit` 做类型检查。
 
 ## 浏览器插件相关概念
@@ -141,15 +136,12 @@ Cloudflare (community.cloudflare.com)
 ## 文件夹作用
 
 - `assets/`：插件图标等静态资源。Plasmo 会把图标处理成不同尺寸并放入构建产物。
-- `build/`：构建输出目录。执行 `npm run build:chrome` 或 Firefox 构建命令后生成，不建议手动改这里的文件。
-- `.plasmo/`：Plasmo 的生成文件和缓存目录。一般不用手动修改。
+- `build/`：构建输出目录。执行 `npm run build` 后生成，不建议手动改这里的文件。
+- `.plasmo/`：Plasmo 的生成文件和缓存目录。已加入忽略，不需要提交。
 - `scripts/`：构建后处理脚本。
-  - `scripts/common.mjs`：构建脚本公共工具。
   - `scripts/wrap-shadow-root.mjs`：把构建后的 ShadowRoot 脚本包进 IIFE，避免污染页面全局。
 - `scripts/chrome/`：Chrome 产物的 manifest 后处理脚本。
   - `scripts/chrome/update-manifest.mjs`：Chrome 构建后清理 manifest。
-- `scripts/firefox/`：Firefox MV2/MV3 产物的 manifest 后处理脚本。
-  - `scripts/firefox/update-manifest.mjs`：Firefox MV2/MV3 构建后清理 manifest。
 - `src/`：插件源码主目录。
 - `src/content.ts`：内容脚本主入口。初始化设置、扫描 DOM、替换页面文本、绑定菜单和页面事件，是阅读业务逻辑的第一站。
   - `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
@@ -158,7 +150,7 @@ Cloudflare (community.cloudflare.com)
 - `src/content.scss`：注入网页的全局样式。Rename 按钮、弹窗、候选列表、已访问标记等样式都在这里。
   - `src/content-utils.ts`：内容脚本辅助逻辑。负责判断 DOM 变化是否要重新扫描，以及把存储数据转成展示数据。
   - `src/types.ts`：更轻量的全局业务类型，例如 `UserTag`、`UserTagMeta`。
-  - `src/global.d.ts`：全局类型声明。给浏览器、userscript 或第三方全局变量补 TypeScript 类型。
+  - `src/global.d.ts`：全局类型声明。给样式导入或第三方全局变量补 TypeScript 类型。
 - `src/components/`：小型 UI 构造函数，例如弹窗容器和标签元素。
   - `src/components/modal.ts`：创建标签输入弹窗的基础 DOM 结构。
   - `src/components/tag.ts`：创建单个标签元素。
@@ -205,7 +197,7 @@ Cloudflare (community.cloudflare.com)
   - `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
   - `src/utils/console.ts`：控制台输出封装。
   - `src/utils/atob.ts`：base64 解码兼容工具。
-- `package.json`：Plasmo 扩展配置、npm scripts、依赖和 manifest 基础配置。
+- `package.json`：扩展配置、npm scripts、依赖和 manifest 基础配置。
 - `tsconfig.json`：TypeScript 编译配置。
 
 ## 代码阅读路线
@@ -225,4 +217,4 @@ Cloudflare (community.cloudflare.com)
 3. 在逻辑里找到页面中的目标 DOM 元素，计算稳定的 `key`，再设置 `meta.title`、`meta.type` 等信息。
 4. 如需样式修正，新增同名 `.scss`，并在站点配置里返回样式文本。
 5. 在 `src/sites/index.ts` 里确认该站点配置会被加载。
-6. 执行 `npm run dev:chrome`，在目标网站上测试 Rename 按钮是否出现、点击是否能保存。
+6. 执行 `npm run dev`，在目标网站上测试 Rename 按钮是否出现、点击是否能保存。

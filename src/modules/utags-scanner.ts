@@ -13,7 +13,6 @@ import { isScanTarget } from '../utils/dom-utils'
 import { bindShadowRootEvents } from './global-events'
 import { ensureCombinedStyleForShadow } from './style-manager'
 
-// For userscript
 interceptShadowDOM()
 
 // 1. 业务配置：只监听这些属性，彻底防止“自我触发”导致的无限循环

@@ -1,5 +1,5 @@
 /**
- * 菜单命令管理模块：封装 userscript/扩展环境里的 registerMenuCommand。
+ * 菜单命令管理模块：封装扩展环境里的 registerMenuCommand。
  * 它负责右键/脚本菜单中的“添加标签”“修改标签”和快捷标签菜单项。
  */
 import { getSettingsValue } from 'browser-extension-settings'
