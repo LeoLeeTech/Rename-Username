@@ -2,34 +2,6 @@
 
 Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename-Username`。
 
-## 安装依赖
-
-```bash
-npm install .
-```
-
-## 开发
-
-```bash
-npm run dev:chrome
-npm run dev:firefox
-```
-
-## 构建
-
-```bash
-npm run build:chrome
-npm run build:firefox
-npm run build:firefox-mv3
-npm run package:edge
-```
-
-## 目录
-
-- `src/`：扩展源码
-- `scripts/`：构建后处理脚本
-- `assets/`：扩展资源
-- `package.json`：Plasmo 扩展配置和 npm 脚本
 
 # 支持网站
 
@@ -72,6 +44,14 @@ Cloudflare (community.cloudflare.com)
 
 这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 Plasmo 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename Username 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
 
+## 目录
+
+- `src/`：扩展源码
+- `scripts/`：构建后处理脚本
+- `assets/`：扩展资源
+- `package.json`：Plasmo 扩展配置和 npm 脚本
+
+
 ## 当前项目使用的技术栈
 
 - TypeScript：项目主要源码语言。大部分业务文件都是 `.ts`，React 页面是 `.tsx`。
@@ -90,16 +70,6 @@ Cloudflare (community.cloudflare.com)
 - npm-run-all：用于并行或串行执行 npm scripts，例如 `run-p dev:*`、`run-s build:*`。
 - cross-env：让 npm scripts 里的环境变量写法兼容不同系统。
 - TypeScript compiler：通过 `npm run typecheck` 执行 `tsc --noemit` 做类型检查。
-
-## 浏览器插件相关概念
-
-- Manifest：浏览器插件的声明文件，最终会出现在 `build/*/manifest.json`。项目没有手写完整 manifest，而是主要通过 `package.json` 的 `manifest` 字段和 Plasmo 入口文件生成。
-- Content script：注入网页的脚本。它可以读写网页 DOM，所以本项目的文本替换和点击交互基本都在 content script 侧完成。
-- Background script：后台脚本。适合做跨域请求、长期消息处理、扩展级状态处理。Chrome MV3 中它通常是 service worker。
-- Popup：点击浏览器工具栏插件图标时出现的小窗口，对应 `src/popup.tsx`。
-- Options page：扩展详情页里的选项页面，对应 `src/options.tsx`。
-- Extension storage：扩展自己的本地存储，不等同于某个网页的 `window.localStorage`。本项目主数据保存在 `extension.utags.urlmap`。
-- Web page localStorage：网页域名自己的 localStorage。本项目目前会在网页 localStorage 中使用 `utags_visited` 记录已访问链接。
 
 ## 数据结构概览
 
@@ -208,21 +178,3 @@ Cloudflare (community.cloudflare.com)
 - `package.json`：Plasmo 扩展配置、npm scripts、依赖和 manifest 基础配置。
 - `tsconfig.json`：TypeScript 编译配置。
 
-## 代码阅读路线
-
-1. 先看 `package.json`，理解 npm scripts 和 Plasmo 入口。
-2. 再看 `src/content.ts`，理解插件怎么初始化、扫描页面和替换文本。
-3. 看 `src/modules/global-events.ts`，理解单击 Rename Username 按钮后如何打开弹窗和保存数据。
-4. 看 `src/modules/advanced-tag-manager.ts`，理解新名字输入弹窗 UI。
-5. 看 `src/storage/bookmarks.ts` 和 `src/types/bookmarks.ts`，理解存储结构。
-6. 看 `src/sites/index.ts` 和一个具体站点文件，例如 `src/sites/z001/005-github.com.ts`，理解如何新增网站适配。
-7. 最后看 `src/content.scss` 和站点 `.scss`，理解样式如何注入到网页。
-
-## 新增一个网站适配的大致步骤
-
-1. 在 `src/sites/z001/` 下新增一个 `xxx-example.com.ts`。
-2. 按已有站点文件的格式导出配置，至少提供 `matches` 和 `list` 逻辑。
-3. 在逻辑里找到页面中的目标 DOM 元素，计算稳定的 `key`，再设置 `meta.title`、`meta.type` 等信息。
-4. 如需样式修正，新增同名 `.scss`，并在站点配置里返回样式文本。
-5. 在 `src/sites/index.ts` 里确认该站点配置会被加载。
-6. 执行 `npm run dev:chrome`，在目标网站上测试 Rename Username 按钮是否出现、点击是否能保存。
