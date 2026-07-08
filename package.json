@@ -2,7 +2,7 @@
   "name": "rename-username",
   "displayName": "Rename Username",
   "displayName:zh-CN": "重命名用户名",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Rename usernames on websites and keep custom names locally in your browser.",
   "type": "module",
   "author": "LeoLeeTech",
