@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Abilita Rename sul sito web corrente',
+  'settings.enableCurrentSite': 'Abilita Rinomina nome utente sul sito web corrente',
   'settings.enableCurrentSiteCustomRule': 'Abilita regole di corrispondenza personalizzate per il sito web corrente',
   'settings.customRuleValue': 'Regole di corrispondenza personalizzate',
   'settings.useVisitedFunction': 'Abilita funzione di tagging del contenuto di navigazione sul sito web attuale',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Usa metodo semplice per aggiungere tag',
   'settings.openTagsPage': 'Elenco tag',
   'settings.openDataPage': 'Esporta/Importa dati',
-  'settings.title': 'Rename',
+  'settings.title': 'Rinomina nome utente',
   'settings.information': 'Dopo aver modificato le impostazioni, ricarica la pagina perché abbiano effetto',
   'settings.report': 'Segnala problema',
   'prompt.addTags': 'Inserisci un nuovo nome',

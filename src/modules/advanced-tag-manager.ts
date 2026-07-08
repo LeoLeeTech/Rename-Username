@@ -1,5 +1,5 @@
 /**
- * 高级重命名弹窗：单击页面上的 Rename 按钮后打开的主要编辑界面。
+ * 高级重命名弹窗：单击页面上的 Rename Username 按钮后打开的主要编辑界面。
  * 它展示置顶名称和常用名称候选项，并在确认后返回用户输入的新名称字符串。
  */
 import { getSettingsValue, showSettings } from 'browser-extension-settings'

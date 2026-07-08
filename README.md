@@ -1,6 +1,6 @@
-# Rename Browser Extension
+# Rename Username Browser Extension
 
-Rename 是一个浏览器扩展，用来把网页上的目标文本替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename`。
+Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的新名字。当前仓库地址是 `https://github.com/LeoLeeTech/Rename`。
 
 ## 安装依赖
 
@@ -70,7 +70,7 @@ Cloudflare (community.cloudflare.com)
 
 # 开发者导览
 
-这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 Plasmo 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
+这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 Plasmo 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename Username 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
 
 ## 当前项目使用的技术栈
 
@@ -155,7 +155,7 @@ Cloudflare (community.cloudflare.com)
   - `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
   - `src/popup.tsx`：工具栏弹窗。当前主要负责给当前页面发送 `utags:show-settings` 消息来打开设置。
   - `src/options.tsx`：扩展选项页。当前是简单入口页面，真正复杂设置在内容脚本渲染的设置面板里。
-- `src/content.scss`：注入网页的全局样式。Rename 按钮、弹窗、候选列表、已访问标记等样式都在这里。
+- `src/content.scss`：注入网页的全局样式。Rename Username 按钮、弹窗、候选列表、已访问标记等样式都在这里。
   - `src/content-utils.ts`：内容脚本辅助逻辑。负责判断 DOM 变化是否要重新扫描，以及把存储数据转成展示数据。
   - `src/types.ts`：更轻量的全局业务类型，例如 `UserTag`、`UserTagMeta`。
   - `src/global.d.ts`：全局类型声明。给浏览器、userscript 或第三方全局变量补 TypeScript 类型。
@@ -167,9 +167,9 @@ Cloudflare (community.cloudflare.com)
   - `src/messages/index.ts`：i18n 初始化入口。
   - `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：各语言文案。
 - `src/modules/`：可复用业务模块。大部分标签编辑、扫描、同步、样式、事件绑定逻辑都在这里。
-- `src/modules/advanced-tag-manager.ts`：单击 Rename 按钮后出现的高级输入弹窗。
+  - `src/modules/advanced-tag-manager.ts`：单击 Rename Username 按钮后出现的高级输入弹窗。
 - `src/modules/simple-tag-manger.ts`：简单输入模式的弹窗。
-- `src/modules/global-events.ts`：全局事件中心。处理点击 Rename 按钮、保存新名字、history 变化、触摸设备交互等。
+  - `src/modules/global-events.ts`：全局事件中心。处理点击 Rename Username 按钮、保存新名字、history 变化、触摸设备交互等。
   - `src/modules/utags-scanner.ts`：底层 DOM 扫描器。监听页面 DOM 变化并找出候选节点。
   - `src/modules/scanned-node-queue.ts`：扫描结果队列。控制节点处理节奏，避免频繁 DOM 更新造成混乱。
   - `src/modules/utags-registry.ts`：记录元素和已创建标签 UI 的对应关系，方便更新和清理。
@@ -212,7 +212,7 @@ Cloudflare (community.cloudflare.com)
 
 1. 先看 `package.json`，理解 npm scripts 和 Plasmo 入口。
 2. 再看 `src/content.ts`，理解插件怎么初始化、扫描页面和替换文本。
-3. 看 `src/modules/global-events.ts`，理解单击 Rename 按钮后如何打开弹窗和保存数据。
+3. 看 `src/modules/global-events.ts`，理解单击 Rename Username 按钮后如何打开弹窗和保存数据。
 4. 看 `src/modules/advanced-tag-manager.ts`，理解新名字输入弹窗 UI。
 5. 看 `src/storage/bookmarks.ts` 和 `src/types/bookmarks.ts`，理解存储结构。
 6. 看 `src/sites/index.ts` 和一个具体站点文件，例如 `src/sites/z001/005-github.com.ts`，理解如何新增网站适配。
@@ -225,4 +225,4 @@ Cloudflare (community.cloudflare.com)
 3. 在逻辑里找到页面中的目标 DOM 元素，计算稳定的 `key`，再设置 `meta.title`、`meta.type` 等信息。
 4. 如需样式修正，新增同名 `.scss`，并在站点配置里返回样式文本。
 5. 在 `src/sites/index.ts` 里确认该站点配置会被加载。
-6. 执行 `npm run dev:chrome`，在目标网站上测试 Rename 按钮是否出现、点击是否能保存。
+6. 执行 `npm run dev:chrome`，在目标网站上测试 Rename Username 按钮是否出现、点击是否能保存。

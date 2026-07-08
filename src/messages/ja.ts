@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '現在のウェブサイトでRenameを有効にする',
+  'settings.enableCurrentSite': '現在のウェブサイトでユーザー名変更を有効にする',
   'settings.enableCurrentSiteCustomRule': '現在のウェブサイトのカスタムマッチングルールを有効にする',
   'settings.customRuleValue': 'カスタムマッチングルール',
   'settings.useVisitedFunction': '現在のウェブサイトで閲覧コンテンツのタグ機能を有効にする',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': 'シンプルな方法でタグを追加する',
   'settings.openTagsPage': 'タグリスト',
   'settings.openDataPage': 'データのエクスポート/インポート',
-  'settings.title': 'Rename',
+  'settings.title': 'ユーザー名変更',
   'settings.information': '設定を変更した後、ページを再読み込みすると有効になります',
   'settings.report': '問題を報告',
   'prompt.addTags': '新しい名前を入力してください',

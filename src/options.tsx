@@ -11,7 +11,7 @@ function IndexOptions() {
         padding: 16,
         width: '500px',
       }}>
-      <h1>Rename</h1>
+      <h1>Rename Username</h1>
       <ul
         style={{
           display: 'flex',

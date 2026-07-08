@@ -1,9 +1,9 @@
 {
-  "name": "rename",
-  "displayName": "Rename",
-  "displayName:zh-CN": "Rename",
+  "name": "rename-username",
+  "displayName": "Rename Username",
+  "displayName:zh-CN": "重命名用户名",
   "version": "0.0.1",
-  "description": "Rename text on websites and keep custom names locally in your browser.",
+  "description": "Rename usernames on websites and keep custom names locally in your browser.",
   "type": "module",
   "author": "LeoLeeTech",
   "license": "MIT",

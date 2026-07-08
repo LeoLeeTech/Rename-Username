@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Habilitar Rename en el sitio web actual',
+  'settings.enableCurrentSite': 'Habilitar Renombrar nombre de usuario en el sitio web actual',
   'settings.enableCurrentSiteCustomRule': 'Habilitar reglas de coincidencia personalizadas para el sitio web actual',
   'settings.customRuleValue': 'Reglas de coincidencia personalizadas',
   'settings.useVisitedFunction': 'Habilitar función de etiquetado de contenido de navegación en el sitio web actual',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Usar método simple para agregar etiquetas',
   'settings.openTagsPage': 'Lista de etiquetas',
   'settings.openDataPage': 'Exportar/Importar datos',
-  'settings.title': 'Rename',
+  'settings.title': 'Renombrar nombre de usuario',
   'settings.information': 'Después de cambiar la configuración, recargue la página para que surta efecto',
   'settings.report': 'Reportar problema',
   'prompt.addTags': 'Introduce un nuevo nombre',

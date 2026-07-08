@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '현재 웹사이트에서 Rename 활성화',
+  'settings.enableCurrentSite': '현재 웹사이트에서 사용자 이름 변경 활성화',
   'settings.enableCurrentSiteCustomRule': '현재 웹사이트에 대한 사용자 지정 일치 규칙 사용',
   'settings.customRuleValue': '사용자 지정 일치 규칙',
   'settings.useVisitedFunction': '현재 웹사이트에서 브라우징 콘텐츠 태그 기능 활성화',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': '간단한 방법으로 태그 추가',
   'settings.openTagsPage': '태그 목록',
   'settings.openDataPage': '데이터 내보내기/가져오기',
-  'settings.title': 'Rename',
+  'settings.title': '사용자 이름 변경',
   'settings.information': '설정을 변경한 후 페이지를 새로고침하면 적용됩니다',
   'settings.report': '문제 신고',
   'prompt.addTags': '새 이름을 입력하세요',

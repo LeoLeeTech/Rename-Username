@@ -628,7 +628,7 @@ function appendNewNameToPage(
     type: 'button',
     // href: "",
     // tabindex: "0",
-    title: 'Rename it',
+    title: 'Rename username',
     'data-utags_tag': '🏷️',
     'data-utags_key': key,
     'data-utags_new_name': newName,

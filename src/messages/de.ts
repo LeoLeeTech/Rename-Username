@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Rename auf der aktuellen Website aktivieren',
+  'settings.enableCurrentSite': 'Benutzernamen umbenennen auf der aktuellen Website aktivieren',
   'settings.enableCurrentSiteCustomRule': 'Benutzerdefinierte Übereinstimmungsregeln für die aktuelle Website aktivieren',
   'settings.customRuleValue': 'Benutzerdefinierte Übereinstimmungsregeln',
   'settings.useVisitedFunction': 'Browsing-Inhalts-Tagging auf der aktuellen Website aktivieren',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Einfache Methode zum Hinzufügen von Tags verwenden',
   'settings.openTagsPage': 'Tag-Liste',
   'settings.openDataPage': 'Daten exportieren/importieren',
-  'settings.title': 'Rename',
+  'settings.title': 'Benutzernamen umbenennen',
   'settings.information': 'Nach dem Ändern der Einstellungen laden Sie die Seite neu, damit sie wirksam werden',
   'settings.report': 'Problem melden',
   'prompt.addTags': 'Bitte geben Sie einen neuen Namen ein',
