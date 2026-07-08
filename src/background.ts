@@ -46,7 +46,7 @@ type HttpResponse = HttpSuccessResponse | HttpErrorResponse
 
 type StorageData = Record<string, number>
 
-console.log('Rename HTTP Proxy extension background script loaded')
+console.log('Rename Username HTTP Proxy extension background script loaded')
 
 // Storage keys
 
@@ -70,11 +70,11 @@ async function updateStatistics() {
     })
 
     console.log(
-      `[Rename Extension Background] Request count updated: ${currentCount + 1}`
+      `[Rename Username Extension Background] Request count updated: ${currentCount + 1}`
     )
   } catch (error) {
     console.error(
-      '[Rename Extension Background] Error updating statistics:',
+      '[Rename Username Extension Background] Error updating statistics:',
       error
     )
   }
@@ -93,7 +93,7 @@ async function handleHttpRequest(
   const { method, url, headers, body, timeout } = request.payload
 
   console.log(
-    `[Rename Extension Background] Processing HTTP request: ${method} ${url}`
+    `[Rename Username Extension Background] Processing HTTP request: ${method} ${url}`
   )
 
   try {
@@ -123,7 +123,7 @@ async function handleHttpRequest(
     const responseBody = await response.text()
 
     console.log(
-      `[Rename Extension Background] HTTP request successful: ${response.status}`
+      `[Rename Username Extension Background] HTTP request successful: ${response.status}`
     )
 
     return {
@@ -137,7 +137,7 @@ async function handleHttpRequest(
       },
     }
   } catch (error) {
-    console.error(`[Rename Extension Background] HTTP request failed:`, error)
+    console.error(`[Rename Username Extension Background] HTTP request failed:`, error)
 
     let errorMessage = 'Network error'
     if (error.name === 'AbortError') {
@@ -167,7 +167,7 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: HttpResponse) => void
   ) => {
-    console.log(`[Rename Extension Background] Received message:`, message.type)
+    console.log(`[Rename Username Extension Background] Received message:`, message.type)
 
     if (message.type === 'HTTP_REQUEST') {
       // Handle HTTP request asynchronously
@@ -179,7 +179,7 @@ chrome.runtime.onMessage.addListener(
         // eslint-disable-next-line promise/prefer-await-to-then
         .catch((error: unknown) => {
           console.error(
-            '[Rename Extension Background] Error handling HTTP request:',
+            '[Rename Username Extension Background] Error handling HTTP request:',
             error
           )
           sendResponse({
@@ -195,7 +195,7 @@ chrome.runtime.onMessage.addListener(
 
     // Handle other message types if needed
     console.log(
-      `[Rename Extension Background] Unknown message type: ${message.type as string}`
+      `[Rename Username Extension Background] Unknown message type: ${message.type as string}`
     )
     sendResponse({ success: false, error: 'Unknown message type' })
   }
@@ -207,14 +207,14 @@ chrome.runtime.onMessage.addListener(
 chrome.runtime.onInstalled.addListener(
   (details: chrome.runtime.InstalledDetails) => {
     console.log(
-      '[Rename Extension Background] Extension installed/updated:',
+      '[Rename Username Extension Background] Extension installed/updated:',
       details.reason
     )
 
     if (details.reason === 'install') {
-      console.log('[Rename Extension Background] First time installation')
+      console.log('[Rename Username Extension Background] First time installation')
     } else if (details.reason === 'update') {
-      console.log('[Rename Extension Background] Extension updated')
+      console.log('[Rename Username Extension Background] Extension updated')
     }
   }
 )
@@ -223,7 +223,7 @@ chrome.runtime.onInstalled.addListener(
  * Extension startup handler
  */
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[Rename Extension Background] Extension started')
+  console.log('[Rename Username Extension Background] Extension started')
 })
 
-console.log('[Rename Extension Background] Background script ready')
+console.log('[Rename Username Extension Background] Background script ready')

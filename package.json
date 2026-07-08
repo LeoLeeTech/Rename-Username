@@ -1,20 +1,20 @@
 {
-  "name": "rename",
-  "displayName": "Rename",
-  "displayName:zh-CN": "Rename",
-  "version": "0.0.1",
-  "description": "Rename text on websites and keep custom names locally in your browser.",
+  "name": "rename-username",
+  "displayName": "Rename Username",
+  "displayName:zh-CN": "重命名用户名",
+  "version": "1.0.0",
+  "description": "Rename usernames on websites and keep custom names locally in your browser.",
   "type": "module",
   "author": "LeoLeeTech",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LeoLeeTech/Rename.git"
+    "url": "git+https://github.com/LeoLeeTech/Rename-Username.git"
   },
   "bugs": {
-    "url": "https://github.com/LeoLeeTech/Rename/issues"
+    "url": "https://github.com/LeoLeeTech/Rename-Username/issues"
   },
-  "homepage": "https://github.com/LeoLeeTech/Rename#readme",
+  "homepage": "https://github.com/LeoLeeTech/Rename-Username#readme",
   "scripts": {
     "format": "prettier --write .",
     "typecheck": "tsc --noemit",

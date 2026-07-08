@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': 'Bật Rename trên trang web hiện tại',
+  'settings.enableCurrentSite': 'Bật Đổi tên người dùng trên trang web hiện tại',
   'settings.enableCurrentSiteCustomRule': 'Bật quy tắc khớp tùy chỉnh cho trang web hiện tại',
   'settings.customRuleValue': 'Quy tắc khớp tùy chỉnh',
   'settings.useVisitedFunction': 'Kích hoạt chức năng gắn tag nội dung điều hướng trên trang web hiện tại',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': 'Sử dụng phương pháp đơn giản để thêm thẻ',
   'settings.openTagsPage': 'Danh sách tag',
   'settings.openDataPage': 'Xuất/Nhập dữ liệu',
-  'settings.title': 'Rename',
+  'settings.title': 'Đổi tên người dùng',
   'settings.information': 'Sau khi thay đổi cài đặt, hãy tải lại trang để có hiệu lực',
   'settings.report': 'Báo cáo vấn đề',
   'prompt.addTags': 'Vui lòng nhập tên mới',

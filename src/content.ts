@@ -255,7 +255,6 @@ const getSettingsTable = (): SettingsTable => {
       type: 'textarea',
       group: groupNumber,
     },
-
   }
 }
 
@@ -619,7 +618,7 @@ function appendNewNameToPage(
     type: 'button',
     // href: "",
     // tabindex: "0",
-    title: 'Rename it',
+    title: 'Rename username',
     'data-utags_tag': '🏷️',
     'data-utags_key': key,
     'data-utags_new_name': newName,
@@ -1290,11 +1289,11 @@ async function main() {
       footer: `
     <p>${i('settings.information')}</p>
     <p>
-    <a href="https://github.com/LeoLeeTech/Rename/issues" target="_blank">
+    <a href="https://github.com/LeoLeeTech/Rename-Username/issues" target="_blank">
     ${i('settings.report')}
     </a></p>
     <p>Open Source on the 
-        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
           LeoLeeTech/Rename
         </a></p>`,
       settingsTable,

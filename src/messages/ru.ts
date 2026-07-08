@@ -1,5 +1,5 @@
 const messages = {
-  'settings.enableCurrentSite': 'Включить Rename на текущем сайте',
+  'settings.enableCurrentSite': 'Включить переименование имени пользователя на текущем сайте',
   'settings.enableCurrentSiteCustomRule': 'Включить пользовательские правила соответствия для текущего веб-сайта',
   'settings.customRuleValue': 'Пользовательские правила соответствия',
   'settings.useVisitedFunction': 'Включить функцию отметки просмотренного контента на текущем сайте',
@@ -15,7 +15,7 @@ const messages = {
   'settings.useSimplePrompt': 'Использовать простой метод добавления тегов',
   'settings.openTagsPage': 'Открыть список тегов',
   'settings.openDataPage': 'Экспорт/импорт данных',
-  'settings.title': 'Rename',
+  'settings.title': 'Переименовать имя пользователя',
   'settings.information': 'После изменения настроек перезагрузите страницу для применения изменений',
   'settings.report': 'Сообщить о проблеме...',
   'prompt.addTags': 'Введите новое имя',

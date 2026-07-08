@@ -11,7 +11,7 @@ function IndexOptions() {
         padding: 16,
         width: '500px',
       }}>
-      <h1>Rename</h1>
+      <h1>Rename Username</h1>
       <ul
         style={{
           display: 'flex',
@@ -31,8 +31,8 @@ function IndexOptions() {
         </li>
       </ul>
       <footer>
-        Open Source on the {' '}
-        <a href="https://github.com/LeoLeeTech/Rename" target="_blank">
+        Open Source on the{' '}
+        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
           LeoLeeTech/Rename
         </a>
       </footer>

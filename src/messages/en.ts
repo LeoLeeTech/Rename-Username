@@ -1,5 +1,5 @@
 const messages = {
-  'settings.enableCurrentSite': 'Enable Rename on the current website',
+  'settings.enableCurrentSite': 'Enable Rename Username on the current website',
   'settings.enableCurrentSiteCustomRule': 'Enable custom matching rules for the current website',
   'settings.customRuleValue': 'Custom matching rules',
   'settings.useVisitedFunction': 'Enable browsing content tagging on the current website',
@@ -15,7 +15,7 @@ const messages = {
   'settings.useSimplePrompt': 'Use simple prompt method to add tags',
   'settings.openTagsPage': 'Open the tag list page',
   'settings.openDataPage': 'Open the import data/export data page',
-  'settings.title': 'Rename',
+  'settings.title': 'Rename Username',
   'settings.information': 'After changing the settings, reload the page to take effect',
   'settings.report': 'Report and Issue...',
   'prompt.addTags': 'Please enter a new name',

@@ -1,5 +1,5 @@
 export const messages = {
-  'settings.enableCurrentSite': '在当前网站启用 Rename',
+  'settings.enableCurrentSite': '在当前网站启用重命名用户名',
   'settings.enableCurrentSiteCustomRule': '启用当前网站的自定义匹配规则',
   'settings.customRuleValue': '自定义匹配规则',
   'settings.useVisitedFunction': '在当前网站启用浏览内容标记功能',
@@ -15,7 +15,7 @@ export const messages = {
   'settings.useSimplePrompt': '使用简单方式添加标签',
   'settings.openTagsPage': '标签列表',
   'settings.openDataPage': '导出数据/导入数据',
-  'settings.title': 'Rename',
+  'settings.title': '重命名用户名',
   'settings.information': '更改设置后，重新加载页面即可生效',
   'settings.report': '反馈问题',
   'prompt.addTags': '请输入新名字',
