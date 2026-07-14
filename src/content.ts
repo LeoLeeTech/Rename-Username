@@ -33,7 +33,6 @@ import {
   type RegisterMenuCommandOptions,
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
-import type { PlasmoCSConfig } from 'plasmo'
 
 import {
   buildTagsForDisplay,
@@ -101,13 +100,6 @@ import type { UserTag, UserTagMeta } from './types'
 import { generateUtagsId } from './utils'
 import { setupConsole } from './utils/console.js'
 import { EventListenerManager } from './utils/event-listener-manager'
-
-export const config: PlasmoCSConfig = {
-  run_at: 'document_start',
-  matches: ['https://*/*', 'http://*/*'],
-
-  all_frames: true,
-}
 
 // Receive popup trigger to show settings in the content context.
 chrome.runtime?.onMessage?.addListener((message: any) => {

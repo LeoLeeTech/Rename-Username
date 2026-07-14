@@ -1,10 +1,10 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./036-twitch.tv.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { getUtagsTitle, setUtagsAttributes } from '../../utils/index'
+import styleText from './036-twitch.tv.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

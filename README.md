@@ -1,8 +1,8 @@
 # 介绍
 
-Rename Username 是一个浏览器扩展，用来把网页上的用户名替换成你自定义的名字。
+Rename Username 是一个浏览器扩展, fork form [Utags](https://github.com/utags/utags)，用来把网页上的用户名替换成你自定义的名字。
 
-- Edge 浏览器安装请点[这](https://microsoftedge.microsoft.com/addons/detail/rename/bnmaifnljjpjhegmbofiikpeaelfipdo) 
+- Edge 浏览器安装请点[这](https://microsoftedge.microsoft.com/addons/detail/rename/bnmaifnljjpjhegmbofiikpeaelfipdo)
 - Chrome 浏览器安装请点[这](https://chromewebstore.google.com/detail/rename-username/opleppedpfapokehniododgoejhbekfb)
 
 ![](assets/x.png)
@@ -50,220 +50,137 @@ Cloudflare (community.cloudflare.com)
 
 # 开发者导览
 
-这一节只介绍继续开发最常用的内容：怎么把项目跑起来、主要文件分别做什么、以及如何给一个新网站的文章/用户/标题加入适配规则。
+这一节面向准备第一次阅读和修改代码的人。这个项目是一个基于 WXT 的浏览器插件，核心逻辑运行在 content script 中：插件把脚本注入到网页，扫描页面上的用户、帖子、视频、仓库等目标元素，然后在这些元素旁边插入 Rename Username 按钮。用户单击按钮后会打开输入弹窗，输入的新名字会保存到浏览器扩展本地存储。
 
-## 1. 怎么运行项目
+## 目录
 
-先安装依赖：
+- `src/`：扩展源码
+- `entrypoints/`：WXT 扩展入口
+- `public/`：扩展静态资源
+- `package.json`：WXT npm 脚本和依赖
+- `wxt.config.ts`：WXT 配置和 manifest 基础信息
 
-```bash
-npm install .
-```
+## 当前项目使用的技术栈
 
-Chrome 本地开发：
+- TypeScript：项目主要源码语言。大部分业务文件都是 `.ts`，React 页面是 `.tsx`。
+- React：用于插件 popup 页面和 options 页面，也就是浏览器工具栏弹窗和扩展选项页。
+- WXT：浏览器插件开发框架。它负责识别 `entrypoints/` 下的 content、background、popup、options 入口，并生成 Chrome/Firefox 扩展产物。Edge 可以复用 Chrome MV3 产物。
+- WebExtension API：代码里会使用 `chrome` / `browser` 扩展 API，例如发送消息、读取当前标签页、background 通信、扩展本地存储等。
+- Content Script：`src/content.ts` 是最重要的入口。它运行在网页上下文旁边，负责扫描 DOM、插入标签 UI、打开设置面板、响应用户点击。
+- Background / Service Worker：`src/background.ts` 是后台脚本，目前主要作为 HTTP 请求代理，接收内容脚本消息后在后台执行 `fetch`。
+- SCSS：`src/content.scss` 和各站点的 `.scss` 文件定义注入网页的按钮、弹窗和页面替换相关样式。
+- browser-extension-i18n：多语言文案工具，文案文件在 `src/messages/`。
+- browser-extension-settings：设置面板工具，`src/content.ts` 里通过 `initSettings` 生成站点设置界面。
+- browser-extension-storage：扩展本地存储封装。重命名数据通过它保存到浏览器扩展 storage，而不是普通网页自己的 localStorage。
+- browser-extension-utils：DOM 查询、事件绑定、菜单注册、工具函数等封装。
+- utags-utils：URL 标准化、标签拆分、标题裁剪等通用工具。
+- Sass：SCSS 编译依赖。
+- npm-run-all：用于并行或串行执行 npm scripts，例如 `run-p dev:*`、`run-s build:*`。
+- cross-env：让 npm scripts 里的环境变量写法兼容不同系统。
+- TypeScript compiler：通过 `npm run typecheck` 执行 `tsc --noemit` 做类型检查。
 
-```bash
-npm run dev:chrome
-```
+## 数据结构概览
 
-命令启动后，Plasmo 会生成开发版扩展。打开 Chrome 的扩展管理页：
+主数据 key 是 `extension.utags.urlmap`，由 `src/storage/bookmarks.ts` 读写。当前重命名数据结构是：
 
-```text
-chrome://extensions/
-```
-
-开启“开发者模式”，点击“加载已解压的扩展程序”，选择 Plasmo 输出的开发目录。之后修改代码时，终端会自动重新构建；如果页面效果没有变化，先在扩展管理页点“重新加载”，再刷新目标网页。
-
-Firefox 本地开发：
-
-```bash
-npm run dev:firefox
-```
-
-类型检查：
-
-```bash
-npm run typecheck
-```
-
-构建发布包：
-
-```bash
-npm run build:chrome
-npm run package:chrome
-npm run package:edge
-npm run build:firefox
-npm run package:firefox
-```
-
-常用产物位置：
-
-- `build/chrome-mv3-prod/`：Chrome MV3 解压目录。
-- `build/chrome-mv3-prod.zip`：Chrome 商店上传包。
-- `build/edge-mv3-prod.zip`：Edge 商店上传包，复用 Chrome MV3 包。
-- `build/firefox-mv2-prod.zip`：Firefox 上传包。
-
-开发时最常看的页面：
-
-- 插件弹窗：点击浏览器工具栏里的扩展图标。
-- 设置面板：点击弹窗里的“设置”，或者页面中的 Rename 按钮弹窗底部“设置”。
-- 扩展存储：Chrome DevTools 的 Application 面板里查看 Extension Storage。
-
-## 2. 各文件作用
-
-- `package.json`：项目元信息、npm scripts、依赖、Plasmo manifest 基础配置。插件名称、描述、权限、Firefox `gecko.id` 都主要从这里进入最终 manifest。
-- `README.md`：项目说明文档。
-- `assets/`：图片资源和商店截图等静态文件。
-- `build/`：构建产物目录，不手动改这里的代码。
-- `scripts/`：构建后处理脚本。
-- `scripts/chrome/update-manifest.mjs`：Chrome 构建后清理 manifest。
-- `scripts/firefox/update-manifest.mjs`：Firefox 构建后清理 manifest。
-- `scripts/wrap-shadow-root.mjs`：构建后包装 ShadowRoot 脚本，避免污染页面全局。
-
-- `src/content.ts`：最重要的入口文件。它是 content script，负责初始化设置、扫描页面、渲染 Rename 按钮、替换页面文本、绑定全局事件。
-- `src/background.ts`：后台脚本。用于处理内容脚本发来的后台请求。
-- `src/popup.tsx`：浏览器工具栏弹窗页面。
-- `src/options.tsx`：扩展 options 页面。
-- `src/content.scss`：注入网页的全局样式，包括 Rename 按钮、弹窗、候选列表等。
-- `src/content-utils.ts`：把 DOM 节点和存储数据转换成展示需要的数据。
-- `src/global.d.ts`：全局类型声明。
-- `src/types.ts`：轻量业务类型。
-
-- `src/components/modal.ts`：弹窗容器构造。
-- `src/components/tag.ts`：旧标签元素构造，目前仍有部分历史代码会用到。
-
-- `src/messages/`：多语言文案。
-- `src/messages/index.ts`：i18n 初始化入口。
-- `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：具体语言文案。
-
-- `src/modules/advanced-tag-manager.ts`：点击 Rename 按钮后打开的输入弹窗。
-- `src/modules/simple-tag-manger.ts`：简单输入模式弹窗。
-- `src/modules/global-events.ts`：全局事件中心，处理点击 Rename 按钮、打开弹窗、保存新名字。
-- `src/modules/utags-scanner.ts`：DOM 扫描器，监听页面变化并找出候选节点。
-- `src/modules/scanned-node-queue.ts`：扫描队列，避免页面变化太频繁时反复处理同一批节点。
-- `src/modules/utags-registry.ts`：记录页面元素和 Rename UI 的对应关系。
-- `src/modules/dom-reference-manager.ts`：用 WeakMap 保存 DOM 元素对应的 key/meta。
-- `src/modules/style-manager.ts`：组合并注入全局样式和站点样式。
-- `src/modules/shadow-root.ts`：处理 Shadow DOM。
-- `src/modules/visited.ts`：已访问标记逻辑，历史功能仍在代码中。
-- `src/modules/menu-command-manager.ts`：浏览器/userscript 菜单命令管理。
-- `src/modules/star-handler.ts`、`src/modules/star-icon.ts`：快速星标历史功能相关逻辑。
-- `src/modules/export-import.ts`：导入导出相关桥接逻辑。
-- `src/modules/sync-adapter.ts`：和外部 webapp 同步数据的桥接层。
-- `src/modules/webapp-bridge.ts`：页面和 background 之间的请求桥接。
-- `src/modules/timer-manager.ts`：统一管理 timeout/interval，方便清理。
-
-- `src/storage/bookmarks.ts`：主数据存储模块。核心数据保存在 `extension.utags.urlmap`，结构是 URL 到 `{ newName, meta }` 的映射。
-- `src/storage/tags.ts`：最近使用、常用候选名称的统计逻辑。
-- `src/types/bookmarks.ts`：主存储数据类型定义。
-
-- `src/sites/index.ts`：站点适配总入口。它会根据当前域名选择具体站点配置；没有命中特定网站时走默认规则。
-- `src/sites/default.ts`：默认站点规则，主要扫描普通链接。
-- `src/sites/none.ts`：空站点配置。
-- `src/sites/z001/`：常规网站适配文件，例如 GitHub、YouTube、V2EX。
-- `src/sites/z999/`：另一组网站适配文件。
-
-- `src/utils/index.ts`：通用工具函数。
-- `src/utils/dom-utils.ts`：给 DOM 元素写入 `data-utags_*` 属性的工具。
-- `src/utils/event-listener-manager.ts`：集中管理事件监听。
-- `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
-- `src/utils/console.ts`：控制台封装。
-
-## 3. 如何加入一个新文章
-
-这里的“加入一个新文章”，本质是让某个网站里的文章标题、作者、帖子链接等元素被 Rename 识别出来。适配时要做三件事：找到元素、给它一个稳定 key、给它一个可读 title。
-
-默认规则会扫描普通 `a[href]`。如果一个网站的文章标题本身就是正常链接，可能不用写代码也能工作。但现代网站经常有特殊 DOM、相对链接、动态渲染、嵌套结构或需要只匹配某一类链接，这时就要新增站点适配。
-
-新增站点适配的大致步骤：
-
-1. 在 `src/sites/z001/` 下新增一个文件，例如：
-
-```text
-src/sites/z001/043-eleduck.com.ts
-```
-
-2. 参考已有站点文件写一个配置。最小结构通常包含：
-
-```ts
-import defaultSite from '../default'
-
-export default (() => {
-  return {
-    matches: /eleduck\.com/,
-    matchedNodesSelectors: [
-      ...defaultSite.matchedNodesSelectors,
-      '.post-title a[href]',
-    ],
-    validate(element: HTMLElement, href: string) {
-      return href.includes('/posts/')
-    },
-    excludeSelectors: [...defaultSite.excludeSelectors],
-  }
-})()
-```
-
-3. 如果目标元素不是 `a[href]`，需要在站点适配的 `preProcess` 里给元素补 `data-utags_link` 和 `data-utags_title`。例如：
-
-```ts
-preProcess() {
-  for (const element of document.querySelectorAll('.post-title')) {
-    const link = element.querySelector('a[href]') as HTMLAnchorElement | null
-    if (!link) continue
-
-    element.setAttribute('data-utags_link', link.href)
-    element.setAttribute('data-utags_title', link.textContent?.trim() || '')
+```json
+{
+  "data": {
+    "https://example.com/page": {
+      "newName": "自定义新名字",
+      "meta": {
+        "title": "Example Page",
+        "type": "post",
+        "created": 1751356800000,
+        "updated": 1751356900000
+      }
+    }
+  },
+  "meta": {
+    "databaseVersion": 3,
+    "extensionVersion": "0.14.2",
+    "created": 1751356800000,
+    "updated": 1751356900000
   }
 }
 ```
 
-4. 在 `src/sites/index.ts` 里导入并加入 `sites` 列表：
+注意：`newName` 是单个字符串，不再做逗号分割。
 
-```ts
-import eleduck from './z001/043-eleduck.com'
+其他本地数据：
 
-const sites: Site[] = [
-  eleduck,
-  // ...
-]
-```
+- `extension.utags.recenttags`：最近新增标签的原始统计数组。
+- `extension.utags.mostusedtags`：最常用标签列表。
+- `extension.utags.recentaddedtags`：最近添加的标签列表。
+- `extension.utags.sync_metadata`：和 webapp 同步时使用的元数据。
+- `extension.utags.extension_id`：同步适配器生成的本扩展实例 ID。
+- `utags_visited`：保存在网页 localStorage 中，用于当前网站的已访问标记。
 
-5. 如果按钮位置或页面布局不对，再新增同名样式文件，例如：
+## 文件夹作用
 
-```text
-src/sites/z001/043-eleduck.com.scss
-```
-
-然后在站点配置里引入并返回：
-
-```ts
-import styleText from 'data-text:./043-eleduck.com.scss'
-
-getStyle: () => styleText
-```
-
-6. 启动开发环境测试：
-
-```bash
-npm run dev:chrome
-```
-
-打开目标页面，确认三件事：
-
-- 鼠标移到目标标题/作者附近时，Rename 按钮能出现。
-- 点击按钮能打开输入弹窗。
-- 保存后刷新页面，新名字仍然能显示。
-
-调试时常用的浏览器控制台检查：
-
-```js
-document.querySelectorAll('a[href]').length
-document.querySelector('.post-title a')?.href
-document.querySelector('.post-title a')?.textContent
-```
-
-如果默认链接规则能选中元素，但插件没有显示按钮，重点检查：当前网站是否启用、元素是否被 `excludeSelectors` 排除、`href` 是否能变成合法 URL、`textContent` 是否为空。
-
-# 是从 utags 仓库 fork 的
-utags 地址: https://github.com/utags/utags
-Rename Username 是基于 `utags/utags` 仓库 fork 并改造出来的浏览器扩展。当前项目保留了一部分历史命名、数据 key 和内部模块名，例如 `utags_*`、`extension.utags.urlmap`，这是为了减少迁移风险和保持已有逻辑稳定。
+- `entrypoints/`：WXT 入口目录。
+  - `entrypoints/content.ts`：普通 isolated world content script 入口，加载 `src/content.ts`。
+  - `entrypoints/shadow-root.content.ts`：main world content script 入口，负责 ShadowRoot 拦截逻辑。
+  - `entrypoints/background.ts`：background service worker 入口，加载 `src/background.ts`。
+  - `entrypoints/popup.html`、`entrypoints/options.html`：WXT HTML 入口，手动挂载 React 页面。
+- `public/`：插件图标等静态资源。WXT 会原样复制到构建产物。
+- `.output/`：WXT 构建输出目录。执行 `npm run build` 后生成，不建议手动改这里的文件。
+- `.wxt/`：WXT 生成的类型和缓存目录。一般不用手动修改。
+- `src/`：插件源码主目录。
+- `src/content.ts`：内容脚本主入口。初始化设置、扫描 DOM、替换页面文本、绑定菜单和页面事件，是阅读业务逻辑的第一站。
+  - `src/background.ts`：后台脚本。接收 HTTP 请求消息并在扩展后台执行 `fetch`，同时记录请求计数。
+  - `src/popup.tsx`：工具栏弹窗。当前主要负责给当前页面发送 `utags:show-settings` 消息来打开设置。
+  - `src/options.tsx`：扩展选项页。当前是简单入口页面，真正复杂设置在内容脚本渲染的设置面板里。
+- `src/content.scss`：注入网页的全局样式。Rename Username 按钮、弹窗、候选列表、已访问标记等样式都在这里。
+  - `src/content-utils.ts`：内容脚本辅助逻辑。负责判断 DOM 变化是否要重新扫描，以及把存储数据转成展示数据。
+  - `src/types.ts`：更轻量的全局业务类型，例如 `UserTag`、`UserTagMeta`。
+  - `src/global.d.ts`：全局类型声明。给浏览器、userscript 或第三方全局变量补 TypeScript 类型。
+- `src/components/`：小型 UI 构造函数，例如弹窗容器和标签元素。
+  - `src/components/modal.ts`：创建标签输入弹窗的基础 DOM 结构。
+  - `src/components/tag.ts`：创建单个标签元素。
+- ShadowRoot 相关入口已迁移到 `entrypoints/shadow-root.content.ts`，具体逻辑仍在 `src/modules/shadow-root.ts`。
+- `src/messages/`：多语言文案。`index.ts` 负责加载各语言文件并初始化 i18n。
+  - `src/messages/index.ts`：i18n 初始化入口。
+  - `src/messages/zh-cn.ts`、`src/messages/en.ts` 等：各语言文案。
+- `src/modules/`：可复用业务模块。大部分标签编辑、扫描、同步、样式、事件绑定逻辑都在这里。
+  - `src/modules/advanced-tag-manager.ts`：单击 Rename Username 按钮后出现的高级输入弹窗。
+- `src/modules/simple-tag-manger.ts`：简单输入模式的弹窗。
+  - `src/modules/global-events.ts`：全局事件中心。处理点击 Rename Username 按钮、保存新名字、history 变化、触摸设备交互等。
+  - `src/modules/utags-scanner.ts`：底层 DOM 扫描器。监听页面 DOM 变化并找出候选节点。
+  - `src/modules/scanned-node-queue.ts`：扫描结果队列。控制节点处理节奏，避免频繁 DOM 更新造成混乱。
+  - `src/modules/utags-registry.ts`：记录元素和已创建标签 UI 的对应关系，方便更新和清理。
+  - `src/modules/dom-reference-manager.ts`：用 WeakMap 保存 DOM 元素和标签元数据的关系。
+  - `src/modules/style-manager.ts`：组合通用样式和站点样式，并注入 document / ShadowRoot。
+  - `src/modules/shadow-root.ts`：处理 Shadow DOM 场景，让插件能在 Web Components 内工作。
+  - `src/modules/visited.ts`：已访问标记功能。读写网页 localStorage 的 `utags_visited`。
+  - `src/modules/menu-command-manager.ts`：菜单命令管理。负责注册添加/修改标签和快捷标签菜单。
+  - `src/modules/star-handler.ts`：快速星标功能的统一处理逻辑。
+  - `src/modules/star-icon.ts`：生成星标按钮 SVG。
+  - `src/modules/export-import.ts`：导入导出相关桥接逻辑。
+  - `src/modules/sync-adapter.ts`：和 webapp 同步本地数据的 postMessage 适配层。
+  - `src/modules/webapp-bridge.ts`：页面和 background 之间的 HTTP 请求桥接。
+  - `src/modules/debugging.ts`：调试快捷键和调试辅助逻辑。
+  - `src/modules/timer-manager.ts`：统一管理 timeout/interval，便于页面卸载时清理。
+- `src/sites/`：不同网站的适配规则。每个 `.ts` 文件描述一个网站如何提取 key、title、type 等信息；对应 `.scss` 文件处理该网站的样式微调。
+  - `src/sites/index.ts`：站点适配总入口。根据当前域名选择具体网站配置。
+  - `src/sites/default.ts`：默认站点适配规则。
+  - `src/sites/none.ts`：无适配或禁用适配时使用。
+- `src/sites/z001/`：常规站点适配集合。
+  - `src/sites/z001/*.ts`：具体网站适配文件。例如 GitHub、YouTube、V2EX 等。
+  - `src/sites/z001/*.scss`：具体网站的样式修正。
+- `src/sites/z999/`：另一组站点适配集合，命名上用于区分站点分组。
+- `src/storage/`：本地存储读写逻辑。
+- `src/storage/bookmarks.ts`：主数据存储模块。读写 `extension.utags.urlmap`，保存 URL 到 newName/meta 的映射。
+- `src/storage/tags.ts`：名称统计模块。维护最近使用和常用名称。
+- `src/types/`：较复杂的业务类型定义。
+  - `src/types/bookmarks.ts`：书签和标签数据结构类型定义。想改存储结构时通常要先看这里。
+- `src/utils/`：通用工具函数、DOM 工具、事件管理器、控制台包装等。
+  - `src/utils/index.ts`：通用工具集合，例如标签排序、数据规范化、DOM 清理、星级标签判断。
+  - `src/utils/dom-utils.ts`：把标签 key/meta 写到 DOM 元素或从 DOM 元素取回。
+  - `src/utils/event-listener-manager.ts`：集中登记事件监听，便于统一移除。
+  - `src/utils/shadow-root-traverser.ts`：遍历普通 DOM 和 Shadow DOM。
+  - `src/utils/console.ts`：控制台输出封装。
+  - `src/utils/atob.ts`：base64 解码兼容工具。
+- `package.json`：WXT npm scripts 和依赖。
+- `wxt.config.ts`：WXT 配置、manifest 基础配置，以及兼容旧 `data-text:` SCSS 导入的 Vite 插件。
+- `tsconfig.json`：TypeScript 编译配置。

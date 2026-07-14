@@ -2,6 +2,8 @@
  * 插件选项页：浏览器扩展详情页里的 options 页面。
  * 当前只放了少量跳转链接；真正的站点设置面板由内容脚本通过 browser-extension-settings 渲染。
  */
+import { createRoot } from 'react-dom/client'
+
 function IndexOptions() {
   return (
     <div
@@ -41,3 +43,8 @@ function IndexOptions() {
 }
 
 export default IndexOptions
+
+const root = document.querySelector('#root')
+if (root) {
+  createRoot(root).render(<IndexOptions />)
+}

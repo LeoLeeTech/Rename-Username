@@ -1,10 +1,10 @@
 import { $, $$ } from 'browser-extension-utils'
-import styleText from 'data-text:./003-panda.chai99ka.moe.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './003-panda.chai99ka.moe.scss?inline'
 
 export default (() => {
   const prefix = 'https://panda.chaika.moe/'

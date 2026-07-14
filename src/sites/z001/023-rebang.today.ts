@@ -1,7 +1,7 @@
 import { $$, createElement } from 'browser-extension-utils'
-import styleText from 'data-text:./023-rebang.today.scss'
 
 import defaultSite from '../default'
+import styleText from './023-rebang.today.scss?inline'
 
 export default (() => {
   const nodeNameMap = {

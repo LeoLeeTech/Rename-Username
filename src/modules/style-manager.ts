@@ -4,8 +4,8 @@
  */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addElement, doc } from 'browser-extension-utils'
-import baseStyleText from 'data-text:../content.scss'
 
+import baseStyleText from '../content.scss?inline'
 import { getCurrentSiteStyle } from '../sites'
 
 const STYLE_ID = 'utags_combined_style'

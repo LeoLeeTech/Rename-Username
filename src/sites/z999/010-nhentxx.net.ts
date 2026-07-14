@@ -1,12 +1,12 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./010-nhentxx.net.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
-import { AI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtags } from '../../utils/dom-utils'
+import { AI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './010-nhentxx.net.scss?inline'
 
 export default (() => {
   const prefix = `https://nhent${AI_DOMAIN_SUFFIX}.net/`

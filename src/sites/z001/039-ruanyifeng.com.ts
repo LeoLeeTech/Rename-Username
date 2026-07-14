@@ -1,10 +1,10 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./039-ruanyifeng.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
+import styleText from './039-ruanyifeng.com.scss?inline'
 
 export default (() => {
   // Constants

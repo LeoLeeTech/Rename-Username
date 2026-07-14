@@ -1,12 +1,12 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./011-hito99mi.la.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
-import { MI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtags } from '../../utils/dom-utils'
+import { MI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './011-hito99mi.la.scss?inline'
 
 export default (() => {
   const prefix = `https://hito${MI_DOMAIN_SUFFIX}.la/`

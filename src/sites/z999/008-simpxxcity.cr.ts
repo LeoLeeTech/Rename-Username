@@ -1,5 +1,4 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./008-simpxxcity.cr.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
@@ -10,6 +9,7 @@ import {
   setUtagsAttributes,
 } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './008-simpxxcity.cr.scss?inline'
 
 export default (() => {
   const prefix = 'https://simpcity.cr/'

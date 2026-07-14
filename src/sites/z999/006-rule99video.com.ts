@@ -1,10 +1,10 @@
 import { $, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./006-rule99video.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './006-rule99video.com.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'

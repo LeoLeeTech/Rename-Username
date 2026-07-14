@@ -1,9 +1,9 @@
 import { $ } from 'browser-extension-utils'
-import styleText from 'data-text:./002-greasyfork.org.scss'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './002-greasyfork.org.scss?inline'
 
 export default (() => {
   function getScriptUrl(url: string) {

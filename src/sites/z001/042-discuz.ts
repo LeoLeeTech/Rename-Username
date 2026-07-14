@@ -1,5 +1,4 @@
 import { $, $$, setAttribute } from 'browser-extension-utils'
-import styleText from 'data-text:./042-discuz.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
@@ -7,6 +6,7 @@ import { deleteUrlParameters } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import { ancestorTextIncludes, setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './042-discuz.scss?inline'
 
 // Class
 export function Discuz(options?: {

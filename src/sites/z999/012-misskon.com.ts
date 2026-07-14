@@ -1,10 +1,10 @@
 import { $, $$, doc } from 'browser-extension-utils'
-import styleText from 'data-text:./012-misskon.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './012-misskon.com.scss?inline'
 
 // Wordpress site
 export default (() => {

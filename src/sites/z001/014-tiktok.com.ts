@@ -1,10 +1,10 @@
 import { $, $$ } from 'browser-extension-utils'
-import styleText from 'data-text:./014-tiktok.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
+import styleText from './014-tiktok.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.tiktok.com/'
