@@ -5,9 +5,9 @@ Rename Username 是一个浏览器扩展, fork form [Utags](https://github.com/u
 - Edge 浏览器安装请点[这](https://microsoftedge.microsoft.com/addons/detail/rename/bnmaifnljjpjhegmbofiikpeaelfipdo)
 - Chrome 浏览器安装请点[这](https://chromewebstore.google.com/detail/rename-username/opleppedpfapokehniododgoejhbekfb)
 
-![](assets/x.png)
-![](assets/github.png)
-![](assets/youtube.png)
+![](public/x.png)
+![](public/github.png)
+![](public/youtube.png)
 
 # 支持网站
 
