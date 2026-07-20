@@ -1,3 +1,8 @@
+/**
+ * 文件说明：普通 userscript 构建脚本。使用 esbuild 打包 content.ts，写入 userscript banner，补齐 GM grant 并输出 utags.user.js。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import process from "node:process"
 import * as esbuild from "esbuild"

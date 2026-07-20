@@ -1,3 +1,8 @@
+/**
+ * 文件说明：样式管理器。合并默认样式、站点样式和 content 样式，并注入到普通 document 或 ShadowRoot。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addElement, doc } from 'browser-extension-utils'
 import baseStyleText from 'data-text:../content.scss'

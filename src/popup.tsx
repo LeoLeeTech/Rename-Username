@@ -1,3 +1,8 @@
+/**
+ * 文件说明：浏览器工具栏弹窗入口。提供打开当前页面内设置面板的按钮，并放置跳转到 UTags 链接列表的入口。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { i } from './messages'
 
 function IndexPopup() {

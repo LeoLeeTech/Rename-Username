@@ -1,3 +1,8 @@
+/**
+ * 文件说明：构建后处理脚本。找到构建目录中的 shadow-root.*.js 并用 IIFE 包裹，避免污染全局作用域或重复执行问题。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"

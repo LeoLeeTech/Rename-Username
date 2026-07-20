@@ -1,3 +1,8 @@
+/**
+ * 文件说明：导入导出模块。负责把当前存储里的标签/书签数据导出为文本，或从外部文本导入恢复。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { createElement, doc } from 'browser-extension-utils'
 
 import { getUrlMap } from '../storage/bookmarks'

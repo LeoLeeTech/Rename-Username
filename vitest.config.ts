@@ -1,3 +1,8 @@
+/**
+ * 文件说明：Vitest 单元测试配置。使用 jsdom 模拟浏览器 DOM，并提供 data-text: loader，方便测试 Plasmo 文本资源导入。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({

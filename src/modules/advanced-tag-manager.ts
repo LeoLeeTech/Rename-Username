@@ -1,3 +1,8 @@
+/**
+ * 文件说明：高级标签管理器。显示当前标签、置顶标签、常用标签、最近标签和 emoji 标签，并处理标签添加、删除、复制和设置弹窗交互。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue, showSettings } from 'browser-extension-settings'
 import {
   $,

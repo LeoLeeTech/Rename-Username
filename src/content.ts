@@ -1,3 +1,8 @@
+/**
+ * 文件说明：浏览器 content script 主入口。负责初始化设置、多语言、站点匹配、DOM 扫描、样式注入、菜单命令、标签/重命名 UI，以及和 webapp 的数据同步。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getPrefferedLocale } from 'browser-extension-i18n'
 import {
   getSettingsValue,

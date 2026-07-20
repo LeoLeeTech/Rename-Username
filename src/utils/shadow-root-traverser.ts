@@ -1,4 +1,9 @@
 /**
+ * 文件说明：Shadow DOM 遍历工具。用于穿透普通 DOM 和 Shadow DOM，辅助扫描、查找和样式注入。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * Default tags that typically don't contain shadow roots and should be excluded from traversal
  */
 

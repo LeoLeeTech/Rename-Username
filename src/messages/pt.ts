@@ -1,3 +1,8 @@
+/**
+ * 文件说明：葡萄牙文多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': 'Habilitar UTags no site atual',
   'settings.enableCurrentSiteCustomRule': 'Ativar regras de correspondência personalizadas para o site atual',

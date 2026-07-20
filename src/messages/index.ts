@@ -1,3 +1,8 @@
+/**
+ * 文件说明：多语言文案入口。负责选择当前语言、导出 i() 翻译函数、提供可用语言列表并支持重置 i18n 状态。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getPrefferedLocale, initAvailableLocales, initI18n } from 'browser-extension-i18n'
 
 import messagesDe from './de'

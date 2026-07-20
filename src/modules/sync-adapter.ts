@@ -1,3 +1,8 @@
+/**
+ * 文件说明：UTags webapp 同步适配层。通过消息协议和网页通信，支持发现扩展、读取远端元数据、下载数据和上传数据。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import {
   addValueChangeListener,
   getValue,

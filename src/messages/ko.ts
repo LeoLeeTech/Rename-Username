@@ -1,3 +1,8 @@
+/**
+ * 文件说明：韩文多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': '현재 웹사이트에서 UTags 활성화',
   'settings.enableCurrentSiteCustomRule': '현재 웹사이트에 대한 사용자 지정 일치 규칙 사용',

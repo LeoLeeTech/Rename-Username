@@ -1,3 +1,8 @@
+/**
+ * 文件说明：成人或敏感站点专属样式文件。修正该站点中标签/重命名 UI 的展示位置、间距、层级或隐藏效果。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 :not(#a):not(#b):not(#c) {
   /* Aside > Don’t miss out > Post thumbnail */
   aside .widget-container > .post-thumbnail .utags_ul {

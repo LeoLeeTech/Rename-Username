@@ -1,3 +1,8 @@
+/**
+ * 文件说明：意大利文多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': 'Abilita UTags sul sito web corrente',
   'settings.enableCurrentSiteCustomRule': 'Abilita regole di corrispondenza personalizzate per il sito web corrente',

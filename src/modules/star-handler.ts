@@ -1,3 +1,8 @@
+/**
+ * 文件说明：快速星标功能模块。用于在部分站点上快速添加或切换星级标签，例如 ★、★★、★★★。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getBookmark } from '../storage/bookmarks'
 
 /**

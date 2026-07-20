@@ -1,4 +1,9 @@
 /**
+ * 文件说明：content script 和 UTags webapp 之间的桥接模块，让网页端可以发现扩展并与扩展侧同步数据。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * HTTP proxy for UTags webapp to bypass CORS restrictions
  */
 

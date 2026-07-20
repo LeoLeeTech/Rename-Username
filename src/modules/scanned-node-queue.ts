@@ -1,3 +1,8 @@
+/**
+ * 文件说明：扫描结果队列。把扫描到的节点分批处理，避免一次性处理大量 DOM 导致页面卡顿，并支持暂停、恢复和队列空闲回调。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export type ScannedNode = HTMLElement
 
 type ProcessNodeFn = (node: ScannedNode) => void

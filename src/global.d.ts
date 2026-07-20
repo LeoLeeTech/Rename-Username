@@ -1,3 +1,8 @@
+/**
+ * 文件说明：全局类型声明文件，用于补充浏览器扩展、userscript、全局变量或第三方模块在 TypeScript 中无法自动识别的类型。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 declare module 'css:*' {
   const cssText: string
   export default cssText

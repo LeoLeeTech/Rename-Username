@@ -1,3 +1,8 @@
+/**
+ * 文件说明：UTags UI 注册表。记录页面上已经创建的 .utags_ul 标签列表，避免重复插入，并支持统一隐藏、清理和刷新。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 const utagsElementMap = new WeakMap<HTMLElement, HTMLElement>()
 const utagsUlSet = new Set<HTMLElement>()
 

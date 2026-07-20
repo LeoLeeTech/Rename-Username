@@ -1,3 +1,8 @@
+/**
+ * 文件说明：构建公共逻辑。提供 esbuild 配置、data-text/schemeImport 资源导入、Sass 编译和开发服务器 watch/serve 工具。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import * as esbuild from "esbuild"
 import * as sass from "sass"

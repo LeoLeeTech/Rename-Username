@@ -1,3 +1,8 @@
+/**
+ * 文件说明：full 版本 userscript 构建脚本，用于生成包含完整站点适配的油猴脚本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import process from "node:process"
 import * as esbuild from "esbuild"

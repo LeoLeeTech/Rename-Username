@@ -1,3 +1,8 @@
+/**
+ * 文件说明：bookmarklet 开发监听脚本。监听源码变化并持续重新构建 bookmarklet 产物。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 
 import { getBuildOptions, runDevServer } from "../common.mjs"

@@ -1,3 +1,8 @@
+/**
+ * 文件说明：XO / ESLint 代码规范配置，用于控制 TypeScript 和 JavaScript 的 lint 规则。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 /** @type {import('xo').FlatXoConfig} */
 const xoConfig = [
   {

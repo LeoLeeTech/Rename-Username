@@ -1,3 +1,8 @@
+/**
+ * 文件说明：越南文多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': 'Bật UTags trên trang web hiện tại',
   'settings.enableCurrentSiteCustomRule': 'Bật quy tắc khớp tùy chỉnh cho trang web hiện tại',

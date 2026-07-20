@@ -1,4 +1,9 @@
 /**
+ * 文件说明：星标图标相关逻辑，用于快速收藏或星级标签功能的页面内图标展示。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * Star icon SVG for use across the application
  */
 

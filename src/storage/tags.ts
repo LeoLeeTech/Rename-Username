@@ -1,3 +1,8 @@
+/**
+ * 文件说明：标签集合存储模块。保存最近使用、最常用、最近添加、置顶和 emoji 标签，供标签编辑弹窗展示候选项。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   addValueChangeListener,

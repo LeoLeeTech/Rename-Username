@@ -1,3 +1,8 @@
+/**
+ * 文件说明：访问过内容标记模块。根据站点和设置判断是否启用 visited 功能，并给访问过的内容应用对应样式。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addEventListener, doc } from 'browser-extension-utils'
 

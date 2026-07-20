@@ -1,4 +1,9 @@
 /**
+ * 文件说明：定时器管理模块。统一创建和清理 setTimeout 等计时器，避免页面切换或脚本卸载后残留任务。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * Timer Manager Module
  *
  * This module provides a centralized way to manage timers (setTimeout and setInterval)

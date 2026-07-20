@@ -1,3 +1,8 @@
+/**
+ * 文件说明：日文多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': '現在のウェブサイトでUTagsを有効にする',
   'settings.enableCurrentSiteCustomRule': '現在のウェブサイトのカスタムマッチングルールを有効にする',

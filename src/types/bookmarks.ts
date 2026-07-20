@@ -1,4 +1,9 @@
 /**
+ * 文件说明：书签/标签数据结构类型定义，描述 BookmarkMetadata、BookmarksData、BookmarkTagsAndMetadata 等存储层类型。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * Represents the metadata associated with a bookmark.
  * This type includes standard fields and allows for arbitrary, user-defined fields via an index signature.
  */

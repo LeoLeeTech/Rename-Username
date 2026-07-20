@@ -1,3 +1,8 @@
+/**
+ * 文件说明：默认站点样式。作为所有站点的基础样式规则，被 default.ts 以 data-text 方式导入并注入页面。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 :not(#a):not(#b):not(#c) {
   .utags_ul_0 {
     /* right-center */

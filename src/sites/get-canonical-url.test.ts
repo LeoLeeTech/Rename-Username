@@ -1,3 +1,8 @@
+/**
+ * 文件说明：Vitest 单元测试文件。用于验证对应源码模块在 jsdom 或 mock 环境下的关键行为。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 // eslint-disable-next-line import-x/no-unassigned-import
 import './test-setup'
 

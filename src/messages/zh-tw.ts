@@ -1,3 +1,8 @@
+/**
+ * 文件说明：繁体中文（台湾）多语言文案文件，提供设置、菜单、提示等 UI 文本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export const messages = {
   'settings.enableCurrentSite': '在目前網站啟用小魚標籤',
   'settings.enableCurrentSiteCustomRule': '啟用目前網站的自訂匹配規則',

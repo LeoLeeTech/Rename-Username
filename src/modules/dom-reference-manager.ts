@@ -1,4 +1,9 @@
 /**
+ * 文件说明：DOM 引用管理模块。维护业务数据与具体 DOM 节点的关联，并提供清理能力以降低内存泄漏风险。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * DOM Reference Manager
  *
  * This module provides a solution to avoid DOM reference cycles by using WeakMap

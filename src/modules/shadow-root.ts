@@ -1,3 +1,8 @@
+/**
+ * 文件说明：Shadow DOM 拦截与事件通知模块。网页创建 shadow root 时发出信号，帮助扫描器补扫 Shadow DOM 内部节点。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 // 2. 生成唯一的事件名称 (可以加上扩展 ID 的 hash，增加私密性)
 // 在 ISOLATED 脚本中也需使用同样的名称监听
 export const SHADOW_SIGNAL_EVENT = 'UTAGS_SHADOW_ROOT_CREATED'

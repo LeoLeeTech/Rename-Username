@@ -1,3 +1,8 @@
+/**
+ * 文件说明：普通 JS 模块构建脚本。输出未压缩和压缩的 module 版本，并使用 local-storage 适配存储。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import * as esbuild from "esbuild"
 

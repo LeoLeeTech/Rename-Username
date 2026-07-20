@@ -1,4 +1,9 @@
 /**
+ * 文件说明：DOM 相关工具函数。扫描器会用这里的逻辑判断一个节点是否是可处理的扫描目标。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * DOM Utilities
  *
  * This module provides utility functions for working with DOM elements,

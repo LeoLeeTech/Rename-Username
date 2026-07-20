@@ -1,3 +1,8 @@
+/**
+ * 文件说明：项目通用工具入口。包含运行环境判断、标签排序/过滤、文本复制、URL 参数删除、DOM 清理和标题提取等工具。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { $, $$, createElement } from 'browser-extension-utils'
 import { getTrimmedTitle, trimTitle } from 'utags-utils'
 

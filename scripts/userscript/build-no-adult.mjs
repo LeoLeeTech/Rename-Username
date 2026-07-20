@@ -1,3 +1,8 @@
+/**
+ * 文件说明：不含成人站点适配的 userscript 构建脚本，用于生成 no-adult 版本油猴脚本。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"

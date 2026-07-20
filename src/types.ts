@@ -1,3 +1,8 @@
+/**
+ * 文件说明：项目通用类型定义，包含用户标签、元信息、站点适配中使用的扩展 HTMLElement 等类型。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 export type UserTag = {
   key: string
   meta?: UserTagMeta

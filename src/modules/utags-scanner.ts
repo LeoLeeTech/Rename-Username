@@ -1,3 +1,8 @@
+/**
+ * 文件说明：DOM 扫描引擎。扫描匹配 data-utags_link 的节点，使用 MutationObserver 监听动态更新，支持初始/增量扫描和 Shadow DOM。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import {
   createHTML,
   runWhenBodyExists,

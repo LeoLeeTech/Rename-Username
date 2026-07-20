@@ -1,3 +1,8 @@
+/**
+ * 文件说明：全局事件绑定模块。处理 document、window 和 ShadowRoot 内的点击、输入、快捷键等事件，以及隐藏页面区域内的 UTags UI。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   $,

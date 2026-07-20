@@ -1,3 +1,8 @@
+/**
+ * 文件说明：content script 的辅助逻辑，主要用于构造展示标签，以及判断节点更新后是否需要刷新页面上的 UTags UI。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getElementUtags } from './modules/dom-reference-manager'
 import { markElementWhetherVisited, TAG_VISITED } from './modules/visited'
 import { getTags } from './storage/bookmarks'

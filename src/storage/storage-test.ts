@@ -1,3 +1,8 @@
+/**
+ * 文件说明：存储测试辅助文件，用于单元测试中模拟或初始化浏览器扩展存储行为。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import {
   addValueChangeListener,
   deleteValue,

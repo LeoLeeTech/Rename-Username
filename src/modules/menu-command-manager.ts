@@ -1,3 +1,8 @@
+/**
+ * 文件说明：菜单命令管理器。统一注册、更新和清理扩展菜单命令，例如隐藏或显示所有标签。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   registerMenuCommand,

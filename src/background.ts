@@ -1,4 +1,9 @@
 /**
+ * 文件说明：扩展后台脚本。接收 content script 发来的 HTTP_REQUEST 消息，在 background 中执行 fetch 请求并把结果返回，用于利用扩展权限处理跨域请求。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
+/**
  * UTags HTTP Proxy - Browser Extension Background Script
  * Handles actual HTTP requests using fetch API with full CORS bypass
  */

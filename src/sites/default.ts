@@ -1,3 +1,8 @@
+/**
+ * 文件说明：默认站点配置。匹配所有页面，默认处理 data-utags_link 节点，清理常见 UTM 参数，并提供默认样式。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import styleText from 'data-text:./default.scss'
 
 import { deleteUrlParameters } from '../utils'

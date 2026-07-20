@@ -1,3 +1,8 @@
+/**
+ * 文件说明：控制台日志工具。用于根据环境统一控制调试日志输出。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 const originConsole = globalThis.console
 let lastLogTime = Date.now()
 

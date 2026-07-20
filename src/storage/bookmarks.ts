@@ -1,3 +1,8 @@
+/**
+ * 文件说明：核心数据存储模块。以 URL 为 key 保存 tags 和 meta，负责读写、缓存、版本迁移、序列化、反序列化和存储变化监听。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import {
   addValueChangeListener,
   getValue,

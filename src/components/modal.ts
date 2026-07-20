@@ -1,3 +1,8 @@
+/**
+ * 文件说明：页面内弹窗组件工厂。用于高级标签管理器、设置、导入导出等 content script 里的交互界面。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import {
   addClass,
   addElement,

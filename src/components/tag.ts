@@ -1,3 +1,8 @@
+/**
+ * 文件说明：页面内标签元素工厂。创建带 utags_text_tag / utags_emoji_tag class 和 data-utags_tag 数据的标签链接或纯展示元素。
+ *
+ * 该注释同步自 develop.md，方便打开单个文件时快速理解职责。
+ */
 import { createElement } from 'browser-extension-utils'
 
 export default function createTag(
