@@ -1,14 +1,15 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, getAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./012-youtube.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { getStarIconSvg } from '../../modules/star-icon'
 import { getBookmark } from '../../storage/bookmarks'
 import type { UserTagMeta } from '../../types'
+import { containsStarRatingTag, removeStarRatingTags } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './012-youtube.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.youtube.com/'
@@ -88,6 +89,30 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Main page
+      'ytd-rich-item-renderer',
+
+      // Search result
+      'ytd-video-renderer',
+
+      // Suggests
+      'yt-lockup-view-model',
+    ],
+    conditionNodesSelectors: [
+      // Main page
+      // Title
+      'ytd-rich-item-renderer a.yt-lockup-metadata-view-model__title',
+      // Author
+      'ytd-rich-item-renderer yt-content-metadata-view-model a',
+
+      // Search result
+      'ytd-video-renderer .ytd-video-renderer h3',
+      'ytd-video-renderer .ytd-channel-name, a',
+
+      // Suggests
+      'yt-lockup-view-model h3.yt-lockup-metadata-view-model__heading-reset a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix) || href.startsWith(prefix2)) {
         let key = getUserProfileUrl(href, true)
@@ -192,11 +217,12 @@ export default (() => {
           const meta: UserTagMeta = { type }
           if (title) meta.title = title
           const bookmark = getBookmark(key)
-          const hasStar = bookmark.newName === '★'
-          const tobeName = hasStar ? '' : '★'
+          const tags = bookmark.tags || []
+          const hasStar = containsStarRatingTag(tags)
+          const tobeTags = hasStar ? removeStarRatingTags(tags) : ['★', ...tags]
           bookmarkElement.dataset.utags_key = key
           bookmarkElement.dataset.utags_meta = JSON.stringify(meta)
-          bookmarkElement.dataset.utags_new_name = tobeName
+          bookmarkElement.dataset.utags_tags = tobeTags.join(',')
 
           if (hasStar) {
             bookmarkElement.classList.add('starred')

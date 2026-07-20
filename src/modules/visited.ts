@@ -1,7 +1,3 @@
-/**
- * 已访问标记模块：在单个网站的 localStorage 中维护 utags_visited。
- * 用于记录用户已经浏览过的链接，并在页面标签里追加 :visited 标记或改变显示效果。
- */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addEventListener, doc } from 'browser-extension-utils'
 

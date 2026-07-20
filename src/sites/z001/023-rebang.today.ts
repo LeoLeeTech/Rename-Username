@@ -1,7 +1,7 @@
 import { $$, createElement } from 'browser-extension-utils'
+import styleText from 'data-text:./023-rebang.today.scss'
 
 import defaultSite from '../default'
-import styleText from './023-rebang.today.scss?inline'
 
 export default (() => {
   const nodeNameMap = {
@@ -68,6 +68,15 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      '.w-screen ul:not(.utags_ul) > li',
+      'aside .w-full .select-none',
+    ],
+    conditionNodesSelectors: [
+      '.w-screen ul:not(.utags_ul) > li [data-utags]:not([href^="https://www.v2ex.com/member/"])',
+      '.w-screen ul:not(.utags_ul) > li a[href^="https://www.v2ex.com/member/"][data-utags].hidden',
+      'aside .w-full .select-none [data-utags]',
+    ],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       'header',

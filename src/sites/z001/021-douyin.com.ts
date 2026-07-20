@@ -1,4 +1,5 @@
 import { $, $$, hasClass } from 'browser-extension-utils'
+import styleText from 'data-text:./021-douyin.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import {
@@ -8,7 +9,6 @@ import {
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './021-douyin.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.douyin.com/'
@@ -87,6 +87,14 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // 视频评论区
+      '[data-e2e="comment-item"]',
+    ],
+    conditionNodesSelectors: [
+      // 视频评论区 > 用户名
+      '[data-e2e="comment-item"] .comment-item-info-wrap a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.includes('www.douyin.com')) {
         return true

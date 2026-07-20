@@ -1,10 +1,6 @@
-/**
- * 内容脚本辅助函数：放置和页面扫描、标签展示有关的轻量工具。
- * 这里会判断 DOM 更新是否需要重新扫描，并把存储中的标签数据转换成页面可显示的数据。
- */
 import { getElementUtags } from './modules/dom-reference-manager'
 import { markElementWhetherVisited, TAG_VISITED } from './modules/visited'
-import { getNewName } from './storage/bookmarks'
+import { getTags } from './storage/bookmarks'
 import type { UserTag, UserTagMeta } from './types'
 
 const validNodeNames: Record<string, boolean> = {
@@ -61,21 +57,21 @@ export function shouldUpdateUtagsWhenNodeUpdated(nodeList: NodeList) {
 
 export function buildTagsForDisplay(
   node: HTMLElement
-): { key: string; newName: string; meta?: UserTagMeta } | undefined {
+): { key: string; tags: string[]; meta?: UserTagMeta } | undefined {
   const utags = getElementUtags(node)
   if (!utags || !utags.key) {
     return
   }
 
   const key = utags.key
-  const object = getNewName(key)
+  const object = getTags(key) as { tags?: string[] }
 
-  let newName = object.newName || ''
+  const tags: string[] = (object.tags || []).slice()
   // The visited state can be updated by other tabs, so re-check before adding the visited tag.
   markElementWhetherVisited(key, node)
   if (node.dataset.utags_visited === '1') {
-    newName = newName || TAG_VISITED
+    tags.push(TAG_VISITED)
   }
 
-  return { key, newName, meta: utags.meta }
+  return { key, tags, meta: utags.meta }
 }

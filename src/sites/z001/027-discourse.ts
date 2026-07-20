@@ -1,10 +1,12 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, doc, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./027-discourse.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { getBookmark } from '../../storage/bookmarks'
 import type { UserTagMeta, UtagsHTMLElement } from '../../types'
+import { containsStarRatingTag, removeStarRatingTags } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import {
   cleanupUtags,
@@ -12,7 +14,6 @@ import {
   removeUtagsAttributes,
   setUtagsAttributes,
 } from '../../utils/index'
-import styleText from './027-discourse.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'
@@ -153,6 +154,42 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      '.topic-list .topic-list-body tr',
+      // replies
+      '.topic-area .topic-post',
+      // search results
+      '.search-results .fps-result',
+      // categories
+      '.column .latest-topic-list .latest-topic-list-item',
+    ],
+    conditionNodesSelectors: [
+      // topic title
+      '.topic-list .topic-list-body tr .title',
+      // category
+      '.topic-list .topic-list-body tr .badge-category__wrapper',
+      // tag
+      '.topic-list .topic-list-body tr .discourse-tag',
+      // author
+      '.topic-list .topic-list-body tr .posters a:first-of-type',
+      // mobile - author
+      '.mobile-view .topic-list a[data-user-card]',
+
+      // replies
+      '.topic-area .topic-post:nth-of-type(n+2) .topic-meta-data:not(.embedded-reply) .names a',
+
+      // search results
+      '.search-results .fps-result .search-link',
+      '.search-results .fps-result .badge-category__wrapper',
+      '.search-results .fps-result .discourse-tag',
+      // Maybe it's the author of the post, not the author of the topic.
+      // ".search-results .fps-result .author a",
+
+      // categories
+      '.column .latest-topic-list .latest-topic-list-item .main-link .title',
+      '.column .latest-topic-list .latest-topic-list-item .main-link .badge-category__wrapper',
+      '.column .latest-topic-list .latest-topic-list-item .main-link .discourse-tag',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true
@@ -367,11 +404,14 @@ export default (() => {
             if (formattedTitle) meta.title = formattedTitle
             if (formattedDescription) meta.description = formattedDescription
             const bookmark = getBookmark(key)
-            const hasStar = bookmark.newName === '★'
-            const tobeName = hasStar ? '' : '★'
+            const tags = bookmark.tags || []
+            const hasStar = containsStarRatingTag(tags)
+            const tobeTags = hasStar
+              ? removeStarRatingTags(tags)
+              : ['★', ...tags]
             bookmarkElement.dataset.utags_key = key
             bookmarkElement.dataset.utags_meta = JSON.stringify(meta)
-            bookmarkElement.dataset.utags_new_name = tobeName
+            bookmarkElement.dataset.utags_tags = tobeTags.join(',')
 
             if (hasStar) {
               bookmarkElement.classList.add('starred')

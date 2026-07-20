@@ -1,11 +1,7 @@
-/**
- * 样式管理模块：把通用 content.scss 和当前网站专属 SCSS 合并后注入页面。
- * 同时兼容普通 document 和 ShadowRoot，避免标签样式在 Shadow DOM 中丢失。
- */
 import { getSettingsValue } from 'browser-extension-settings'
 import { addElement, doc } from 'browser-extension-utils'
+import baseStyleText from 'data-text:../content.scss'
 
-import baseStyleText from '../content.scss?inline'
 import { getCurrentSiteStyle } from '../sites'
 
 const STYLE_ID = 'utags_combined_style'
@@ -17,12 +13,33 @@ const registeredShadowRoots = new Set<ShadowRoot>()
 let sharedCSSStyleSheet: CSSStyleSheet | undefined
 let sharedCSSStyleSheetText = ''
 
+function getCustomStyles(): string {
+  const host = location.host
+  let styles = ''
+
+  const customEnabled = getSettingsValue<boolean>('customStyle')
+  const customValue = getSettingsValue<string>('customStyleValue') || ''
+  if (customEnabled && customValue) {
+    styles += '\n' + customValue
+  }
+
+  const siteCustomEnabled = getSettingsValue<boolean>(`customStyle_${host}`)
+  const siteCustomValue =
+    getSettingsValue<string>(`customStyleValue_${host}`) || ''
+  if (siteCustomEnabled && siteCustomValue) {
+    styles += '\n' + siteCustomValue
+  }
+
+  return styles
+}
+
 export function buildCombinedStyle(): string {
   const host = location.host
   const siteEnabled = getSettingsValue<boolean>(`enableCurrentSite_${host}`)
   const siteStyle = siteEnabled ? getCurrentSiteStyle() || '' : ''
+  const customStyles = siteEnabled ? getCustomStyles() : ''
 
-  return [baseStyleText, siteStyle].filter(Boolean).join('\n')
+  return [baseStyleText, siteStyle, customStyles].filter(Boolean).join('\n')
 }
 
 function ensureStyleInRoot(root: Document | ShadowRoot, cssText: string) {

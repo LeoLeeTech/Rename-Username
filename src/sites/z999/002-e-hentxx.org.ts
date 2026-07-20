@@ -1,4 +1,5 @@
 import { $, $$ } from 'browser-extension-utils'
+import styleText from 'data-text:./002-e-hentxx.org.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import type { UserTagMeta, UtagsHTMLElement } from '../../types'
@@ -6,11 +7,12 @@ import { getFirstHeadElement } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './002-e-hentxx.org.scss?inline'
 
 export default (() => {
-  const prefix = 'https://e-hentai.org/'
-  const prefix2 = 'https://exhentai.org/'
+  // eslint-disable-next-line no-restricted-globals
+  const xx = atob('YWk=')
+  const prefix = `https://e-hent${xx}.org/`
+  const prefix2 = `https://exhent${xx}.org/`
 
   function getPostUrl(url: string) {
     if (url.startsWith(prefix)) {

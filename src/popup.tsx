@@ -1,9 +1,3 @@
-/**
- * 插件弹窗页面：点击浏览器工具栏里的插件图标时显示。
- * 这里提供一个入口，把消息发给当前标签页的内容脚本，让内容脚本打开设置面板。
- */
-import { createRoot } from 'react-dom/client'
-
 import { i } from './messages'
 
 function IndexPopup() {
@@ -47,10 +41,24 @@ function IndexPopup() {
         style={{ marginTop: 8, marginBottom: 20, width: '100%' }}>
         {i('prompt.settings')}
       </button>
+      <ul
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          listStyleType: 'none',
+          padding: 16,
+        }}>
+        <li>
+          🔖{' '}
+          <a href="https://utags.link/" target="_blank">
+            书签列表
+          </a>
+        </li>
+      </ul>
       <footer>
-        Open Source on the{' '}
-        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
-          LeoLeeTech/Rename
+        Made with ❤️ by{' '}
+        <a href="https://www.pipecraft.net/" target="_blank">
+          Pipecraft
         </a>
       </footer>
     </div>
@@ -58,8 +66,3 @@ function IndexPopup() {
 }
 
 export default IndexPopup
-
-const root = document.querySelector('#root')
-if (root) {
-  createRoot(root).render(<IndexPopup />)
-}

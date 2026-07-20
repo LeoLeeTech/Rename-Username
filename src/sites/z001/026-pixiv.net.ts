@@ -1,9 +1,9 @@
 import { $, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./026-pixiv.net.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
-import styleText from './026-pixiv.net.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.pixiv.net/'
@@ -39,6 +39,29 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Thumbnail
+      'li.list-none',
+      // Home recommend
+      '[data-ga4-label="home_recommend"] > div.w-full',
+      // Comments
+      '.charcoal-modal-body section[role="feed"] > article',
+      // Artworks > Related works
+      '.gtm-illust-recommend-zone li',
+      // Tags
+      'section ul li',
+    ],
+    conditionNodesSelectors: [
+      'li.list-none a',
+      // Home recommend
+      '[data-ga4-label="home_recommend"] > div.w-full a[data-ga4-label="user_name_link"]',
+      // Comments
+      '.charcoal-modal-body section[role="feed"] > article a',
+      // Artworks > Related works
+      '.gtm-illust-recommend-zone li a',
+      // Tags
+      'section ul li a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.includes('www.pixiv.net')) {
         return true

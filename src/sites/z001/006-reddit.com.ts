@@ -1,10 +1,12 @@
-import { $, setAttribute } from 'browser-extension-utils'
+import type { prependListener } from 'node:cluster'
+import { $, $$, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./006-reddit.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
+import { createTimeout } from '../../modules/timer-manager'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './006-reddit.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.reddit.com/'
@@ -121,6 +123,26 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      'shreddit-feed article',
+      'shreddit-feed shreddit-ad-post',
+      'shreddit-comment',
+      'shreddit-comment-tree-ad',
+      'shreddit-comments-page-ad',
+    ],
+    conditionNodesSelectors: [
+      'shreddit-feed article a[data-testid="subreddit-name"]',
+      'shreddit-feed article a[slot="title"]',
+      'shreddit-feed article [slot="authorName"] a',
+      // Flair
+      'shreddit-feed article shreddit-post-flair a',
+      'shreddit-feed shreddit-ad-post a',
+      'shreddit-comment faceplate-hovercard a',
+      'shreddit-comment [noun="comment_author"] a',
+      // Promoted
+      'shreddit-comment-tree-ad .promoted-name-container a',
+      'shreddit-comments-page-ad .promoted-name-container a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true
@@ -189,6 +211,17 @@ export default (() => {
       '[slot="tabs"]',
     ],
     getStyle: () => styleText,
+    postProcess() {
+      createTimeout(() => {
+        for (const element of $$(`[data-utags_list_node*=",hide,"],
+    [data-utags_list_node*=",隐藏,"],
+    [data-utags_list_node*=",屏蔽,"],
+    [data-utags_list_node*=",不再显示,"],
+    [data-utags_list_node*=",block,"]`)) {
+          setAttribute(element, 'collapsed', '')
+        }
+      }, 1000)
+    },
     getCanonicalUrl,
   }
 })()

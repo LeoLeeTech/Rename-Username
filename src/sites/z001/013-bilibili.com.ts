@@ -1,9 +1,9 @@
 import { $, $$, removeAttribute, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./013-bilibili.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
-import styleText from './013-bilibili.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.bilibili.com/'
@@ -126,6 +126,16 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // '.css-ulyotp-DivCommentContentContainer',
+      // '.css-1gstnae-DivCommentItemWrapper',
+      // '.css-x6y88p-DivItemContainerV2',
+    ],
+    conditionNodesSelectors: [
+      // '.css-ulyotp-DivCommentContentContainer a[href^="/@"]',
+      // '.css-1gstnae-DivCommentItemWrapper a[href^="/@"]',
+      // '.css-x6y88p-DivItemContainerV2 a[href^="/@"]',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       // element.dataset.utags_absolute = '1'
       if (

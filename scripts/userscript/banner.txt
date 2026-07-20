@@ -1,0 +1,64 @@
+// ==UserScript==
+// @name                 🏷️ {displayName}
+// @name:zh-CN           🏷️ {displayName:zh-CN}
+// @name:zh-HK           🏷️ {displayName:zh-HK}
+// @name:zh-TW           🏷️ {displayName:zh-TW}
+// @name:ja              🏷️ {displayName:ja}
+// @name:ko              🏷️ {displayName:ko}
+// @name:de              🏷️ {displayName:de}
+// @name:fr              🏷️ {displayName:fr}
+// @name:es              🏷️ {displayName:es}
+// @name:it              🏷️ {displayName:it}
+// @name:pt              🏷️ {displayName:pt}
+// @name:pt-BR           🏷️ {displayName:pt}
+// @name:vi              🏷️ {displayName:vi}
+// @name:ru              🏷️ {displayName:ru}
+// @namespace            {namespace}
+// @homepageURL          {homepage}
+// @supportURL           {bugs.url}
+// @version              {version}
+// @description          {description_userscript}
+// @description:zh-CN    {description_userscript:zh-CN}
+// @description:zh-HK    {description_userscript:zh-HK}
+// @description:zh-TW    {description_userscript:zh-TW}
+// @description:ja       {description_userscript:ja}
+// @description:ko       {description_userscript:ko}
+// @description:de       {description_userscript:de}
+// @description:fr       {description_userscript:fr}
+// @description:es       {description_userscript:es}
+// @description:it       {description_userscript:it}
+// @description:pt       {description_userscript:pt}
+// @description:pt-BR    {description_userscript:pt}
+// @description:vi       {description_userscript:vi}
+// @description:ru       {description_userscript:ru}
+// @icon                 {icon}
+// @author               {author}
+// @license              {license}
+// @match                https://*/*
+// @match                http://*/*
+// @exclude              *://challenges.cloudflare.com/*
+// @connect              dav.jianguoyun.com
+// @connect              localhost
+// @connect              *
+// @run-at               document-start
+// ==/UserScript==
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////                  The Official Installation URLs                                                                                        ////
+////                            官方安装网址                                                                                                  ////
+////                                                                                                                                        ////
+//// * https://greasyfork.org/scripts/569761-utags-add-usertags-to-links                                                                    ////
+//// ** downloadURL https://update.greasyfork.org/scripts/569761/%F0%9F%8F%B7%EF%B8%8F%20UTags%20-%20Add%20usertags%20to%20links.user.js    ////
+//// * https://scriptcat.org/script-show-page/2784                                                                                          ////
+//// ** downloadURL https://scriptcat.org/scripts/code/2784/%F0%9F%8F%B7%EF%B8%8F+UTags+-+Add+usertags+to+links.user.js                     ////
+//// * https://github.com/utags/utags                                                                                                       ////
+//// ** downloadURL https://github.com/utags/utags/raw/main/packages/extension/build/userscript-prod/utags.user.js                          ////
+////                                                                                                                                        ////
+////                                                                                                                                        ////
+////                         Extension Version                                                                                              ////
+////                            浏览器扩展版本                                                                                                ////
+//// * Chrome Web Store - https://chromewebstore.google.com/detail/utags-add-usertags-to-lin/kofjcnaphffjoookgahgjidofbdplgig               ////
+//// * Edge Add-ons - https://microsoftedge.microsoft.com/addons/detail/utags-add-usertags-to-l/bhlbflbehfoccjjenpekilgabbjjnphe            ////
+//// * Firefox Addon Store - https://addons.mozilla.org/firefox/addon/utags/                                                                ////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//

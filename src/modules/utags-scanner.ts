@@ -1,7 +1,3 @@
-/**
- * DOM 扫描器模块：监听页面节点新增和属性变化，找出可能需要显示标签的元素。
- * 它也处理 Shadow DOM 场景，确保动态网页和 Web Components 里的目标节点能被发现。
- */
 import {
   createHTML,
   runWhenBodyExists,
@@ -13,6 +9,7 @@ import { isScanTarget } from '../utils/dom-utils'
 import { bindShadowRootEvents } from './global-events'
 import { ensureCombinedStyleForShadow } from './style-manager'
 
+// For userscript
 interceptShadowDOM()
 
 // 1. 业务配置：只监听这些属性，彻底防止“自我触发”导致的无限循环
@@ -91,8 +88,8 @@ export class UTagsScanner {
   ignore = '[data-utags_ignore]'
   exclude = '[data-utags_exclude]'
   onBeforeMatch:
-    ((node: Element, action: 'add' | 'delete') => boolean | void) | undefined =
-    undefined
+    | ((node: Element, action: 'add' | 'delete') => boolean | void)
+    | undefined = undefined
 
   startTime = 0
   currentScanActiveTime = 0

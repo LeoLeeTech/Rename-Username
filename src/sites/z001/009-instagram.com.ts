@@ -1,8 +1,8 @@
 import { $, $$ } from 'browser-extension-utils'
+import styleText from 'data-text:./009-instagram.com.scss'
 
 import { setUtags } from '../../utils/dom-utils'
 import defaultSite from '../default'
-import styleText from './009-instagram.com.scss?inline'
 
 export default (() => {
   return {

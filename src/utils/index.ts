@@ -12,7 +12,12 @@ export const starTags = ['★★★', '★★', '★', '☆☆☆', '☆☆', '�
 
 // eslint-disable-next-line n/prefer-global/process
 export const isChromeExtension = process.env.PLASMO_TARGET === 'chrome-mv3'
-export const isExtension = isChromeExtension
+// eslint-disable-next-line n/prefer-global/process
+export const isFirefoxExtension = process.env.PLASMO_TARGET === 'firefox-mv2'
+export const isExtension = isChromeExtension || isFirefoxExtension
+// @ts-expect-error `scripts/common.mjs` handle it
+// eslint-disable-next-line n/prefer-global/process
+export const isUserscript = process.env.PLASMO_TARGET === 'userscript'
 // eslint-disable-next-line n/prefer-global/process
 export const isProduction = process.env.PLASMO_TAG === 'prod'
 
@@ -157,6 +162,17 @@ export function deleteUrlParameters(
   return url.toString()
 }
 
+/*
+let testUrl = "https://example.com?foo=1&bar=2&foo=3&hoo=11"
+console.log(deleteUrlParameters(testUrl, ["", "bar"]))
+
+console.log(deleteUrlParameters(testUrl, "*"))
+
+console.log(deleteUrlParameters(testUrl, "foo"))
+
+console.log(deleteUrlParameters(testUrl, "*", ["bar"]))
+*/
+
 export function getUrlParameters(
   urlString: string,
   keys: string[] | string,
@@ -184,6 +200,23 @@ export function getUrlParameters(
 
   return result
 }
+
+/*
+let testUrl = "https://example.com?foo=1&bar=2&foo=3&hoo=11&car=&go#boo=5"
+console.log(getUrlParameters(testUrl, ["", "bar"]))
+
+console.log(getUrlParameters(testUrl, "*"))
+
+console.log(getUrlParameters(testUrl, "foo"))
+
+console.log(getUrlParameters(testUrl, ["bar"]))
+
+console.log(getUrlParameters(testUrl, ["bar", "foo", "boo"]))
+
+console.log(getUrlParameters(testUrl, ["bar", "foo", "car", "go"]))
+
+console.log(getUrlParameters(testUrl, ["bar", "foo", "car", "go"], true))
+*/
 
 type BookmarkItem = [string, BookmarkTagsAndMetadata]
 
@@ -262,23 +295,23 @@ function isBookmarkTagsAndMetadata(
   return (
     value !== null &&
     typeof value === 'object' &&
-    'newName' in value &&
-    typeof (value as BookmarkTagsAndMetadata).newName === 'string'
+    'tags' in value &&
+    Array.isArray((value as BookmarkTagsAndMetadata).tags)
   )
 }
 
 /**
  * Sort bookmark properties to ensure consistent structure
- * Places newName first, followed by other properties, with meta always at the end
- * @param value - Bookmark data with new name and metadata
+ * Places tags first, followed by other properties, with meta always at the end
+ * @param value - Bookmark data with tags and metadata
  * @returns Sorted bookmark object with consistent property order
  */
 function sortBookmarkProperties(
   value: BookmarkTagsAndMetadata
 ): BookmarkTagsAndMetadata {
-  const { newName, meta, ...rest } = value
+  const { tags, meta, ...rest } = value
   return {
-    newName,
+    tags,
     ...rest,
     meta,
   }

@@ -5,13 +5,13 @@ import {
   parseInt10,
   setAttribute,
 } from 'browser-extension-utils'
+import styleText from 'data-text:./001-v2ex.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './001-v2ex.scss?inline'
 
 export default (() => {
   function getCanonicalUrl(url: string) {
@@ -172,6 +172,43 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      '.box .cell',
+      // v2ex 超级增强
+      '.my-box .comment',
+      // v2ex polish 热门回复
+      '.v2p-modal-comments .cell',
+    ],
+    conditionNodesSelectors: [
+      // 帖子标题
+      '.box .cell .topic-link',
+      // 右边栏标题
+      '.item_hot_topic_title a',
+      // 帖子作者
+      '.box .cell .topic_info strong:first-of-type a[href*="/member/"]',
+      // 帖子节点
+      '.box .cell .topic_info .node',
+      // VXNA 作者
+      '.xna-source-author a',
+      // VXNA 博客
+      '.xna-entry-source a',
+      // planet site address
+      '.planet-site-address a',
+      // 回复者
+      '.box .cell strong a.dark[href*="/member/"]',
+      // 回复者 (v2ex polish)
+      '.box .cell[id^="r_"] strong > a[href*="/member/"]',
+      // 回复内容标签
+      '.box .cell .ago a',
+      // 回复内容标签(手机网页版)
+      '.box .cell .fade.small a',
+      // 回复者 (v2ex 超级增强)
+      '.comment .username',
+      // 回复内容标签 (v2ex 超级增强)
+      '.comment .ago',
+      // v2ex polish 热门回复
+      '.v2p-modal-comments .cell strong > a[href*="/member/"]',
+    ],
     matchedNodesSelectors: [
       // 所有页面帖子链接
       'a[href*="/t/"]',

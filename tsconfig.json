@@ -1,32 +1,17 @@
 {
-  "extends": "./.wxt/tsconfig.json",
+  "extends": "plasmo/templates/tsconfig.base",
   "include": [
-    ".wxt/wxt.d.ts",
-    "entrypoints/**/*.ts",
-    "entrypoints/**/*.tsx",
+    ".plasmo/index.d.ts",
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "wxt.config.ts"
   ],
-  "exclude": [
-    "node_modules/**",
-    "build/**",
-    ".output/**"
-  ],
+  "exclude": ["node_modules/**", "build/**"],
   "compilerOptions": {
-    "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "skipLibCheck": true,
-    "strictFunctionTypes": false,
-    "noImplicitThis": false,
-    "noImplicitAny": false,
-    "useUnknownInCatchVariables": false,
     "paths": {
-      "~*": [
-        "./src/*"
-      ]
+      "~*": ["./src/*"],
     },
     "strictNullChecks": true
-  }
+  },
 }

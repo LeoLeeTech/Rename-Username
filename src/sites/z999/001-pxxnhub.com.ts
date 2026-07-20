@@ -1,17 +1,22 @@
 import { getSettingsValue } from 'browser-extension-settings'
 import { $, $$, createHTML, getAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./001-pxxnhub.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { getStarIconSvg } from '../../modules/star-icon'
 import { getBookmark } from '../../storage/bookmarks'
 import type { UserTagMeta } from '../../types'
+import { containsStarRatingTag, removeStarRatingTags } from '../../utils'
 import { setUtags } from '../../utils/dom-utils'
 import { getHrefAttribute, setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './001-pxxnhub.com.scss?inline'
 
 export default (() => {
-  const hostname = 'pornhub.com'
+  // 'or'
+  // eslint-disable-next-line no-restricted-globals
+  const xx = atob('b3I=')
+  // magix to define pxxnhub.com
+  const hostname = `p${xx}nhub.com`
   const prefix = `https://www.${hostname}/`
 
   function getUserProfileUrl(href: string, exact = false) {
@@ -121,6 +126,39 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Search result
+      'ul.search-video-thumbs li',
+
+      // Related videos
+      'ul.videos li',
+
+      // Comments
+      '.videoViewPage .commentBlock',
+
+      // Categories
+      'ul.categoriesListSection li',
+    ],
+    conditionNodesSelectors: [
+      // Search result
+      // Channel
+      'ul.search-video-thumbs li .usernameWrap a',
+      // Video title
+      'ul.search-video-thumbs li .vidTitleWrapper a',
+
+      // Related videos
+      'ul.videos li .usernameWrap a',
+      'ul.videos li .vidTitleWrapper a',
+
+      // Channel > Videos
+      'ul.videos li .title a',
+
+      // Comments
+      '.videoViewPage .commentBlock .usernameWrap a',
+
+      // Categories
+      'ul.categoriesListSection li .categoryTitleWrapper a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       const hrefAttr = getHrefAttribute(element)
       if (!hrefAttr || hrefAttr === 'null' || hrefAttr === '#') {
@@ -222,11 +260,12 @@ export default (() => {
           const meta: UserTagMeta = { type }
           if (title) meta.title = title
           const bookmark = getBookmark(key)
-          const hasStar = bookmark.newName === '★'
-          const tobeName = hasStar ? '' : '★'
+          const tags = bookmark.tags || []
+          const hasStar = containsStarRatingTag(tags)
+          const tobeTags = hasStar ? removeStarRatingTags(tags) : ['★', ...tags]
           bookmarkElement.dataset.utags_key = key
           bookmarkElement.dataset.utags_meta = JSON.stringify(meta)
-          bookmarkElement.dataset.utags_new_name = tobeName
+          bookmarkElement.dataset.utags_tags = tobeTags.join(',')
 
           if (hasStar) {
             bookmarkElement.classList.add('starred')

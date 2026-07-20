@@ -1,11 +1,11 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./041-toutiao.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { deleteUrlParameters, setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './041-toutiao.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.toutiao.com/'
@@ -126,6 +126,26 @@ export default (() => {
         }
       }
     },
+    // listNodesSelectors: [
+    //   // Post list
+    //   '[data-main-left] ul.card li',
+    //   // Comments
+    //   '[data-main-left].utags_no_hide > div > div.card article',
+    //   // Comments Flat view
+    //   '[data-main-left]:not(.utags_no_hide) > div > div.card',
+    //   // Right sidebar
+    //   '[data-right-sidebar] .card-body > h4 + div > div',
+    // ],
+    // conditionNodesSelectors: [
+    //   // Post list
+    //   '[data-main-left] ul.card li a:not(time + div a):not(.utags_text_tag)',
+    //   // Comments
+    //   '[data-main-left].utags_no_hide > div > div.card article address > div > a[rel="author"]',
+    //   // Comments Flat view
+    //   '[data-main-left]:not(.utags_no_hide) > div > div.card article address > div > a[rel="author"]',
+    //   // Right sidebar
+    //   '[data-right-sidebar] .card-body > h4 + div > div a',
+    // ],
     validate(element: HTMLAnchorElement, href: string) {
       href = normalizeDomain(href)
 

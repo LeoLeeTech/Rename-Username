@@ -1,10 +1,10 @@
 import { $, $$, hasClass, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./018-xiaohongshu.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './018-xiaohongshu.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://www.xiaohongshu.com/'
@@ -88,6 +88,18 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      '.feeds-container section',
+      // replies
+      '.comment-item',
+    ],
+    conditionNodesSelectors: [
+      // author
+      '.feeds-container section .author-wrapper .author',
+      '.feeds-container section .cover',
+      // replies
+      '.comment-item .author-wrapper .author a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

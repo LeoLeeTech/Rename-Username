@@ -1,15 +1,15 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./010-nhentxx.net.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
+import { xaxi } from '../../utils/atob'
 import { setUtags } from '../../utils/dom-utils'
-import { AI_DOMAIN_SUFFIX } from '../../utils/domain-parts'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './010-nhentxx.net.scss?inline'
 
 export default (() => {
-  const prefix = `https://nhent${AI_DOMAIN_SUFFIX}.net/`
+  const prefix = `https://nhent${xaxi}.net/`
 
   function getGalleryUrl(url: string, exact = false): string | undefined {
     if (url.startsWith(prefix)) {
@@ -41,6 +41,14 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // thumb
+      '.gallery',
+    ],
+    conditionNodesSelectors: [
+      // thumb title
+      '.gallery a.cover',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

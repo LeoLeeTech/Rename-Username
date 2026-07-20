@@ -1,7 +1,3 @@
-/**
- * 全局事件绑定模块：集中处理网页上的点击、键盘、鼠标和 history 路由变化。
- * 标签按钮被点击后，会在这里打开输入弹窗、保存标签，并触发页面重新扫描/刷新。
- */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   $,
@@ -13,13 +9,18 @@ import {
   isTouchScreen,
   removeClass,
 } from 'browser-extension-utils'
+import { splitTags } from 'utags-utils'
+
 import { i } from '../messages'
-import { saveNewName } from '../storage/bookmarks'
+import { saveTags } from '../storage/bookmarks'
+import { getEmojiTags } from '../storage/tags'
 import { type NullOrUndefined, type UserTag, type UserTagMeta } from '../types'
+import { filterTags, sortTags } from '../utils'
 import { type EventListenerManager } from '../utils/event-listener-manager'
 import { advancedPrompt } from './advanced-tag-manager'
 import { simplePrompt } from './simple-tag-manger'
 import { createInterval } from './timer-manager'
+import { addVisited, removeVisited, TAG_VISITED } from './visited'
 
 const numberLimitOfShowAllUtagsInArea = 10
 let lastShownArea: HTMLElement | undefined
@@ -162,7 +163,8 @@ function bindDocumentEventsInternal(
           '.utags_captain_tag,.utags_captain_tag2,.utags_custom_btn'
         ) as HTMLElement | undefined
         const textTag = target.closest('.utags_text_tag') as
-          HTMLElement | undefined
+          | HTMLElement
+          | undefined
         if (captainTag) {
           event.preventDefault()
           event.stopPropagation()
@@ -176,22 +178,41 @@ function bindDocumentEventsInternal(
 
           setTimeout(async () => {
             const key = captainTag.dataset.utags_key
-            const newName = captainTag.dataset.utags_new_name || ''
+            const tags = captainTag.dataset.utags_tags || ''
             const meta: UserTagMeta | undefined = captainTag.dataset.utags_meta
               ? (JSON.parse(captainTag.dataset.utags_meta) as UserTagMeta)
               : undefined
             const myPrompt = getSettingsValue('useSimplePrompt')
               ? simplePrompt
               : advancedPrompt
-            const nextNewName = (await myPrompt(i('prompt.addTags'), newName)) as
-              string | NullOrUndefined
+            const newTags = (await myPrompt(i('prompt.addTags'), tags)) as
+              | string
+              | NullOrUndefined
 
             isPromptShown = false
 
             captainTag.focus()
             // eslint-disable-next-line eqeqeq
-            if (key && nextNewName != undefined) {
-              await saveNewName(key, nextNewName, meta)
+            if (key && newTags != undefined) {
+              const emojiTags = await getEmojiTags()
+              const newTagsArray = sortTags(
+                filterTags(splitTags(newTags), TAG_VISITED),
+                emojiTags
+              )
+
+              if (
+                tags.includes(TAG_VISITED) &&
+                !newTags.includes(TAG_VISITED)
+              ) {
+                removeVisited(key)
+              } else if (
+                !tags.includes(TAG_VISITED) &&
+                newTags.includes(TAG_VISITED)
+              ) {
+                addVisited(key)
+              }
+
+              await saveTags(key, newTagsArray, meta)
             }
           })
         } else if (textTag) {

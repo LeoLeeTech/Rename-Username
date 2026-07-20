@@ -1,8 +1,3 @@
-/**
- * 内容脚本入口：这是浏览器插件注入到网页里的主程序。
- * 它负责初始化设置、扫描页面 DOM、把标签按钮插入到目标元素旁边、
- * 绑定点击/滚动/菜单命令等页面事件，并把各个功能模块串起来。
- */
 import { getPrefferedLocale } from 'browser-extension-i18n'
 import {
   getSettingsValue,
@@ -30,10 +25,14 @@ import {
   setAttribute,
   setStyle,
   throttle,
+  uniq,
   type RegisterMenuCommandOptions,
 } from 'browser-extension-utils'
 import polyfillRequestIdleCallback from 'browser-extension-utils/request-idle-callback-polyfill'
+import type { PlasmoCSConfig } from 'plasmo'
+import { splitTags } from 'utags-utils'
 
+import createTag from './components/tag'
 import {
   buildTagsForDisplay,
   shouldUpdateUtagsWhenNodeUpdated,
@@ -84,6 +83,7 @@ import {
 import { setupWebappBridge } from './modules/webapp-bridge'
 import {
   getCanonicalUrl,
+  getListNodes,
   isScannerBusy,
   postProcess,
   scanDom,
@@ -91,28 +91,46 @@ import {
   type ScanDomOptions,
 } from './sites/index'
 import {
-  addNewNameValueChangeListener,
+  addTagsValueChangeListener,
   clearCachedUrlMap,
-  getNewName,
+  getTags,
   initBookmarksStore,
 } from './storage/bookmarks'
+import { getEmojiTags } from './storage/tags'
 import type { UserTag, UserTagMeta } from './types'
-import { generateUtagsId } from './utils'
+import { generateUtagsId, sortTags } from './utils'
 import { setupConsole } from './utils/console.js'
 import { EventListenerManager } from './utils/event-listener-manager'
 
-// Receive popup trigger to show settings in the content context.
-chrome.runtime?.onMessage?.addListener((message: any) => {
-  if (message?.type === 'utags:show-settings') {
-    void showSettings()
-  }
-})
+export const config: PlasmoCSConfig = {
+  run_at: 'document_start',
+  matches: ['https://*/*', 'http://*/*'],
+
+  all_frames: true,
+}
+
+if (
+  // eslint-disable-next-line n/prefer-global/process
+  process.env.PLASMO_TARGET === 'chrome-mv3' ||
+  // eslint-disable-next-line n/prefer-global/process
+  process.env.PLASMO_TARGET === 'firefox-mv2'
+) {
+  // Receive popup trigger to show settings in the content context
+  const runtime =
+    (globalThis as any).chrome?.runtime ?? (globalThis as any).browser?.runtime
+  runtime?.onMessage?.addListener((message: any) => {
+    if (message?.type === 'utags:show-settings') {
+      void showSettings()
+    }
+  })
+}
 
 const EXCLUDED_SUBFRAME_HOSTS = new Set([
   'challenges.cloudflare.com',
   'accounts.google.com',
 ])
 
+let emojiTags: string[]
 const host = location.host
 
 const eventManager = new EventListenerManager()
@@ -188,13 +206,16 @@ const isQuickStarAvailable = () => {
     host === 'idcflare.com' ||
     // FIXME: 临时关闭 youtube.com 的快速收藏功能
     // host.includes('youtube.com') ||
-    host.includes('pornhub.com')
+    // eslint-disable-next-line no-restricted-globals
+    host.includes(`p${atob('b3I=')}nhub.com`)
   ) {
     return true
   }
 
   return false
 }
+
+const isTagManager = location.href.includes('utags.pipecraft.net/tags/')
 
 const getSettingsTable = (): SettingsTable => {
   let groupNumber = 1
@@ -215,6 +236,17 @@ const getSettingsTable = (): SettingsTable => {
         }
       : {}),
 
+    showHidedItems: {
+      title: i('settings.showHidedItems'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    noOpacityEffect: {
+      title: i('settings.noOpacityEffect'),
+      defaultValue: false,
+      group: groupNumber,
+    },
+
     [`useVisitedFunction_${host}`]: {
       title: i('settings.useVisitedFunction'),
       defaultValue: false,
@@ -230,7 +262,105 @@ const getSettingsTable = (): SettingsTable => {
         [i('settings.displayEffectOfTheVisitedContent.showtagonly')]: '1',
         [i('settings.displayEffectOfTheVisitedContent.changecolor')]: '4',
         [i('settings.displayEffectOfTheVisitedContent.translucent')]: '2',
+        [i('settings.displayEffectOfTheVisitedContent.hide')]: '3',
       },
+      group: groupNumber,
+    },
+
+    pinnedTagsTitle: {
+      title: i('settings.pinnedTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="pinnedTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: ++groupNumber,
+    },
+    pinnedTags: {
+      title: i('settings.pinnedTags'),
+      defaultValue: i('settings.pinnedTagsDefaultValue'),
+      placeholder: i('settings.pinnedTagsPlaceholder'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+    emojiTagsTitle: {
+      title: i('settings.emojiTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="emojiTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: groupNumber,
+    },
+    emojiTags: {
+      title: i('settings.emojiTags'),
+      defaultValue:
+        '★, ★★, ★★★, ☆, ☆☆, ☆☆☆, 👍, 👎, ❤️, ⭐, 🌟, 🔥, 💩, ⚠️, 💯, 👏, 👀, 🐷, 📌, 📍, 🏆, 💎, 💡, 🤖, 📔, 📖, 📚, 📜, 📕, 📗, 🧰, ⛔, 🚫, 🔴, 🟠, 🟡, 🟢, 🔵, 🟣, ❗, ❓, ✅, ❌',
+      placeholder: '👍, 👎',
+      type: 'textarea',
+      group: groupNumber,
+    },
+    quickTagsTitle: {
+      title: i('settings.quickTags'),
+      type: 'action',
+      async onclick() {
+        const input = $('textarea[data-key="quickTags"]') as HTMLInputElement
+        if (input) {
+          input.scrollIntoView({ block: 'start' })
+          input.selectionStart = input.value.length
+          input.selectionEnd = input.value.length
+          input.focus()
+        }
+      },
+      group: ++groupNumber,
+    },
+    quickTags: {
+      title: i('settings.quickTags'),
+      defaultValue: '★, ❤️',
+      placeholder: i('settings.quickTagsPlaceholder'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+
+    customStyle: {
+      title: i('settings.customStyle'),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    customStyleValue: {
+      title: 'Custom style value',
+      defaultValue: i('settings.customStyleDefaultValue'),
+      placeholder: i('settings.customStyleDefaultValue'),
+      type: 'textarea',
+      group: groupNumber,
+    },
+    customStyleTip: {
+      title: i('settings.customStyleExamples'),
+      type: 'tip',
+      tipContent: i('settings.customStyleExamplesContent'),
+      group: groupNumber,
+    },
+
+    [`customStyle_${host}`]: {
+      title: i(`settings.customStyleCurrentSite`),
+      defaultValue: false,
+      group: ++groupNumber,
+    },
+    [`customStyleValue_${host}`]: {
+      title: 'Custom style value',
+      defaultValue: '',
+      placeholder: i('settings.customStyleDefaultValue'),
+      type: 'textarea',
       group: groupNumber,
     },
 
@@ -247,12 +377,55 @@ const getSettingsTable = (): SettingsTable => {
       type: 'textarea',
       group: groupNumber,
     },
+
+    enableTagStyleInPrompt: {
+      title: i('settings.enableTagStyleInPrompt'),
+      defaultValue: true,
+      group: ++groupNumber,
+    },
+
+    useSimplePrompt: {
+      title: i('settings.useSimplePrompt'),
+      defaultValue: false,
+      group: groupNumber,
+    },
+
+    openTagsPage: {
+      title: i('settings.openTagsPage'),
+      type: 'externalLink',
+      url: 'https://utags.link/',
+      group: ++groupNumber,
+    },
+    openDataPage: {
+      title: i('settings.openDataPage'),
+      type: 'externalLink',
+      url: 'https://utags.link/',
+      group: groupNumber,
+    },
   }
 }
 
 // Styles are centrally managed by style-manager now
 
 function updateDocumentElementAttributes() {
+  if (getSettingsValue('showHidedItems')) {
+    if (!hasClass(doc.documentElement, 'utags_no_hide')) {
+      addClass(doc.documentElement, 'utags_no_hide')
+      updateTagPositionForAllTaggedTargets()
+    }
+  } else if (hasClass(doc.documentElement, 'utags_no_hide')) {
+    removeClass(doc.documentElement, 'utags_no_hide')
+    updateTagPositionForAllTaggedTargets()
+  }
+
+  if (getSettingsValue('noOpacityEffect')) {
+    if (!hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
+      addClass(doc.documentElement, 'utags_no_opacity_effect')
+    }
+  } else if (hasClass(doc.documentElement, 'utags_no_opacity_effect')) {
+    removeClass(doc.documentElement, 'utags_no_opacity_effect')
+  }
+
   {
     const newValue =
       getSettingsValue<string>(`displayEffectOfTheVisitedContent_${host}`) || ''
@@ -390,12 +563,18 @@ function showCurrentPageLinkUtagsPrompt(
     const element = $('#utags_current_page_link + ul.utags_ul button')!
     if (element) {
       if (tag) {
+        const currentTags = splitTags(element.dataset.utags_tags)
         if (remove) {
-          if (element.dataset.utags_new_name === tag) {
-            element.dataset.utags_new_name = ''
+          if (currentTags.includes(tag)) {
+            element.dataset.utags_tags = currentTags
+              .filter((t) => t !== tag)
+              .join(', ')
           }
-        } else if (element.dataset.utags_new_name !== tag) {
-          element.dataset.utags_new_name = tag
+        } else if (!currentTags.includes(tag)) {
+          element.dataset.utags_tags = sortTags(
+            [...currentTags, tag],
+            emojiTags
+          ).join(', ')
         }
       }
 
@@ -428,12 +607,11 @@ async function updateAddTagsToCurrentPageMenuCommand() {
     return
   }
 
-  const object = getNewName(key)
-  const newName = object.newName || ''
-  const currentNames = newName ? [newName] : []
+  const object = getTags(key)
+  const tags = object.tags
 
-  await menuCommandManager.updateMenuCommand(currentNames)
-  await menuCommandManager.updateQuickTagMenuCommands(currentNames)
+  await menuCommandManager.updateMenuCommand(tags)
+  await menuCommandManager.updateQuickTagMenuCommands(tags)
 }
 
 const scrollBoundElements = new WeakSet<HTMLElement>()
@@ -550,19 +728,10 @@ function appendUtagsToElement(
   target.after(utagsUl)
 }
 
-function replaceElementTextWithNewName(element: HTMLElement, newName: string) {
-  const target = getUtagsTargetElementByElement(element)
-  if (target.dataset.utags_original_text === undefined) {
-    target.dataset.utags_original_text = target.textContent || ''
-  }
-
-  target.textContent = newName || target.dataset.utags_original_text || ''
-}
-
-function appendNewNameToPage(
+function appendTagsToPage(
   element: HTMLElement,
   key: string,
-  newName: string,
+  tags: string[],
   meta: UserTagMeta | undefined
 ) {
   let utagsId = element.dataset.utags_id
@@ -578,10 +747,9 @@ function appendNewNameToPage(
   if (existingUtagsUl) {
     if (
       hasClass(existingUtagsUl, 'utags_ul') &&
-      element.dataset.utags === newName &&
+      element.dataset.utags === tags.join(',') &&
       key === getAttribute(existingUtagsUl, 'data-utags_key')
     ) {
-      replaceElementTextWithNewName(element, newName)
       if (!existingUtagsUl.isConnected) {
         appendUtagsToElement(element, existingUtagsUl)
         ensureUtagsUlTracked(existingUtagsUl)
@@ -600,7 +768,7 @@ function appendNewNameToPage(
   // For example: https://www.zhipin.com/
   const tagName = element.dataset.utags_ul_type === 'ol' ? 'ol' : 'ul'
   const utagsUl = createElement(tagName, {
-    class: newName ? 'utags_ul utags_ul_1' : 'utags_ul utags_ul_0',
+    class: tags.length === 0 ? 'utags_ul utags_ul_0' : 'utags_ul utags_ul_1',
     'data-utags_key': key,
     'data-utags_exclude': '',
   })
@@ -610,21 +778,37 @@ function appendNewNameToPage(
     type: 'button',
     // href: "",
     // tabindex: "0",
-    title: 'Rename username',
+    title: 'Add tags',
     'data-utags_tag': '🏷️',
     'data-utags_key': key,
-    'data-utags_new_name': newName,
+    'data-utags_tags': tags.join(', '),
     'data-utags_meta': meta ? JSON.stringify(meta) : '',
     'data-utags_exclude': '',
-    class: newName
-      ? 'utags_text_tag utags_captain_tag2'
-      : 'utags_text_tag utags_captain_tag',
+    class:
+      tags.length === 0
+        ? 'utags_text_tag utags_captain_tag'
+        : 'utags_text_tag utags_captain_tag2',
   })
-  const svg = `<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1782953328874" class="icon" viewBox="0 0 1126 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3175" xmlns:xlink="http://www.w3.org/1999/xlink" width="219.921875" height="200"><path d="M0 844.800045a563.199859 179.199955 0 1 0 1126.399718 0 563.199859 179.199955 0 1 0-1126.399718 0Z" fill="#3E4CA6" p-id="3176"></path><path d="M876.082981 793.600058c0 70.681582-140.083165 127.999968-312.883122 127.999968S250.316737 864.28164 250.316737 793.600058a1825.765944 1825.765944 0 0 1 59.315186-287.948728c11.007997-40.55039 83.148779-1.2032 96.639975-42.36799 12.313597-37.606391-70.169582-57.420786-9.574397-210.534347C446.054288 128.000224 497.484676 0.000256 563.199859 0.000256c34.559991 0 297.625526-0.9984 394.905501 156.902361 26.700793 43.315189 51.046387 153.599962 19.148796 151.526362-27.238393-1.8176-25.113594-136.268766-129.177568-136.268766-67.788783 0-128.895968 6.860798-100.070375 94.438376 9.574398 29.055993 19.635195 78.00318 31.487992 107.391974 12.799997 31.718392-31.615992 37.913591-27.110393 52.633586 5.299199 17.279996 51.455987 32.588792 56.319986 49.715188A1947.161113 1947.161113 0 0 1 876.082981 793.600058z" fill="#4C5DBA" p-id="3177"></path><path d="M563.199859 768.000064c-136.934366 0-253.004737-36.044791-295.423926-86.169578A818.738995 818.738995 0 0 0 250.316737 793.600058c0 70.681582 140.083165 127.999968 312.883122 127.999968s312.883122-57.318386 312.883122-127.999968a815.180596 815.180596 0 0 0-17.459196-111.769572C816.230196 731.955273 700.134225 768.000064 563.199859 768.000064z" fill="#B154C1" p-id="3178"></path><path d="M614.399846 921.600026h-102.399974a51.199987 51.199987 0 0 1-51.199987-51.199988v-76.79998a51.199987 51.199987 0 0 1 51.199987-51.199988h102.399974a51.199987 51.199987 0 0 1 51.199988 51.199988v76.79998a51.199987 51.199987 0 0 1-51.199988 51.199988z m-102.399974-153.599962a25.599994 25.599994 0 0 0-25.599994 25.599994v76.79998a25.599994 25.599994 0 0 0 25.599994 25.599994h102.399974a25.599994 25.599994 0 0 0 25.599994-25.599994v-76.79998a25.599994 25.599994 0 0 0-25.599994-25.599994z" fill="#FFC107" p-id="3179"></path><path d="M563.199859 819.200051h102.399975v25.599994h-102.399975z" fill="#FFC107" p-id="3180"></path><path d="M665.599834 819.200051h-102.399975v25.599994h102.399975v-25.599994z" fill="#FFC107" p-id="3181"></path></svg>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-tags-fill" viewBox="0 0 16 16">
+<path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586V2zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+<path d="M1.293 7.793A1 1 0 0 1 1 7.086V2a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l.043-.043-7.457-7.457z"/>
+</svg>
+`
   a.innerHTML = createHTML(svg)
 
   li.append(a)
   utagsUl.append(li)
+
+  for (const tag of tags) {
+    li = createElement('li', { class: 'utags_li', 'data-utags_exclude': '' })
+    const a = createTag(tag, {
+      isEmoji: emojiTags.includes(tag),
+      noLink: isTagManager,
+      enableSelect: isTagManager,
+    })
+    li.append(a)
+    utagsUl.append(li)
+  }
 
   registerElementUtagsUl(element, utagsUl)
   utagsUl.dataset.utags_id = utagsId
@@ -644,8 +828,7 @@ function appendNewNameToPage(
     appendUtagsToElement(element, utagsUl)
   }
 
-  replaceElementTextWithNewName(element, newName)
-  setAttribute(element, 'data-utags', newName)
+  setAttribute(element, 'data-utags', tags.join(','))
   /* Fix v2ex polish start */
   // 为了防止阻塞渲染页面，延迟执行
   // 20260327: 删掉此逻辑
@@ -732,9 +915,9 @@ function processNodeForDisplay(node: HTMLElement) {
     return
   }
 
-  const { key, newName, meta } = result
+  const { key, tags, meta } = result
 
-  appendNewNameToPage(node, key, newName, meta)
+  appendTagsToPage(node, key, tags, meta)
 }
 
 configureScannedNodeProcessor(processNodeForDisplay)
@@ -748,6 +931,52 @@ async function displayTags() {
 
   if (DEBUG) {
     console.debug('start of displayTags')
+  }
+
+  emojiTags = await getEmojiTags()
+
+  // console.debug("displayTags")
+  const listNodes = getListNodes()
+  for (const node of listNodes) {
+    if (node.dataset.utags_list_node === undefined) {
+      // Flag list nodes first
+      node.dataset.utags_list_node = ''
+    }
+  }
+
+  for (const node of listNodes) {
+    const conditionNodes = $$('[data-utags_condition_node]', node)
+    const tagsArray: string[] = []
+    for (const node2 of conditionNodes) {
+      if (!node2.dataset.utags) {
+        continue
+      }
+
+      if (node2.closest('[data-utags_list_node]') !== node) {
+        // Nested list node
+        continue
+      }
+
+      tagsArray.push(node2.dataset.utags)
+    }
+
+    // The list node and the condition node are the same element
+    if (node.dataset.utags_condition_node !== undefined && node.dataset.utags) {
+      tagsArray.push(node.dataset.utags)
+    }
+
+    let listNodeValue: string
+    if (tagsArray.length === 1) {
+      listNodeValue = ',' + tagsArray[0] + ','
+    } else if (tagsArray.length > 1) {
+      listNodeValue = ',' + uniq(tagsArray.join(',').split(',')).join(',') + ','
+    } else {
+      listNodeValue = ''
+    }
+
+    if (node.dataset.utags_list_node !== listNodeValue) {
+      node.dataset.utags_list_node = listNodeValue
+    }
   }
 
   // cleanUnusedUtags()
@@ -789,7 +1018,7 @@ async function initStorage() {
     void updateAddTagsToCurrentPageMenuCommand()
   }
 
-  addNewNameValueChangeListener(onStorageChange)
+  addTagsValueChangeListener(onStorageChange)
   addVisitedValueChangeListener(onStorageChange)
 }
 
@@ -1281,13 +1510,13 @@ async function main() {
       footer: `
     <p>${i('settings.information')}</p>
     <p>
-    <a href="https://github.com/LeoLeeTech/Rename-Username/issues" target="_blank">
+    <a href="https://github.com/utags/utags/issues" target="_blank">
     ${i('settings.report')}
     </a></p>
-    <p>Open Source on the 
-        <a href="https://github.com/LeoLeeTech/Rename-Username" target="_blank">
-          LeoLeeTech/Rename
-        </a></p>`,
+    <p>Made with ❤️ by
+    <a href="https://www.pipecraft.net/" target="_blank">
+      Pipecraft
+    </a></p>`,
       settingsTable,
       availableLocales: getAvailableLocales(),
       async onValueChange() {
@@ -1315,6 +1544,31 @@ async function main() {
             : 'none'
         }
 
+        item = $(`[data-key="customStyleValue"]`, settingsMainView)
+        if (item) {
+          // FIXME: data-key should on the parent element of textarea
+          item.parentElement!.style.display = getSettingsValue(`customStyle`)
+            ? 'block'
+            : 'none'
+        }
+
+        item = $(`.bes_tip`, settingsMainView)
+        if (item) {
+          item.style.display = getSettingsValue(`customStyle`)
+            ? 'block'
+            : 'none'
+        }
+
+        item = $(`[data-key="customStyleValue_${host}"]`, settingsMainView)
+        if (item) {
+          // FIXME: data-key should on the parent element of textarea
+          item.parentElement!.style.display = getSettingsValue(
+            `customStyle_${host}`
+          )
+            ? 'block'
+            : 'none'
+        }
+
         item = $(`[data-key="customRuleValue_${host}"]`, settingsMainView)
         if (item) {
           customRuleTextAreaElem = item as HTMLTextAreaElement
@@ -1335,13 +1589,16 @@ async function main() {
 
   setupWebappBridge()
 
-  // Register bookmark list menu command.
+  // Register bookmark list menu command for userscript
   await registerMenuCommand(`🔖 ${i('menu.bookmarkList')}`, () => {
+    // Open https://utags.link/ in new tab or focus existing tab
     const url = 'https://utags.link/'
+
+    // For userscript environment, simply open in new tab
     window.open(url, 'utags_bookmarks')
   })
 
-  // Register hide/unhide all tags menu command with dynamic title.
+  // Register hide/unhide all tags menu command for userscript (with dynamic title)
   await registerOrUpdateHideAllTagsMenu()
 
   // Initialize the star handler with required dependencies

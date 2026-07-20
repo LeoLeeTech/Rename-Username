@@ -1,9 +1,9 @@
 import { $$, setStyle } from 'browser-extension-utils'
+import styleText from 'data-text:./007-twitter.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
-import styleText from './007-twitter.com.scss?inline'
 
 export default (() => {
   const prefix = 'https://x.com/'
@@ -24,6 +24,14 @@ export default (() => {
         setUtagsAttributes(element, { key, type: 'user' })
       }
     },
+    listNodesSelectors: [
+      // feed
+      '[data-testid="cellInnerDiv"]',
+    ],
+    conditionNodesSelectors: [
+      // feed
+      '[data-testid="cellInnerDiv"] [data-testid="User-Name"] a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix) || href.startsWith(prefix2)) {
         // Remove prefix

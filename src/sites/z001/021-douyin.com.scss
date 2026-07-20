@@ -27,6 +27,17 @@
       display: flex !important;
     }
   }
+
+  /* Comments prevent from hide */
+  [data-e2e="comment-item"][data-utags_list_node*=",hide,"],
+  [data-e2e="comment-item"][data-utags_list_node*=",隐藏,"],
+  [data-e2e="comment-item"][data-utags_list_node*=",屏蔽,"],
+  [data-e2e="comment-item"][data-utags_list_node*=",不再显示,"],
+  [data-e2e="comment-item"][data-utags_list_node*=",block,"] {
+    opacity: 1%;
+    display: flex !important;
+  }
+
   [data-e2e="detail-video-info"] {
     .utags_ul[data-utags_key*="/video/"] {
       display: block !important;

@@ -1,9 +1,8 @@
 /**
- * Webapp 桥接模块：监听页面发来的 HTTP_REQUEST/PING 等 postMessage 消息。
- * 对需要跨域的请求，它会转发给 background 脚本执行，再把结果回传给网页。
+ * HTTP proxy for UTags webapp to bypass CORS restrictions
  */
 
-// Webapp 桥接消息的数据类型定义。
+// Type definitions
 type HttpRequestPayload = {
   method: string
   url: string
@@ -67,6 +66,40 @@ type BackgroundResponse = {
   details?: any
 }
 
+type GMXMLHttpRequestResponse = {
+  status: number
+  statusText: string
+  responseText: string
+  responseHeaders?: string
+}
+
+type GMXMLHttpRequestOptions = {
+  method: string
+  url: string
+  headers?: Record<string, string>
+  data?: string
+  timeout?: number
+  onload: (response: GMXMLHttpRequestResponse) => void
+  onerror: (error: any) => void
+  ontimeout: () => void
+}
+
+type AllowedHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+function normalizeHttpMethod(method: string): AllowedHttpMethod | undefined {
+  const upper = method.toUpperCase()
+  if (
+    upper === 'GET' ||
+    upper === 'POST' ||
+    upper === 'PUT' ||
+    upper === 'DELETE'
+  ) {
+    return upper
+  }
+
+  return undefined
+}
+
 /**
  * Handle HTTP request message from webapp
  * @param {HttpRequestMessage} message - The HTTP request message
@@ -76,7 +109,16 @@ function handleHttpRequest(
   message: HttpRequestMessage,
   event: MessageEvent
 ): void {
-  handleHttpRequestExtension(message, event)
+  if (
+    // eslint-disable-next-line n/prefer-global/process
+    process.env.PLASMO_TARGET === 'chrome-mv3' ||
+    // eslint-disable-next-line n/prefer-global/process
+    process.env.PLASMO_TARGET === 'firefox-mv2'
+  ) {
+    handleHttpRequestExtension(message, event)
+  } else {
+    handleHttpRequestUserscript(message, event)
+  }
 }
 
 /**
@@ -91,7 +133,7 @@ function handleHttpRequestExtension(
   const { id, payload } = message
   const { method, url } = payload
 
-  console.log(`[Rename Extension] Processing HTTP request: ${method} ${url}`)
+  console.log(`[UTags Extension] Processing HTTP request: ${method} ${url}`)
 
   // Forward request to background script
   chrome.runtime
@@ -111,7 +153,7 @@ function handleHttpRequestExtension(
     // eslint-disable-next-line promise/prefer-await-to-then
     .catch((error: unknown) => {
       console.error(
-        '[Rename Extension] Error communicating with background script:',
+        '[UTags Extension] Error communicating with background script:',
         error
       )
       sendHttpError(id, 'Extension communication error', event, error)
@@ -123,6 +165,82 @@ function handleHttpRequestExtension(
  * @param {HttpRequestMessage} message - The HTTP request message
  * @param {MessageEvent} event - The message event
  */
+function handleHttpRequestUserscript(
+  message: HttpRequestMessage,
+  event: MessageEvent
+): void {
+  const { id, payload } = message
+  const { method, url, headers, body, timeout } = payload
+
+  console.log(`[UTags Extension] Processing HTTP request: ${method} ${url}`)
+
+  const normalizedMethod = normalizeHttpMethod(method)
+  if (!normalizedMethod) {
+    sendHttpError(id, `Unsupported HTTP method: ${method}`, event)
+    return
+  }
+
+  // Use GM.xmlHttpRequest or fallback to GM_xmlhttpRequest
+  const gmRequest = GM?.xmlHttpRequest || GM_xmlhttpRequest
+
+  if (!gmRequest) {
+    sendHttpError(id, 'GM.xmlHttpRequest not available', event)
+    return
+  }
+
+  void gmRequest({
+    method: normalizedMethod,
+    url,
+    headers: headers || {},
+    data: body,
+    timeout: timeout || 30_000,
+    onload(response) {
+      console.log(
+        `[UTags Extension] HTTP request successful: ${response.status}`
+      )
+
+      // Parse response headers
+      const responseHeaders: Record<string, string> = {}
+      if (response.responseHeaders) {
+        const headerLines = response.responseHeaders.split('\r\n')
+        for (const line of headerLines) {
+          const [key, value] = line.split(': ')
+          if (key && value) {
+            responseHeaders[key.toLowerCase()] = value
+          }
+        }
+      }
+
+      sendHttpResponse(
+        id,
+        {
+          ok: response.status >= 200 && response.status < 300,
+          status: response.status,
+          statusText: response.statusText ?? '',
+          headers: responseHeaders,
+          body: response.responseText ?? '',
+        },
+        event
+      )
+    },
+    onerror(error) {
+      console.error(`[UTags Extension] HTTP request failed:`, error)
+      sendHttpError(
+        id,
+        error && typeof error.statusText === 'string'
+          ? (error.statusText as string)
+          : 'Network error',
+        event,
+        error
+      )
+    },
+    ontimeout() {
+      console.error(`[UTags Extension] HTTP request timeout`)
+      sendHttpError(id, 'Request timeout', event)
+    },
+  })
+}
+
 /**
  * Send HTTP response back to webapp
  * @param {string} requestId - The original request ID
@@ -181,7 +299,7 @@ function sendHttpError(
  * @param {MessageEvent} event - The message event
  */
 function handlePing(message: PingMessage, event: MessageEvent): void {
-  console.log('[Rename Extension] Received ping, sending pong')
+  console.log('[UTags Extension] Received ping, sending pong')
 
   const pongMessage: PongMessage = {
     type: 'PONG',
@@ -204,7 +322,9 @@ function messageListener(event: MessageEvent): void {
   }
 
   const message: HttpRequestMessage | PingMessage | undefined = event.data as
-    HttpRequestMessage | PingMessage | undefined
+    | HttpRequestMessage
+    | PingMessage
+    | undefined
   try {
     // Validate message structure
     if (
@@ -221,7 +341,7 @@ function messageListener(event: MessageEvent): void {
       return
     }
 
-    console.log(`[Rename Extension] Received message:`, message.type)
+    console.log(`[UTags Extension] Received message:`, message.type)
 
     switch (message.type) {
       case 'PING': {
@@ -237,11 +357,11 @@ function messageListener(event: MessageEvent): void {
       // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       default: {
         // @ts-expect-error log invalid types
-        console.log(`[Rename Extension] Unknown message type: ${message.type}`)
+        console.log(`[UTags Extension] Unknown message type: ${message.type}`)
       }
     }
   } catch (error) {
-    console.error('[Rename Extension] Error handling message:', error)
+    console.error('[UTags Extension] Error handling message:', error)
     // Send error response if we have a valid message with ID
     if (message && message.id) {
       sendHttpError(
@@ -261,7 +381,7 @@ export function setupWebappBridge(): void {
   // Setup message listener
   window.addEventListener('message', messageListener)
   // Announce extension availability
-  console.log('[Rename Extension] ready for HTTP proxy requests')
+  console.log('[UTags Extension] ready for HTTP proxy requests')
 }
 
 // Optional: Send a ready signal to webapp
@@ -272,7 +392,7 @@ export function setupWebappBridge(): void {
 //     source: 'utags-extension',
 //     id: `ready-${Date.now()}`,
 //     payload: {
-//       name: 'Rename HTTP Proxy Extension',
+//       name: 'UTags HTTP Proxy Extension',
 //       version: '1.0.0',
 //     },
 //   }

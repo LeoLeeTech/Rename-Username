@@ -1,11 +1,11 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./032-flarum.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './032-flarum.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'
@@ -82,6 +82,20 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      'ul.DiscussionList-discussions li',
+      '.hotDiscussion-content ul li',
+      // replies
+      '.PostStream .PostStream-item',
+    ],
+    conditionNodesSelectors: [
+      // topic title
+      'ul.DiscussionList-discussions li a',
+      '.hotDiscussion-content ul li a',
+
+      // replies
+      '.PostStream .PostStream-item .PostUser-name a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

@@ -222,22 +222,17 @@
     .utags_captain_tag2 {
       width: var(--utags-captain-tag-size) !important;
       height: var(--utags-captain-tag-size) !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
       padding: 1px 0 0 1px !important;
       background: none !important;
       color: var(--utags-captain-tag-color) !important;
       border: none !important;
-      overflow: hidden !important;
 
       &::before {
         content: none !important;
       }
 
       svg {
-        width: 100% !important;
-        height: 100% !important;
+        fill: currentColor !important;
         vertical-align: -3px;
         margin: 0 !important;
         padding: 0 !important;
@@ -245,6 +240,9 @@
 
       * {
         color: inherit !important;
+        fill: currentColor !important;
+        width: unset;
+        height: unset;
       }
     }
 
@@ -440,6 +438,59 @@
     }
   }
 
+  .utags_current_tags_wrapper {
+    display: flex;
+    justify-content: space-between;
+
+    .utags_button_copy {
+      cursor: pointer;
+      font-size: 10px;
+      line-height: 1;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 2px;
+      color: var(--utags-action-button-text-color);
+      background-color: var(--utags-action-button-bg-color);
+      border: 1px solid var(--utags-action-button-border-color);
+      text-shadow: none;
+      text-align: center;
+      font-family: revert;
+    }
+  }
+
+  :not(#utags_should_has_higher_specificity):not(
+      #utags_should_has_higher_specificity
+    )
+    ul.utags_current_tags {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 10px 0 !important;
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    &:empty,
+    &:empty + button {
+      display: none !important;
+    }
+
+    li .utags_text_tag:hover {
+      --utags-text-tag-color: #000;
+      --utags-text-tag-border-color: #000;
+      --utags-text-tag-background-color: unset;
+      opacity: 0.5;
+      text-decoration: line-through !important;
+    }
+
+    li .utags_text_tag[data-utags_tag=":visited"]:hover {
+      --utags-text-tag-background-color: var(
+        --utags-visited-tag-background-color
+      );
+      --utags-text-tag-border-color: var(--utags-visited-tag-background-color);
+      opacity: 0.3;
+    }
+  }
+
   .utags_list_wrapper {
     display: flex;
     justify-content: space-between;
@@ -503,6 +554,11 @@
       }
     }
 
+    &.utags_emoji_list li span {
+      font-family: var(--utags-emoji-tag-font-family) !important;
+      line-height: unset !important;
+    }
+
     .utags_text_tag {
       &::before {
         display: none !important;
@@ -559,6 +615,86 @@
     }
   }
 
+  textarea[data-key="customStyleValue"] {
+    height: 250px;
+  }
+  textarea[data-key^="customStyleValue_"] {
+    height: 250px;
+  }
+
+  [data-utags_list_node] {
+    /* 在 opacity 100% 与 opacity 小于 100% 的元素之间移动时，鼠标移到边缘时会剧烈闪烁。*/
+    /* 改成 99.99% 不闪烁，但在某些场合影响层叠效果。 */
+    /* 增加延迟，可以使它不闪烁 */
+    transition: opacity 0.1s ease-in;
+  }
+
+  [data-utags_list_node*=",标题党,"],
+  [data-utags_list_node*=",標題黨,"],
+  [data-utags_list_node*=",推广,"],
+  [data-utags_list_node*=",推廣,"],
+  [data-utags_list_node*=",无聊,"],
+  [data-utags_list_node*=",忽略,"],
+  [data-utags_list_node*=",ignore,"],
+  [data-utags_list_node*=",clickbait,"],
+  [data-utags_list_node*=",promotion,"],
+  [data-utags_list_node*=",sb,"] {
+    opacity: 10%;
+  }
+
+  [data-utags_list_node*=",已阅,"],
+  [data-utags_list_node*=",已閱,"],
+  [data-utags_list_node*=",已讀,"],
+  [data-utags_list_node*=",已读,"],
+  [data-utags_list_node*=",新用户,"] {
+    opacity: 50%;
+  }
+
+  [data-utags_list_node*=",hide,"],
+  [data-utags_list_node*=",隐藏,"],
+  [data-utags_list_node*=",隱藏,"],
+  [data-utags_list_node*=",屏蔽,"],
+  [data-utags_list_node*=",封鎖,"],
+  [data-utags_list_node*=",不再显示,"],
+  [data-utags_list_node*=",block,"] {
+    opacity: 5%;
+    display: none;
+  }
+
+  [data-utags_list_node*=",★,"],
+  [data-utags_list_node*=",★★,"],
+  [data-utags_list_node*=",★★★,"],
+  [data-utags_list_node*=",☆,"],
+  [data-utags_list_node*=",☆☆,"],
+  [data-utags_list_node*=",☆☆☆,"],
+  /* Tag start with !, eg. !, !!, !!!, !important */
+  [data-utags_list_node*=",!"] {
+    opacity: 100% !important;
+    display: var(--utags-list-node-display) !important;
+  }
+
+  [data-utags_list_node*=",热门,"],
+  [data-utags_list_node*=",收藏,"],
+  [data-utags_list_node*=",重要,"],
+  [data-utags_list_node*=",关注,"],
+  [data-utags_list_node*=",關注,"],
+  [data-utags_list_node*=",稍后阅读,"] {
+    background-image: linear-gradient(to right, #ffffff00, #fefce8) !important;
+    opacity: 100% !important;
+    display: var(--utags-list-node-display) !important;
+  }
+
+  [data-utags_list_node*=",热门,"],
+  [data-utags_list_node*=",收藏,"],
+  [data-utags_list_node*=",重要,"],
+  [data-utags_list_node*=",关注,"] {
+    background-image: linear-gradient(to right, #ffffff00, #fef2f2) !important;
+  }
+
+  [data-utags_list_node]:hover {
+    opacity: 100% !important;
+  }
+
   /* For debugging */
   [data-utags_other="1"] + ul.utags_ul {
     .utags_captain_tag,
@@ -566,6 +702,33 @@
       color: yellow !important;
     }
   }
+}
+
+[data-utags-visited="4"] [data-utags_list_node*=",:visited,"] {
+  [data-utags_condition_node][data-utags_visited="1"] {
+    color: var(--utags-visited-title-color) !important;
+  }
+}
+
+[data-utags-visited="2"] [data-utags_list_node*=",:visited,"] {
+  opacity: var(--utags-visited-opacity);
+}
+
+[data-utags-visited="3"] [data-utags_list_node*=",:visited,"] {
+  opacity: 5%;
+  display: none;
+}
+
+.utags_no_hide [data-utags_list_node*=","] {
+  display: var(--utags-list-node-display) !important;
+}
+
+.utags_no_opacity_effect [data-utags_list_node*=","] {
+  opacity: 100% !important;
+}
+
+textarea[data-key="emojiTags"] {
+  font-family: var(--utags-text-tag-font-family);
 }
 
 :root {

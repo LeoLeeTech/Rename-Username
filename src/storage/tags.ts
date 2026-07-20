@@ -1,7 +1,3 @@
-/**
- * 标签统计存储模块：维护最近添加、最常用等候选标签列表。
- * 主书签数据不在这里，这里只保存为了输入提示和菜单展示而派生出来的标签索引。
- */
 import { getSettingsValue } from 'browser-extension-settings'
 import {
   addValueChangeListener,
@@ -20,6 +16,8 @@ const STORAGE_KEY_RECENT_TAGS = 'extension.utags.recenttags'
 
 const STORAGE_KEY_MOST_USED_TAGS = 'extension.utags.mostusedtags'
 
+const STORAGE_KEY_RECENT_ADDED_TAGS = 'extension.utags.recentaddedtags'
+
 /**
  * Calculates a weighted score based on current timestamp
  * Used for tag ranking and sorting
@@ -31,31 +29,31 @@ function getScore(weight = 1): number {
 }
 
 /**
- * Adds new names to the recent names list and updates related collections
- * @param newNames Array of new names to add
- * @param oldNames Array of existing names to compare against
+ * Adds new tags to the recent tags list and updates related tag collections
+ * @param newTags Array of new tags to add
+ * @param oldTags Array of existing tags to compare against
  */
-export async function addRecentNames(
-  newNames: string[],
-  oldNames: string[]
+export async function addRecentTags(
+  newTags: string[],
+  oldTags: string[]
 ): Promise<void> {
-  if (newNames.length === 0) return
+  if (newTags.length === 0) return
 
-  // Filter out names that already exist in oldNames
-  const uniqueNewNames =
-    oldNames?.length > 0
-      ? newNames.filter((name) => name && !oldNames.includes(name))
-      : newNames.filter(Boolean)
+  // Filter out tags that already exist in oldTags
+  const uniqueNewTags =
+    oldTags?.length > 0
+      ? newTags.filter((tag) => tag && !oldTags.includes(tag))
+      : newTags.filter(Boolean)
 
-  if (uniqueNewNames.length === 0) return
+  if (uniqueNewTags.length === 0) return
 
-  // Retrieve existing recent names or initialize new array
+  // Retrieve existing recent tags or initialize new array
   const recentTags: RecentTag[] = await getRecentTags()
   const score = getScore()
 
-  // Add new names with current score
-  for (const name of uniqueNewNames) {
-    recentTags.push({ tag: name, score })
+  // Add new tags with current score
+  for (const tag of uniqueNewTags) {
+    recentTags.push({ tag, score })
   }
 
   // Maintain maximum size of recent tags list
@@ -65,14 +63,16 @@ export async function addRecentNames(
 
   // Update storage and related tag collections
   await setValue(STORAGE_KEY_RECENT_TAGS, recentTags)
-  await generateMostUsedTags(recentTags)
+  await generateMostUsedAndRecentAddedTags(recentTags)
 }
 
 /**
- * Generates most used tags from the recent tags collection
+ * Generates most used and recently added tags from the recent tags collection
  * @param recentTags Array of recent tags with scores
  */
-async function generateMostUsedTags(recentTags: RecentTag[]): Promise<void> {
+async function generateMostUsedAndRecentAddedTags(
+  recentTags: RecentTag[]
+): Promise<void> {
   // Aggregate tag scores
   const tagScores: Record<string, RecentTag> = {}
 
@@ -98,7 +98,23 @@ async function generateMostUsedTags(recentTags: RecentTag[]): Promise<void> {
     .map((tag) => tag.tag)
     .slice(0, 200) // Limit to top 200 tags
 
-  await setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags)
+  // Generate recent added tags list (unique, maintaining order)
+  const recentAddedTags = Array.from(
+    new Set(
+      recentTags
+        .map((tag) => tag.tag)
+        .reverse()
+        .filter(Boolean)
+    )
+  ).slice(0, 200) // Limit to latest 200 tags
+
+  // Update storage
+  await Promise.all([
+    setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags),
+    setValue(STORAGE_KEY_RECENT_ADDED_TAGS, recentAddedTags),
+  ])
+  // await setValue(STORAGE_KEY_MOST_USED_TAGS, mostUsedTags)
+  // await setValue(STORAGE_KEY_RECENT_ADDED_TAGS, recentAddedTags)
 }
 
 export async function getRecentTags(): Promise<RecentTag[]> {
@@ -116,9 +132,26 @@ export async function getMostUsedTags(): Promise<string[]> {
 }
 
 /**
+ * Retrieves the list of recently added tags
+ * @returns Array of recently added tag strings
+ */
+export async function getRecentAddedTags(): Promise<string[]> {
+  const values = await getValue<string[]>(STORAGE_KEY_RECENT_ADDED_TAGS)
+  return Array.isArray(values) ? values : []
+}
+
+/**
  * Retrieves the list of pinned tags from settings
  * @returns Array of pinned tag strings
  */
 export async function getPinnedTags(): Promise<string[]> {
   return splitTags(getSettingsValue('pinnedTags') || '')
+}
+
+/**
+ * Retrieves the list of emoji tags from settings
+ * @returns Array of emoji tag strings
+ */
+export async function getEmojiTags(): Promise<string[]> {
+  return splitTags(getSettingsValue('emojiTags') || '')
 }

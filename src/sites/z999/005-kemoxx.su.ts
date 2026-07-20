@@ -5,12 +5,12 @@ import {
   hasClass,
   setAttribute,
 } from 'browser-extension-utils'
+import styleText from 'data-text:./005-kemoxx.su.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { setUtags } from '../../utils/dom-utils'
 import { getHrefAttribute, setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './005-kemoxx.su.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'
@@ -51,6 +51,18 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Artists
+      '.card-list__items > a.user-card',
+      '.post-card',
+    ],
+    conditionNodesSelectors: [
+      // Artists
+      '.card-list__items > a.user-card',
+      '.post-card a',
+      // post card with user id
+      '.post-card[data-user]',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       const hrefAttr = getHrefAttribute(element)
 

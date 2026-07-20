@@ -1,11 +1,11 @@
 import { $, $$ } from 'browser-extension-utils'
+import styleText from 'data-text:./005-github.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import type { UtagsHTMLElement } from '../../types'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './005-github.com.scss?inline'
 
 export default (() => {
   const noneUsers = new Set([
@@ -165,6 +165,8 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [],
+    conditionNodesSelectors: [],
     validate(element: HTMLAnchorElement, href: string) {
       if (href.startsWith(prefix)) {
         if (/since|until/.test(href)) {

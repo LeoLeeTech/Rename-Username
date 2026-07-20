@@ -80,7 +80,8 @@ export function initStarHandler(
 
 export function hasStarTag(href: string): boolean {
   const bookmark = getBookmark(href)
-  return bookmark?.newName === STAR_TAG
+  const tags = bookmark?.tags || []
+  return tags.includes(STAR_TAG)
 }
 
 /**
@@ -110,9 +111,10 @@ export function toggleStarHandler(
   try {
     // Get current bookmark data
     const bookmark = getBookmark(href)
+    const currentTags = bookmark?.tags || []
 
     // Check if star tag is currently present
-    const hasStarTag = bookmark?.newName === STAR_TAG
+    const hasStarTag = currentTags.includes(STAR_TAG)
 
     // Create options object with only non-empty values
     const options = createPromptOptions(metadata)

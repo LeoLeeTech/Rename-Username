@@ -1,10 +1,9 @@
 /**
- * 后台脚本：运行在浏览器插件的 background/service worker 环境。
- * 当前主要用于接收内容脚本发来的 HTTP_REQUEST 消息，在扩展后台执行 fetch，
- * 从而给页面侧的 webapp bridge 提供跨域请求代理能力，并记录请求统计。
+ * UTags HTTP Proxy - Browser Extension Background Script
+ * Handles actual HTTP requests using fetch API with full CORS bypass
  */
 
-// HTTP 代理消息的数据类型定义。
+// Type definitions
 type HttpRequestPayload = {
   method: string
   url: string
@@ -46,7 +45,7 @@ type HttpResponse = HttpSuccessResponse | HttpErrorResponse
 
 type StorageData = Record<string, number>
 
-console.log('Rename Username HTTP Proxy extension background script loaded')
+console.log('UTags HTTP Proxy extension background script loaded')
 
 // Storage keys
 
@@ -70,11 +69,11 @@ async function updateStatistics() {
     })
 
     console.log(
-      `[Rename Username Extension Background] Request count updated: ${currentCount + 1}`
+      `[UTags Extension Background] Request count updated: ${currentCount + 1}`
     )
   } catch (error) {
     console.error(
-      '[Rename Username Extension Background] Error updating statistics:',
+      '[UTags Extension Background] Error updating statistics:',
       error
     )
   }
@@ -93,7 +92,7 @@ async function handleHttpRequest(
   const { method, url, headers, body, timeout } = request.payload
 
   console.log(
-    `[Rename Username Extension Background] Processing HTTP request: ${method} ${url}`
+    `[UTags Extension Background] Processing HTTP request: ${method} ${url}`
   )
 
   try {
@@ -123,7 +122,7 @@ async function handleHttpRequest(
     const responseBody = await response.text()
 
     console.log(
-      `[Rename Username Extension Background] HTTP request successful: ${response.status}`
+      `[UTags Extension Background] HTTP request successful: ${response.status}`
     )
 
     return {
@@ -137,7 +136,7 @@ async function handleHttpRequest(
       },
     }
   } catch (error) {
-    console.error(`[Rename Username Extension Background] HTTP request failed:`, error)
+    console.error(`[UTags Extension Background] HTTP request failed:`, error)
 
     let errorMessage = 'Network error'
     if (error.name === 'AbortError') {
@@ -167,7 +166,7 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: HttpResponse) => void
   ) => {
-    console.log(`[Rename Username Extension Background] Received message:`, message.type)
+    console.log(`[UTags Extension Background] Received message:`, message.type)
 
     if (message.type === 'HTTP_REQUEST') {
       // Handle HTTP request asynchronously
@@ -179,7 +178,7 @@ chrome.runtime.onMessage.addListener(
         // eslint-disable-next-line promise/prefer-await-to-then
         .catch((error: unknown) => {
           console.error(
-            '[Rename Username Extension Background] Error handling HTTP request:',
+            '[UTags Extension Background] Error handling HTTP request:',
             error
           )
           sendResponse({
@@ -195,7 +194,7 @@ chrome.runtime.onMessage.addListener(
 
     // Handle other message types if needed
     console.log(
-      `[Rename Username Extension Background] Unknown message type: ${message.type as string}`
+      `[UTags Extension Background] Unknown message type: ${message.type as string}`
     )
     sendResponse({ success: false, error: 'Unknown message type' })
   }
@@ -207,14 +206,14 @@ chrome.runtime.onMessage.addListener(
 chrome.runtime.onInstalled.addListener(
   (details: chrome.runtime.InstalledDetails) => {
     console.log(
-      '[Rename Username Extension Background] Extension installed/updated:',
+      '[UTags Extension Background] Extension installed/updated:',
       details.reason
     )
 
     if (details.reason === 'install') {
-      console.log('[Rename Username Extension Background] First time installation')
+      console.log('[UTags Extension Background] First time installation')
     } else if (details.reason === 'update') {
-      console.log('[Rename Username Extension Background] Extension updated')
+      console.log('[UTags Extension Background] Extension updated')
     }
   }
 )
@@ -223,7 +222,7 @@ chrome.runtime.onInstalled.addListener(
  * Extension startup handler
  */
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[Rename Username Extension Background] Extension started')
+  console.log('[UTags Extension Background] Extension started')
 })
 
-console.log('[Rename Username Extension Background] Background script ready')
+console.log('[UTags Extension Background] Background script ready')

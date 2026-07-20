@@ -1,7 +1,3 @@
-/**
- * 高级重命名弹窗：单击页面上的 Rename Username 按钮后打开的主要编辑界面。
- * 它展示置顶名称和常用名称候选项，并在确认后返回用户输入的新名称字符串。
- */
 import { getSettingsValue, showSettings } from 'browser-extension-settings'
 import {
   $,
@@ -13,16 +9,26 @@ import {
   removeClass,
   removeEventListener,
 } from 'browser-extension-utils'
+import { splitTags } from 'utags-utils'
 
 import createModal from '../components/modal'
+import createTag from '../components/tag'
 import { i } from '../messages'
-import { getMostUsedTags, getPinnedTags } from '../storage/tags'
+import {
+  getEmojiTags,
+  getMostUsedTags,
+  getPinnedTags,
+  getRecentAddedTags,
+} from '../storage/tags'
+import { copyText, sortTags } from '../utils'
 import { createTimeout } from './timer-manager'
 
 let pinnedTags: string[]
 let mostUsedTags: string[]
+let recentAddedTags: string[]
+let emojiTags: string[]
 let displayedTags = new Set()
-let currentNewName = ''
+let currentTags = new Set<string>()
 let disableTagStyleInPrompt = false
 
 /**
@@ -32,23 +38,40 @@ let disableTagStyleInPrompt = false
 export function clearTagManagerCache(): void {
   pinnedTags = []
   mostUsedTags = []
+  recentAddedTags = []
+  emojiTags = []
   displayedTags = new Set()
-  currentNewName = ''
+  currentTags = new Set()
 }
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-types
 function onSelect(selected: string | null, input: HTMLInputElement) {
   if (selected) {
-    currentNewName = selected.trim()
-    input.value = currentNewName
+    input.value = ''
+
+    const tags = splitTags(selected)
+    for (const tag of tags) {
+      currentTags.add(tag)
+    }
+
+    updateLists()
+  }
+}
+
+function removeTag(tag: string | undefined) {
+  if (tag) {
+    tag = tag.trim()
+    currentTags.delete(tag)
+
     updateLists()
   }
 }
 
 function updateLists(container?: HTMLElement) {
   displayedTags = new Set()
-  if (currentNewName) {
-    displayedTags.add(currentNewName)
+  const ul1 = $('.utags_modal_content ul.utags_current_tags', container)
+  if (ul1) {
+    updateCurrentTagList(ul1)
   }
 
   const ul = $(
@@ -59,6 +82,14 @@ function updateLists(container?: HTMLElement) {
     updateCandidateTagList(ul, pinnedTags)
   }
 
+  const ul4 = $(
+    '.utags_modal_content ul.utags_select_list.utags_emoji_list',
+    container
+  )
+  if (ul4) {
+    updateCandidateTagList(ul4, emojiTags, 1000, true)
+  }
+
   const ul2 = $(
     '.utags_modal_content ul.utags_select_list.utags_most_used',
     container
@@ -66,12 +97,21 @@ function updateLists(container?: HTMLElement) {
   if (ul2) {
     updateCandidateTagList(ul2, mostUsedTags)
   }
+
+  const ul3 = $(
+    '.utags_modal_content ul.utags_select_list.utags_recent_added',
+    container
+  )
+  if (ul3) {
+    updateCandidateTagList(ul3, recentAddedTags)
+  }
 }
 
 function updateCandidateTagList(
   ul: HTMLElement,
   candidateTags: string[],
-  limitSize?: number
+  limitSize?: number,
+  isEmoji?: boolean
 ) {
   ul.textContent = ''
 
@@ -87,7 +127,7 @@ function updateCandidateTagList(
       // class: index === 0 ? "utags_active" : "",
     })
     addElement(li, 'span', {
-      class: 'utags_text_tag',
+      class: 'utags_text_tag' + (isEmoji ? ' utags_emoji_tag' : ''),
       textContent: text,
       'data-utags_tag': text,
     })
@@ -116,6 +156,18 @@ function getPreviousList(parentElement: HTMLElement) {
   return parentPrevious
 }
 
+function updateCurrentTagList(ul: HTMLElement) {
+  ul.textContent = ''
+
+  const sortedTags = sortTags([...currentTags], emojiTags)
+  for (const tag of sortedTags) {
+    displayedTags.add(tag)
+    const li = addElement(ul, 'li')
+    const a = createTag(tag, { isEmoji: emojiTags.includes(tag), noLink: true })
+    if (li) li.append(a)
+  }
+}
+
 /**
  * @param type 0, 1, 2
  */
@@ -133,6 +185,14 @@ function removeAllActive(type?: number) {
       removeClass(li, 'utags_active2')
     }
   }
+}
+
+async function copyCurrentTags(input: HTMLInputElement) {
+  const value = sortTags([...currentTags], emojiTags).join(', ')
+  await copyText(value)
+  input.value = value
+  input.focus()
+  input.select()
 }
 
 function stopEventPropagation(event: Event) {
@@ -158,11 +218,23 @@ function createPromptView(
     textContent: message,
   })
 
+  const currentTagsWrapper = addElement(content, 'div', {
+    class: 'utags_current_tags_wrapper',
+  })
+  addElement(currentTagsWrapper, 'span', {
+    textContent: '',
+    style: 'display: none;',
+    'data-utags': '',
+  })
+  addElement(currentTagsWrapper, 'ul', {
+    class: 'utags_current_tags utags_ul',
+    'data-utags_exclude': '',
+  })
+
   let enableCloseModalOnBlur = false
   const input = addElement(content, 'input', {
     type: 'text',
-    value,
-    placeholder: 'name',
+    placeholder: 'foo, bar',
     onblur(event: FocusEvent) {
       // console.log('onblur', event.relatedTarget, doc.activeElement, Date.now())
       // relatedTarget is null when Escape key pressed
@@ -219,6 +291,16 @@ function createPromptView(
     }
   }
 
+  addElement(currentTagsWrapper, 'button', {
+    type: 'button',
+    class: 'utags_button_copy',
+    tabIndex: '0',
+    textContent: i('prompt.copy'),
+    async onclick() {
+      await copyCurrentTags(input)
+    },
+  })
+
   const listWrapper = addElement(content, 'div', {
     class: 'utags_list_wrapper',
     tabIndex: '-1',
@@ -236,6 +318,20 @@ function createPromptView(
       'utags_select_list utags_most_used' +
       (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
     'data-utags_list_name': i('prompt.mostUsedTags'),
+  })
+
+  addElement(listWrapper, 'ul', {
+    class:
+      'utags_select_list utags_recent_added' +
+      (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
+    'data-utags_list_name': i('prompt.recentAddedTags'),
+  })
+
+  addElement(listWrapper, 'ul', {
+    class:
+      'utags_select_list utags_emoji_list' +
+      (disableTagStyleInPrompt ? ' utags_disable_tag_style' : ''),
+    'data-utags_list_name': i('prompt.emojiTags'),
   })
 
   updateLists(content)
@@ -267,7 +363,7 @@ function createPromptView(
   }
 
   const okHandler = () => {
-    closeModal(currentNewName)
+    closeModal(Array.from(currentTags).join(','))
   }
 
   addElement(buttonWrapper, 'button', {
@@ -284,8 +380,7 @@ function createPromptView(
     tabIndex: '0',
     textContent: i('prompt.ok'),
     onclick() {
-      currentNewName = input.value.trim()
-      updateLists()
+      onSelect(input.value.trim(), input)
       okHandler()
     },
   })
@@ -323,8 +418,7 @@ function createPromptView(
         if (current) {
           onSelect(current.textContent, input)
         } else if (input.value.trim()) {
-          currentNewName = input.value.trim()
-          okHandler()
+          onSelect(input.value.trim(), input)
         } else {
           okHandler()
         }
@@ -515,6 +609,10 @@ function createPromptView(
       if (target.closest('.utags_modal_content ul.utags_select_list li')) {
         onSelect(target.textContent, input)
       }
+
+      if (target.closest('.utags_modal_content ul.utags_current_tags li a')) {
+        removeTag(target.dataset.utags_tag)
+      }
     } else {
       closeModal()
     }
@@ -529,7 +627,8 @@ function createPromptView(
     }
 
     const li = target.closest('ul.utags_select_list li') as
-      HTMLElement | undefined
+      | HTMLElement
+      | undefined
     if (li) {
       removeAllActive()
       addClass(li, 'utags_active2')
@@ -563,7 +662,9 @@ export async function advancedPrompt(
 ) {
   pinnedTags = await getPinnedTags()
   mostUsedTags = await getMostUsedTags()
-  currentNewName = value || ''
+  recentAddedTags = await getRecentAddedTags()
+  emojiTags = await getEmojiTags()
+  currentTags = new Set(splitTags(value))
   disableTagStyleInPrompt = !getSettingsValue<boolean>('enableTagStyleInPrompt')
 
   return new Promise((resolve) => {

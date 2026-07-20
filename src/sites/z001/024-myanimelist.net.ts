@@ -1,9 +1,12 @@
+import styleText from 'data-text:./024-myanimelist.net.scss'
+
 import defaultSite from '../default'
-import styleText from './024-myanimelist.net.scss?inline'
 
 export default (() => {
   return {
     matches: /myanimelist\.net/,
+    listNodesSelectors: [],
+    conditionNodesSelectors: [],
     excludeSelectors: [
       ...defaultSite.excludeSelectors,
       '#headerSmall',

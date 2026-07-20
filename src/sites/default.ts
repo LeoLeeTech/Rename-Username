@@ -1,5 +1,6 @@
+import styleText from 'data-text:./default.scss'
+
 import { deleteUrlParameters } from '../utils'
-import styleText from './default.scss?inline'
 
 export default (() => {
   return {

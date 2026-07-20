@@ -1,10 +1,10 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./036-twitch.tv.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { getUtagsTitle, setUtagsAttributes } from '../../utils/index'
-import styleText from './036-twitch.tv.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'
@@ -103,6 +103,16 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // videos
+      '.tw-tower [data-a-target^="video-tower-card-"]',
+      '.tw-transition-group .tw-transition',
+    ],
+    conditionNodesSelectors: [
+      // videos
+      '.tw-tower [data-a-target^="video-tower-card-"] a',
+      '.tw-transition-group .tw-transition a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true

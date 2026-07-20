@@ -1,4 +1,5 @@
 import { $, $$, doc, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./008-simpxxcity.cr.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
@@ -9,7 +10,6 @@ import {
   setUtagsAttributes,
 } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './008-simpxxcity.cr.scss?inline'
 
 export default (() => {
   const prefix = 'https://simpcity.cr/'
@@ -96,6 +96,18 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Post list
+      '.structItem--thread',
+      // Comments
+      'article.message--post[itemtype="https://schema.org/Comment"]',
+    ],
+    conditionNodesSelectors: [
+      // Post list
+      '.structItem--thread .structItem-cell--main a',
+      // Comments
+      'article.message--post[itemtype="https://schema.org/Comment"] .message-userDetails a.username',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       href = normalizeDomain(href)
 

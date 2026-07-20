@@ -1,11 +1,11 @@
 import { $, $$, doc, hasClass, setAttribute } from 'browser-extension-utils'
+import styleText from 'data-text:./040-2libra.com.scss'
 import { getTrimmedTitle } from 'utags-utils'
 
 import { addVisited, setVisitedAvailable } from '../../modules/visited'
 import { setUtags } from '../../utils/dom-utils'
 import { setUtagsAttributes } from '../../utils/index'
 import defaultSite from '../default'
-import styleText from './040-2libra.com.scss?inline'
 
 export default (() => {
   const prefix = location.origin + '/'
@@ -50,6 +50,15 @@ export default (() => {
     matches: /2libra\.com/,
     preProcess() {
       setVisitedAvailable(true)
+
+      if (
+        location.pathname.startsWith('/post/') &&
+        !location.pathname.startsWith('/post/hot/') &&
+        !location.pathname.startsWith('/post/latest')
+      ) {
+        // 楼中楼回复模式添加 utags_no_hide 类名，防止被隐藏
+        $('[data-main-left]')?.classList.add('utags_no_hide')
+      }
 
       {
         const key = getPostUrl(location.href)
@@ -101,6 +110,26 @@ export default (() => {
         }
       }
     },
+    listNodesSelectors: [
+      // Post list
+      '[data-main-left] ul.card li',
+      // Comments
+      '[data-main-left].utags_no_hide > div > div.card article',
+      // Comments Flat view
+      '[data-main-left]:not(.utags_no_hide) > div > div.card',
+      // Right sidebar
+      '[data-right-sidebar] .card-body > h4 + div > div',
+    ],
+    conditionNodesSelectors: [
+      // Post list
+      '[data-main-left] ul.card li a:not(time + div a):not(.utags_text_tag)',
+      // Comments
+      '[data-main-left].utags_no_hide > div > div.card article address > div > a[href^="/user/"]',
+      // Comments Flat view
+      '[data-main-left]:not(.utags_no_hide) > div > div.card article address > div > a[href^="/user/"]',
+      // Right sidebar
+      '[data-right-sidebar] .card-body > h4 + div > div a',
+    ],
     validate(element: HTMLAnchorElement, href: string) {
       if (!href.startsWith(prefix)) {
         return true
