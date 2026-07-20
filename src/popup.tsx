@@ -53,17 +53,11 @@ function IndexPopup() {
           listStyleType: 'none',
           padding: 16,
         }}>
-        <li>
-          🔖{' '}
-          <a href="https://utags.link/" target="_blank">
-            书签列表
-          </a>
-        </li>
       </ul>
       <footer>
         Made with ❤️ by{' '}
-        <a href="https://www.pipecraft.net/" target="_blank">
-          Pipecraft
+        <a href="https://github.com/LeoLeeTech" target="_blank">
+          李吉磊 Leo Lee
         </a>
       </footer>
     </div>

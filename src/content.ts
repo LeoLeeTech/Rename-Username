@@ -240,18 +240,6 @@ const getSettingsTable = (): SettingsTable => {
           },
         }
       : {}),
-
-    showHidedItems: {
-      title: i('settings.showHidedItems'),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
-    noOpacityEffect: {
-      title: i('settings.noOpacityEffect'),
-      defaultValue: false,
-      group: groupNumber,
-    },
-
     [`useVisitedFunction_${host}`]: {
       title: i('settings.useVisitedFunction'),
       defaultValue: false,
@@ -272,95 +260,6 @@ const getSettingsTable = (): SettingsTable => {
       group: groupNumber,
     },
 
-    pinnedTagsTitle: {
-      title: i('settings.pinnedTags'),
-      type: 'action',
-      async onclick() {
-        const input = $('textarea[data-key="pinnedTags"]') as HTMLInputElement
-        if (input) {
-          input.scrollIntoView({ block: 'start' })
-          input.selectionStart = input.value.length
-          input.selectionEnd = input.value.length
-          input.focus()
-        }
-      },
-      group: ++groupNumber,
-    },
-    pinnedTags: {
-      title: i('settings.pinnedTags'),
-      defaultValue: i('settings.pinnedTagsDefaultValue'),
-      placeholder: i('settings.pinnedTagsPlaceholder'),
-      type: 'textarea',
-      group: groupNumber,
-    },
-    emojiTagsTitle: {
-      title: i('settings.emojiTags'),
-      type: 'action',
-      async onclick() {
-        const input = $('textarea[data-key="emojiTags"]') as HTMLInputElement
-        if (input) {
-          input.scrollIntoView({ block: 'start' })
-          input.selectionStart = input.value.length
-          input.selectionEnd = input.value.length
-          input.focus()
-        }
-      },
-      group: groupNumber,
-    },
-    emojiTags: {
-      title: i('settings.emojiTags'),
-      defaultValue:
-        '★, ★★, ★★★, ☆, ☆☆, ☆☆☆, 👍, 👎, ❤️, ⭐, 🌟, 🔥, 💩, ⚠️, 💯, 👏, 👀, 🐷, 📌, 📍, 🏆, 💎, 💡, 🤖, 📔, 📖, 📚, 📜, 📕, 📗, 🧰, ⛔, 🚫, 🔴, 🟠, 🟡, 🟢, 🔵, 🟣, ❗, ❓, ✅, ❌',
-      placeholder: '👍, 👎',
-      type: 'textarea',
-      group: groupNumber,
-    },
-    quickTagsTitle: {
-      title: i('settings.quickTags'),
-      type: 'action',
-      async onclick() {
-        const input = $('textarea[data-key="quickTags"]') as HTMLInputElement
-        if (input) {
-          input.scrollIntoView({ block: 'start' })
-          input.selectionStart = input.value.length
-          input.selectionEnd = input.value.length
-          input.focus()
-        }
-      },
-      group: ++groupNumber,
-    },
-    quickTags: {
-      title: i('settings.quickTags'),
-      defaultValue: '★, ❤️',
-      placeholder: i('settings.quickTagsPlaceholder'),
-      type: 'textarea',
-      group: groupNumber,
-    },
-
-    customStyle: {
-      title: i('settings.customStyle'),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
-    customStyleValue: {
-      title: 'Custom style value',
-      defaultValue: i('settings.customStyleDefaultValue'),
-      placeholder: i('settings.customStyleDefaultValue'),
-      type: 'textarea',
-      group: groupNumber,
-    },
-    customStyleTip: {
-      title: i('settings.customStyleExamples'),
-      type: 'tip',
-      tipContent: i('settings.customStyleExamplesContent'),
-      group: groupNumber,
-    },
-
-    [`customStyle_${host}`]: {
-      title: i(`settings.customStyleCurrentSite`),
-      defaultValue: false,
-      group: ++groupNumber,
-    },
     [`customStyleValue_${host}`]: {
       title: 'Custom style value',
       defaultValue: '',
@@ -380,31 +279,6 @@ const getSettingsTable = (): SettingsTable => {
       placeholder: `.content a[href]
 #main a[href]`,
       type: 'textarea',
-      group: groupNumber,
-    },
-
-    enableTagStyleInPrompt: {
-      title: i('settings.enableTagStyleInPrompt'),
-      defaultValue: true,
-      group: ++groupNumber,
-    },
-
-    useSimplePrompt: {
-      title: i('settings.useSimplePrompt'),
-      defaultValue: false,
-      group: groupNumber,
-    },
-
-    openTagsPage: {
-      title: i('settings.openTagsPage'),
-      type: 'externalLink',
-      url: 'https://utags.link/',
-      group: ++groupNumber,
-    },
-    openDataPage: {
-      title: i('settings.openDataPage'),
-      type: 'externalLink',
-      url: 'https://utags.link/',
       group: groupNumber,
     },
   }
